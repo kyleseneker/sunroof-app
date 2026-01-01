@@ -8,6 +8,10 @@ import { api } from '@/lib/api/client';
 import { Plus, ArrowRight, MapPin, X, Lock, ChevronRight, ChevronLeft, Sparkles, Trash2, HelpCircle, Camera, Clock, ImageIcon, Pencil, FileText, Download, ArrowUpDown, Copy, Check, Share, Plane, Timer, Archive, UserPlus, Users, Loader2, Search, RefreshCw } from 'lucide-react';
 import { useToast } from './Toast';
 import GalleryView from './GalleryView';
+import Avatar from './Avatar';
+import { KeyboardShortcutsHelp, useKeyboardShortcutsHelp } from './KeyboardShortcuts';
+import MemoryBadge from './MemoryBadge';
+import ActionSheet from './ActionSheet';
 import Image from 'next/image';
 import Link from 'next/link';
 import { getJourneyGradient } from '@/lib/utils/gradients';
@@ -67,6 +71,25 @@ export default function Dashboard({ activeJourneys: initialActiveJourneys = [], 
   
   // Collaborator emails cache (user_id -> email)
   const [collaboratorEmails, setCollaboratorEmails] = useState<Record<string, string>>({});
+  
+  // Keyboard shortcuts help modal (desktop only)
+  const { isOpen: showShortcuts, close: closeShortcuts } = useKeyboardShortcutsHelp();
+  
+  // Action sheet for journey actions (mobile-friendly)
+  const [actionSheetJourney, setActionSheetJourney] = useState<Journey | null>(null);
+  
+  // Detect if user is on mobile (no hover, touch device)
+  const [isMobile, setIsMobile] = useState(false);
+  useEffect(() => {
+    const checkMobile = () => {
+      const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+      const isSmallScreen = window.innerWidth < 768;
+      setIsMobile(isTouchDevice && isSmallScreen);
+    };
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   // Random destination placeholder (changes each time modal opens)
   const destinationPlaceholder = useMemo(() => {
@@ -1427,18 +1450,15 @@ $$ LANGUAGE sql SECURITY DEFINER;
           {/* Profile Avatar */}
           <Link 
             href="/profile"
-            className="w-10 h-10 rounded-full overflow-hidden bg-gradient-to-br from-orange-500 to-pink-500 flex items-center justify-center text-sm font-bold hover:opacity-90 active:scale-95 transition-all"
+            className="hover:opacity-90 active:scale-95 transition-all"
             title="Profile"
           >
-            {user?.user_metadata?.avatar_url ? (
-              <img 
-                src={user.user_metadata.avatar_url} 
-                alt="Avatar" 
-                className="w-full h-full object-cover"
-              />
-            ) : (
-              user?.user_metadata?.display_name?.[0]?.toUpperCase() || user?.email?.[0]?.toUpperCase() || '?'
-            )}
+            <Avatar 
+              src={user?.user_metadata?.avatar_url}
+              name={user?.user_metadata?.display_name}
+              email={user?.email}
+              size="md"
+            />
           </Link>
             </div>
       </header>
@@ -1567,6 +1587,12 @@ $$ LANGUAGE sql SECURITY DEFINER;
                   <div 
                     key={journey.id}
                     onClick={() => setFocusedJourney(journey)}
+                    onContextMenu={(e) => {
+                      if (isOwner(journey)) {
+                        e.preventDefault();
+                        setActionSheetJourney(journey);
+                      }
+                    }}
                     className="relative w-full glass rounded-[28px] p-6 overflow-hidden border border-white/10 cursor-pointer card-glow active:scale-[0.98] transition-all duration-300"
                     style={{ animationDelay: `${index * 100}ms` }}
                   >
@@ -1600,27 +1626,43 @@ $$ LANGUAGE sql SECURITY DEFINER;
                           )}
                         </div>
                         {(journey.memory_count ?? 0) > 0 && (
-                          <p className="text-zinc-600 text-xs mt-1">
-                            {journey.memory_count} {journey.memory_count === 1 ? 'memory' : 'memories'}
-                          </p>
+                          <div className="mt-1">
+                            <MemoryBadge 
+                              count={journey.memory_count ?? 0} 
+                              isLocked={true}
+                              variant="compact"
+                            />
+                          </div>
                         )}
                       </div>
-                      {/* Owner-only action buttons */}
+                      {/* Owner-only action buttons - show inline on desktop, menu button on mobile */}
                       {isOwner(journey) && (
-                        <div className="flex gap-1">
+                        isMobile ? (
                           <button
-                            onClick={(e) => { e.stopPropagation(); openEditModal(journey); }}
-                            className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center hover:bg-white/10 transition-colors"
+                            onClick={(e) => { e.stopPropagation(); setActionSheetJourney(journey); }}
+                            className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center active:bg-white/20 transition-colors"
+                            aria-label="Journey options"
                           >
-                            <Pencil className="w-3.5 h-3.5 text-zinc-500" />
+                            <svg className="w-5 h-5 text-white/60" fill="currentColor" viewBox="0 0 20 20">
+                              <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" />
+                            </svg>
                           </button>
-                          <button
-                            onClick={(e) => { e.stopPropagation(); setDeleteConfirm(journey.id); }}
-                            className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center hover:bg-red-500/20 transition-colors"
-                          >
-                            <Trash2 className="w-3.5 h-3.5 text-zinc-500" />
-                          </button>
-                        </div>
+                        ) : (
+                          <div className="flex gap-1">
+                            <button
+                              onClick={(e) => { e.stopPropagation(); openEditModal(journey); }}
+                              className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center hover:bg-white/10 transition-colors"
+                            >
+                              <Pencil className="w-3.5 h-3.5 text-zinc-500" />
+                            </button>
+                            <button
+                              onClick={(e) => { e.stopPropagation(); setDeleteConfirm(journey.id); }}
+                              className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center hover:bg-red-500/20 transition-colors"
+                            >
+                              <Trash2 className="w-3.5 h-3.5 text-zinc-500" />
+                            </button>
+                          </div>
+                        )
                       )}
                     </div>
 
@@ -1768,6 +1810,62 @@ $$ LANGUAGE sql SECURITY DEFINER;
           </p>
         </footer>
       </main>
+      
+      {/* Keyboard Shortcuts Help Modal (desktop only) */}
+      {!isMobile && (
+        <KeyboardShortcutsHelp isOpen={showShortcuts} onClose={closeShortcuts} />
+      )}
+      
+      {/* Action Sheet for journey actions (mobile-friendly) */}
+      <ActionSheet
+        isOpen={!!actionSheetJourney}
+        onClose={() => setActionSheetJourney(null)}
+        title={actionSheetJourney?.name}
+        options={[
+          {
+            label: 'Capture Memory',
+            icon: <Camera className="w-5 h-5" />,
+            onClick: () => {
+              if (actionSheetJourney) onCapture?.(actionSheetJourney);
+            },
+          },
+          {
+            label: 'Edit Journey',
+            icon: <Pencil className="w-5 h-5" />,
+            onClick: () => {
+              if (actionSheetJourney) openEditModal(actionSheetJourney);
+            },
+          },
+          {
+            label: 'Manage Memories',
+            icon: <ImageIcon className="w-5 h-5" />,
+            onClick: () => {
+              if (actionSheetJourney) {
+                setManagingMemories(actionSheetJourney);
+                fetchLockedMemories(actionSheetJourney.id);
+              }
+            },
+          },
+          {
+            label: 'Invite Collaborator',
+            icon: <UserPlus className="w-5 h-5" />,
+            onClick: () => {
+              if (actionSheetJourney) {
+                setJourneyToShare(actionSheetJourney);
+                setShowInviteModal(true);
+              }
+            },
+          },
+          {
+            label: 'Delete Journey',
+            icon: <Trash2 className="w-5 h-5" />,
+            variant: 'danger',
+            onClick: () => {
+              if (actionSheetJourney) setDeleteConfirm(actionSheetJourney.id);
+            },
+          },
+        ]}
+      />
     </div>
   );
 }

@@ -253,14 +253,54 @@ button, a, [role="button"] {
   animation: pulse-glow 2s ease-in-out infinite;
 }
 
-/* Fade in animation */
+/* Fade animations */
 @keyframes fade-in {
   from { opacity: 0; }
   to { opacity: 1; }
 }
 
+@keyframes fade-out {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
 .animate-fade-in {
   animation: fade-in 0.3s ease-out forwards;
+}
+
+.animate-fade-out {
+  animation: fade-out 0.2s ease-out forwards;
+}
+
+/* Slide animations for action sheets */
+@keyframes slide-up {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slide-down {
+  from {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+}
+
+.animate-slide-up {
+  animation: slide-up 0.3s cubic-bezier(0.32, 0.72, 0, 1) forwards;
+}
+
+.animate-slide-down {
+  animation: slide-down 0.2s ease-in forwards;
 }
 
 /* Scale in animation */
@@ -596,6 +636,16 @@ button, a, [role="button"] {
     opacity: 0.8;
     transform: scale(1.05);
   }
+}
+
+/* Subtle bounce for memory badges */
+@keyframes bounce-subtle {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.15); }
+}
+
+.animate-bounce-subtle {
+  animation: bounce-subtle 0.3s ease-out;
 }
 
 .animate-breathe {
