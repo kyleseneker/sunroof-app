@@ -13,8 +13,8 @@ export default function LoginPage() {
   const [showHelp, setShowHelp] = useState(false);
   const [checkingSession, setCheckingSession] = useState(true);
   
-  // OTP code entry
-  const [otp, setOtp] = useState(['', '', '', '', '', '']);
+  // OTP code entry (Supabase uses 8-character tokens)
+  const [otp, setOtp] = useState(['', '', '', '', '', '', '', '']);
   const [verifying, setVerifying] = useState(false);
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
@@ -80,7 +80,7 @@ export default function LoginPage() {
     setOtp(newOtp);
     
     // Auto-focus next input
-    if (value && index < 5) {
+    if (value && index < 7) {
       inputRefs.current[index + 1]?.focus();
     }
   };
@@ -93,21 +93,21 @@ export default function LoginPage() {
 
   const handleOtpPaste = (e: React.ClipboardEvent) => {
     e.preventDefault();
-    const pasted = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, 6);
+    const pasted = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, 8);
     const newOtp = [...otp];
     for (let i = 0; i < pasted.length; i++) {
       newOtp[i] = pasted[i];
     }
     setOtp(newOtp);
     // Focus last filled or next empty
-    const focusIndex = Math.min(pasted.length, 5);
+    const focusIndex = Math.min(pasted.length, 7);
     inputRefs.current[focusIndex]?.focus();
   };
 
-  // Auto-verify when all 6 digits entered
+  // Auto-verify when all 8 digits entered
   useEffect(() => {
     const code = otp.join('');
-    if (code.length === 6) {
+    if (code.length === 8) {
       verifyOtp(code);
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -129,7 +129,7 @@ export default function LoginPage() {
       if (verifyError) {
         console.error('OTP verification error:', verifyError);
         setError('Invalid code. Please try again.');
-        setOtp(['', '', '', '', '', '']);
+        setOtp(['', '', '', '', '', '', '', '']);
         inputRefs.current[0]?.focus();
         setVerifying(false);
         return;
@@ -161,7 +161,7 @@ export default function LoginPage() {
   const resendCode = async () => {
     setLoading(true);
     setError(null);
-    setOtp(['', '', '', '', '', '']);
+    setOtp(['', '', '', '', '', '', '', '']);
 
     const { error } = await supabase.auth.signInWithOtp({
       email: email.trim(),
@@ -213,8 +213,12 @@ export default function LoginPage() {
           <Mail className="w-8 h-8 text-emerald-400" />
         </div>
         <h1 className="text-2xl font-light mb-2">Check your email</h1>
-        <p className="text-zinc-500 max-w-xs mb-8">
-          We sent a code to <span className="text-white">{email}</span>
+        <p className="text-zinc-500 max-w-xs mb-4">
+          We sent a login link to <span className="text-white">{email}</span>
+        </p>
+        
+        <p className="text-zinc-600 text-sm mb-6">
+          Click the link in your email to sign in, or enter the code below:
         </p>
 
         {/* OTP Input */}
@@ -230,7 +234,7 @@ export default function LoginPage() {
               onChange={(e) => handleOtpChange(index, e.target.value)}
               onKeyDown={(e) => handleOtpKeyDown(index, e)}
               disabled={verifying}
-              className="w-12 h-14 text-center text-2xl font-mono bg-zinc-900 border border-zinc-800 rounded-xl text-white focus:outline-none focus:border-orange-500/50 disabled:opacity-50 transition-all"
+              className="w-10 h-12 text-center text-xl font-mono bg-zinc-900 border border-zinc-800 rounded-lg text-white focus:outline-none focus:border-orange-500/50 disabled:opacity-50 transition-all"
               autoFocus={index === 0}
             />
           ))}
@@ -247,10 +251,6 @@ export default function LoginPage() {
           <p className="text-red-400 text-sm mb-4">{error}</p>
         )}
 
-        <p className="text-zinc-600 text-sm mb-6">
-          Enter the 6-digit code from your email
-        </p>
-
         <div className="space-y-3">
           <button
             onClick={resendCode}
@@ -266,7 +266,7 @@ export default function LoginPage() {
               sessionStorage.removeItem('otp-sent');
               setSent(false); 
               setEmail(''); 
-              setOtp(['', '', '', '', '', '']); 
+              setOtp(['', '', '', '', '', '', '', '']); 
             }}
             className="text-sm text-zinc-500 hover:text-white transition-colors"
           >
@@ -434,7 +434,7 @@ export default function LoginPage() {
         <div className="text-center space-y-4">
           <div className="space-y-2">
             <p className="text-xs text-zinc-600">
-              No password needed. We&apos;ll send you a code.
+              No password needed. We&apos;ll send you a login link.
             </p>
             <button 
               onClick={() => setShowHelp(true)}
