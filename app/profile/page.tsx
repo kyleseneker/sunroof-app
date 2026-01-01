@@ -326,14 +326,16 @@ export default function ProfilePage() {
                     height={96}
                     className="w-24 h-24 rounded-full object-cover"
                   />
-                  {/* Remove avatar button */}
-                  <button 
-                    onClick={handleRemoveAvatar}
-                    disabled={uploadingAvatar}
-                    className="absolute -top-1 -right-1 w-6 h-6 rounded-full bg-red-500 flex items-center justify-center hover:bg-red-600 transition-colors"
-                  >
-                    <X className="w-3 h-3" />
-                  </button>
+                  {/* Remove avatar button - only show for uploaded avatars, not OAuth */}
+                  {!avatarUrl.includes('googleusercontent.com') && (
+                    <button 
+                      onClick={handleRemoveAvatar}
+                      disabled={uploadingAvatar}
+                      className="absolute -top-1 -right-1 w-6 h-6 rounded-full bg-red-500 flex items-center justify-center hover:bg-red-600 transition-colors"
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
+                  )}
                 </div>
               ) : (
                 <div className="w-24 h-24 rounded-full bg-gradient-to-br from-orange-500 via-pink-500 to-purple-500 flex items-center justify-center text-3xl font-bold shadow-lg shadow-orange-500/20 animate-breathe">
