@@ -73,8 +73,8 @@ export default function ProfilePage() {
       }
       
       setUser(user);
-      setDisplayName(user.user_metadata?.display_name || '');
-      setAvatarUrl(user.user_metadata?.avatar_url || null);
+      setDisplayName(user.user_metadata?.display_name || user.user_metadata?.full_name || '');
+      setAvatarUrl(user.user_metadata?.avatar_url || user.user_metadata?.picture || null);
       
       // Fetch journeys first
       const { data: journeys } = await supabase

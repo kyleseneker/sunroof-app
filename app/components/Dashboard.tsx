@@ -1454,8 +1454,8 @@ $$ LANGUAGE sql SECURITY DEFINER;
             title="Profile"
           >
             <Avatar 
-              src={user?.user_metadata?.avatar_url}
-              name={user?.user_metadata?.display_name}
+              src={user?.user_metadata?.avatar_url || user?.user_metadata?.picture}
+              name={user?.user_metadata?.display_name || user?.user_metadata?.full_name}
               email={user?.email}
               size="md"
             />
