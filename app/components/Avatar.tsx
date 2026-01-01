@@ -66,11 +66,11 @@ export default function Avatar({
   const uploadSize = uploadButtonSizes[size];
 
   return (
-    <div className={`relative inline-block ${className}`}>
+    <div className={`relative ${sizeClass} ${className}`}>
       {/* Avatar Circle */}
       <div
         className={`
-          ${sizeClass}
+          w-full h-full
           relative rounded-full overflow-hidden
           bg-gradient-to-br from-orange-500 via-pink-500 to-purple-500
           flex items-center justify-center font-bold text-white
