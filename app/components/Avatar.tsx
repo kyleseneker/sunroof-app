@@ -71,7 +71,7 @@ export default function Avatar({
       <div
         className={`
           ${sizeClass}
-          rounded-full overflow-hidden
+          relative rounded-full overflow-hidden
           bg-gradient-to-br from-orange-500 via-pink-500 to-purple-500
           flex items-center justify-center font-bold text-white
           shadow-lg shadow-orange-500/20
