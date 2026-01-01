@@ -185,6 +185,13 @@ export function useLongPress(
     }, delay);
   }, [onLongPress, delay]);
 
+  const clear = useCallback(() => {
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+      timeoutRef.current = null;
+    }
+  }, []);
+
   const move = useCallback((e: React.TouchEvent | React.MouseEvent) => {
     if (!timeoutRef.current) return;
     
@@ -204,14 +211,7 @@ export function useLongPress(
     if (distance > 10) {
       clear();
     }
-  }, []);
-
-  const clear = useCallback(() => {
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current);
-      timeoutRef.current = null;
-    }
-  }, []);
+  }, [clear]);
 
   const end = useCallback((e: React.TouchEvent | React.MouseEvent) => {
     clear();

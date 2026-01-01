@@ -145,3 +145,29 @@ export function getGreeting(): string {
       return 'Good night';
   }
 }
+
+/**
+ * Get human-readable time until a date (for journey unlock countdowns)
+ */
+export function getTimeUntilUnlock(unlockDate: Date | string): string {
+  const now = new Date();
+  const unlock = typeof unlockDate === 'string' ? new Date(unlockDate) : unlockDate;
+  const diff = unlock.getTime() - now.getTime();
+  
+  if (diff <= 0) return 'now';
+  
+  const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+  const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+  const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+  
+  if (days > 0) return `${days}d ${hours}h`;
+  if (hours > 0) return `${hours}h ${minutes}m`;
+  return `${minutes}m`;
+}
+
+/**
+ * Check if a journey is unlocked (past unlock date or completed status)
+ */
+export function isJourneyUnlocked(journey: { unlock_date: string; status?: string }): boolean {
+  return new Date(journey.unlock_date) <= new Date() || journey.status === 'completed';
+}

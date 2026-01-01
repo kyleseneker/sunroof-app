@@ -1,7 +1,7 @@
 'use client';
 
 import Image from 'next/image';
-import { Camera, Loader2 } from 'lucide-react';
+import { Camera, Loader2, X } from 'lucide-react';
 
 interface AvatarProps {
   src?: string | null;
@@ -9,8 +9,10 @@ interface AvatarProps {
   email?: string | null;
   size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl';
   showUploadButton?: boolean;
+  showRemoveButton?: boolean;
   uploading?: boolean;
   onUploadClick?: () => void;
+  onRemoveClick?: () => void;
   className?: string;
 }
 
@@ -57,7 +59,7 @@ function getInitials(name?: string | null, email?: string | null): string {
 
 /**
  * Reusable Avatar component with image support and initial fallback.
- * Features gradient background, optional upload button, and multiple sizes.
+ * Features gradient background, optional upload/remove buttons, and multiple sizes.
  */
 export default function Avatar({
   src,
@@ -65,8 +67,10 @@ export default function Avatar({
   email,
   size = 'md',
   showUploadButton = false,
+  showRemoveButton = false,
   uploading = false,
   onUploadClick,
+  onRemoveClick,
   className = '',
 }: AvatarProps) {
   const initials = getInitials(name, email);
@@ -99,7 +103,19 @@ export default function Avatar({
         </div>
       )}
 
-      {/* Upload Button Overlay */}
+      {/* Remove Button (top-right) */}
+      {showRemoveButton && onRemoveClick && src && (
+        <button
+          onClick={onRemoveClick}
+          disabled={uploading}
+          className="absolute -top-1 -right-1 w-6 h-6 rounded-full bg-red-500 flex items-center justify-center hover:bg-red-600 transition-colors disabled:opacity-50"
+          aria-label="Remove avatar"
+        >
+          <X className="w-3 h-3" />
+        </button>
+      )}
+
+      {/* Upload Button (bottom-right) */}
       {showUploadButton && onUploadClick && (
         <button
           onClick={onUploadClick}

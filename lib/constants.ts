@@ -45,6 +45,7 @@ export const PULL_TO_REFRESH_THRESHOLD = 80;
 // Defaults
 export const DEFAULT_UNLOCK_DAYS = 3;
 export const UNLOCK_DAY_OPTIONS = [1, 3, 7, 14, 30] as const;
+export const MAX_ACTIVE_JOURNEYS = 10;
 
 // Storage keys
 export const STORAGE_KEY_INTRO_SEEN = 'sunroof_intro';

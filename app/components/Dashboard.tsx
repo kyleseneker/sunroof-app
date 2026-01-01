@@ -4,8 +4,7 @@ import { supabase } from '@/lib/supabase';
 import { fetchPastJourneysWithCounts } from '@/lib/supabase-queries';
 import { useAuth } from '@/lib/auth';
 import { hapticSuccess } from '@/lib/haptics';
-import { api } from '@/lib/api/client';
-import { Plus, ArrowRight, MapPin, X, Lock, ChevronRight, ChevronLeft, Sparkles, Trash2, HelpCircle, Camera, Clock, ImageIcon, Pencil, FileText, Download, ArrowUpDown, Copy, Check, Share, Plane, Timer, Archive, UserPlus, Users, Loader2, Search, RefreshCw } from 'lucide-react';
+import { Plus, ArrowRight, MapPin, X, Lock, ChevronRight, Sparkles, Trash2, HelpCircle, Camera, Clock, ImageIcon, Pencil, FileText, Plane, Timer, Archive, UserPlus, Users, Loader2, Search, RefreshCw } from 'lucide-react';
 import { useToast } from './Toast';
 import GalleryView from './GalleryView';
 import Avatar from './Avatar';
@@ -15,7 +14,8 @@ import ActionSheet from './ActionSheet';
 import Image from 'next/image';
 import Link from 'next/link';
 import { getJourneyGradient } from '@/lib/utils/gradients';
-import { DESTINATION_SUGGESTIONS } from '@/lib/constants';
+import { formatDate, getTimeUntilUnlock, isJourneyUnlocked, getGreeting } from '@/lib/utils/dates';
+import { DESTINATION_SUGGESTIONS, MAX_ACTIVE_JOURNEYS } from '@/lib/constants';
 import type { Journey } from '@/types';
 
 export default function Dashboard({ activeJourneys: initialActiveJourneys = [], onCapture }: { activeJourneys?: Journey[], onCapture?: (journey: Journey) => void }) {
@@ -262,44 +262,9 @@ export default function Dashboard({ activeJourneys: initialActiveJourneys = [], 
     }
   };
 
-  const formatDate = (dateStr: string) => {
-    return new Date(dateStr).toLocaleDateString('en-US', { 
-      month: 'short', 
-      day: 'numeric',
-      year: 'numeric'
-    });
-  };
+  // Use isJourneyUnlocked as isUnlocked for cleaner code
+  const isUnlocked = isJourneyUnlocked;
 
-  const getTimeUntilUnlock = (unlockDate: string) => {
-    const now = new Date();
-    const unlock = new Date(unlockDate);
-    const diffMs = unlock.getTime() - now.getTime();
-    
-    if (diffMs <= 0) return 'Ready';
-    
-    const days = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-    const hours = Math.floor((diffMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-    
-    if (days > 0) {
-      return `${days}d ${hours}h`;
-    }
-    return `${hours}h`;
-  };
-
-  const isUnlocked = (journey: Journey) => {
-    return new Date(journey.unlock_date) <= new Date() || journey.status === 'completed';
-  };
-
-  // Time-based greeting
-  const getGreeting = () => {
-    const hour = new Date().getHours();
-    if (hour < 12) return 'Good morning';
-    if (hour < 17) return 'Good afternoon';
-    return 'Good evening';
-  };
-
-  // Max active journeys limit
-  const MAX_ACTIVE_JOURNEYS = 10;
   const canCreateJourney = activeJourneys.length < MAX_ACTIVE_JOURNEYS;
   
   // Auto-close search when no journeys exist

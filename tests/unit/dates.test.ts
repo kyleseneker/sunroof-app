@@ -8,6 +8,8 @@ import {
   isToday,
   getTimeOfDay,
   getGreeting,
+  getTimeUntilUnlock,
+  isJourneyUnlocked,
 } from '@/lib/utils/dates';
 
 describe('Date Utilities', () => {
@@ -239,6 +241,61 @@ describe('Date Utilities', () => {
 
       vi.setSystemTime(new Date('2024-06-15T23:00:00'));
       expect(getGreeting()).toBe('Good night');
+    });
+  });
+
+  describe('getTimeUntilUnlock', () => {
+    it('returns "now" for past dates', () => {
+      const pastDate = new Date(Date.now() - 1000);
+      expect(getTimeUntilUnlock(pastDate)).toBe('now');
+    });
+
+    it('formats days and hours', () => {
+      const inThreeDays = new Date(Date.now() + 3 * 24 * 60 * 60 * 1000 + 5 * 60 * 60 * 1000);
+      expect(getTimeUntilUnlock(inThreeDays)).toBe('3d 5h');
+    });
+
+    it('formats hours and minutes when less than a day', () => {
+      const inFiveHours = new Date(Date.now() + 5 * 60 * 60 * 1000 + 30 * 60 * 1000);
+      expect(getTimeUntilUnlock(inFiveHours)).toBe('5h 30m');
+    });
+
+    it('formats minutes only when less than an hour', () => {
+      const inThirtyMinutes = new Date(Date.now() + 30 * 60 * 1000);
+      expect(getTimeUntilUnlock(inThirtyMinutes)).toBe('30m');
+    });
+
+    it('accepts string dates', () => {
+      const futureDate = new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString();
+      expect(getTimeUntilUnlock(futureDate)).toContain('d');
+    });
+  });
+
+  describe('isJourneyUnlocked', () => {
+    it('returns true for past unlock dates', () => {
+      const journey = { unlock_date: new Date(Date.now() - 1000).toISOString() };
+      expect(isJourneyUnlocked(journey)).toBe(true);
+    });
+
+    it('returns false for future unlock dates', () => {
+      const journey = { unlock_date: new Date(Date.now() + 1000 * 60 * 60).toISOString() };
+      expect(isJourneyUnlocked(journey)).toBe(false);
+    });
+
+    it('returns true if status is completed regardless of date', () => {
+      const journey = {
+        unlock_date: new Date(Date.now() + 1000 * 60 * 60 * 24 * 30).toISOString(),
+        status: 'completed',
+      };
+      expect(isJourneyUnlocked(journey)).toBe(true);
+    });
+
+    it('returns false if status is active and date is future', () => {
+      const journey = {
+        unlock_date: new Date(Date.now() + 1000 * 60 * 60 * 24).toISOString(),
+        status: 'active',
+      };
+      expect(isJourneyUnlocked(journey)).toBe(false);
     });
   });
 });

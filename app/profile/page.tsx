@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import { useToast } from '../components/Toast';
+import { formatDate } from '@/lib/utils/dates';
 import { 
   ArrowLeft, 
   Mail, 
@@ -12,11 +13,9 @@ import {
   Trash2, 
   Loader2,
   Check,
-  Pencil,
-  Camera,
-  X
+  Pencil
 } from 'lucide-react';
-import Image from 'next/image';
+import Avatar from '@/app/components/Avatar';
 
 interface Stats {
   totalJourneys: number;
@@ -266,18 +265,8 @@ export default function ProfilePage() {
     }
   };
 
-  const getInitial = () => {
-    if (displayName) return displayName[0].toUpperCase();
-    if (user?.email) return user.email[0].toUpperCase();
-    return '?';
-  };
-
-  const formatDate = (dateStr: string) => {
-    return new Date(dateStr).toLocaleDateString('en-US', {
-      month: 'short',
-      year: 'numeric',
-    });
-  };
+  // Format dates with month + year only for profile stats
+  const formatMonthYear = (dateStr: string) => formatDate(dateStr, { month: 'short', year: 'numeric' });
 
   if (loading) {
     return (
@@ -316,45 +305,18 @@ export default function ProfilePage() {
                 className="hidden"
               />
               
-              {/* Avatar */}
-              {avatarUrl ? (
-                <div className="relative">
-                  <Image
-                    src={avatarUrl}
-                    alt="Avatar"
-                    width={96}
-                    height={96}
-                    className="w-24 h-24 rounded-full object-cover"
-                  />
-                  {/* Remove avatar button - only show for uploaded avatars, not OAuth */}
-                  {!avatarUrl.includes('googleusercontent.com') && (
-                    <button 
-                      onClick={handleRemoveAvatar}
-                      disabled={uploadingAvatar}
-                      className="absolute -top-1 -right-1 w-6 h-6 rounded-full bg-red-500 flex items-center justify-center hover:bg-red-600 transition-colors"
-                    >
-                      <X className="w-3 h-3" />
-                    </button>
-                  )}
-                </div>
-              ) : (
-                <div className="w-24 h-24 rounded-full bg-gradient-to-br from-orange-500 via-pink-500 to-purple-500 flex items-center justify-center text-3xl font-bold shadow-lg shadow-orange-500/20 animate-breathe">
-                  {getInitial()}
-                </div>
-              )}
-              
-              {/* Upload button */}
-              <button 
-                onClick={() => fileInputRef.current?.click()}
-                disabled={uploadingAvatar}
-                className="absolute bottom-0 right-0 w-8 h-8 rounded-full bg-zinc-800 border-2 border-black flex items-center justify-center hover:bg-zinc-700 transition-colors disabled:opacity-50"
-              >
-                {uploadingAvatar ? (
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                ) : (
-                  <Camera className="w-4 h-4" />
-                )}
-              </button>
+              {/* Avatar with upload/remove controls */}
+              <Avatar
+                src={avatarUrl}
+                name={displayName}
+                email={user?.email}
+                size="xl"
+                showUploadButton
+                showRemoveButton={!!avatarUrl && !avatarUrl.includes('googleusercontent.com')}
+                uploading={uploadingAvatar}
+                onUploadClick={() => fileInputRef.current?.click()}
+                onRemoveClick={handleRemoveAvatar}
+              />
             </div>
             
             {isEditingName ? (
@@ -406,7 +368,7 @@ export default function ProfilePage() {
               </div>
               <div className="text-center p-4 bg-gradient-to-br from-emerald-500/10 to-emerald-500/5 rounded-2xl border border-emerald-500/10">
                 <div className="text-lg font-bold text-emerald-400">
-                  {stats.firstJourneyDate ? formatDate(stats.firstJourneyDate) : 'N/A'}
+                  {stats.firstJourneyDate ? formatMonthYear(stats.firstJourneyDate) : 'N/A'}
                 </div>
                 <div className="text-xs text-zinc-500 mt-1">Member Since</div>
               </div>
@@ -424,7 +386,7 @@ export default function ProfilePage() {
               <div className="flex items-center gap-3 text-sm">
                 <Calendar className="w-4 h-4 text-zinc-500" />
                 <span className="text-zinc-300">
-                  Joined {formatDate(user?.created_at || new Date().toISOString())}
+                  Joined {formatMonthYear(user?.created_at || new Date().toISOString())}
                 </span>
               </div>
             </div>
