@@ -268,6 +268,9 @@ export default function ProfilePage() {
   // Format dates with month + year only for profile stats
   const formatMonthYear = (dateStr: string) => formatDate(dateStr, { month: 'short', year: 'numeric' });
 
+  // OAuth users have their avatar managed by the provider (e.g., Google)
+  const isOAuthUser = !!user?.user_metadata?.picture;
+
   if (loading) {
     return (
       <div className="fixed inset-0 bg-black flex items-center justify-center">
@@ -305,14 +308,14 @@ export default function ProfilePage() {
                 className="hidden"
               />
               
-              {/* Avatar with upload/remove controls */}
+              {/* Avatar - hide upload/remove for OAuth users (managed by provider) */}
               <Avatar
                 src={avatarUrl}
                 name={displayName}
                 email={user?.email}
                 size="xl"
-                showUploadButton
-                showRemoveButton={!!avatarUrl && !avatarUrl.includes('googleusercontent.com')}
+                showUploadButton={!isOAuthUser}
+                showRemoveButton={!!avatarUrl && !isOAuthUser}
                 uploading={uploadingAvatar}
                 onUploadClick={() => fileInputRef.current?.click()}
                 onRemoveClick={handleRemoveAvatar}
