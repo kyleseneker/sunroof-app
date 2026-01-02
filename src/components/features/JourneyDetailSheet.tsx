@@ -1,9 +1,9 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { X, Lock, Pencil, Trash2, UserPlus, Users, ChevronRight, Clock, Camera } from 'lucide-react';
+import { X, Lock, Pencil, Trash2, UserPlus, Users, ChevronRight, Clock, Camera, Unlock } from 'lucide-react';
 import { getEmailByUserId, updateJourney } from '@/services';
-import { useToast, IconButton } from '@/components/ui';
+import { useToast, IconButton, ConfirmDialog } from '@/components/ui';
 import { getTimeUntilUnlock, getJourneyGradient, hapticSuccess } from '@/lib';
 import type { Journey } from '@/types';
 
@@ -34,6 +34,10 @@ export default function JourneyDetailSheet({
   
   // Collaborator emails cache
   const [collaboratorEmails, setCollaboratorEmails] = useState<Record<string, string>>({});
+  
+  // Unlock now state
+  const [showUnlockConfirm, setShowUnlockConfirm] = useState(false);
+  const [unlocking, setUnlocking] = useState(false);
 
   // Fetch collaborator emails when journey changes
   useEffect(() => {
@@ -79,12 +83,49 @@ export default function JourneyDetailSheet({
     });
   };
 
+  // Unlock journey immediately
+  const handleUnlockNow = async () => {
+    if (!journey || unlocking) return;
+    
+    setUnlocking(true);
+    
+    const { error } = await updateJourney({
+      id: journey.id,
+      unlockDate: new Date().toISOString(),
+    });
+    
+    if (error) {
+      showToast('Failed to unlock journey', 'error');
+      setUnlocking(false);
+      return;
+    }
+    
+    hapticSuccess();
+    showToast('Journey unlocked! 🎉', 'success');
+    setShowUnlockConfirm(false);
+    
+    // Reload to show the unlocked gallery
+    window.location.reload();
+  };
+
   if (!journey) return null;
 
   const countdown = getTimeUntilUnlock(journey.unlock_date);
 
   return (
     <div className="fixed inset-0 z-50 bg-black flex flex-col safe-top safe-bottom">
+      {/* Unlock Now Confirmation */}
+      <ConfirmDialog
+        isOpen={showUnlockConfirm}
+        onClose={() => setShowUnlockConfirm(false)}
+        onConfirm={handleUnlockNow}
+        title="Unlock journey now?"
+        description="This will unlock your memories immediately. You can view them right away, but you won't be able to add more memories to this journey."
+        confirmLabel={unlocking ? 'Unlocking...' : 'Unlock Now'}
+        variant="confirm"
+        loading={unlocking}
+      />
+      
       {/* Dynamic gradient background */}
       <div 
         className="absolute inset-0"
@@ -192,13 +233,24 @@ export default function JourneyDetailSheet({
         {!journey.shared_with?.length && <div className="mb-4" />}
         
         {/* Countdown */}
-        <div className="rounded-2xl p-6 mb-6 bg-white/5 backdrop-blur-md border border-white/10">
+        <div className="rounded-2xl p-6 mb-4 bg-white/5 backdrop-blur-md border border-white/10">
           <div className="flex items-center gap-2 mb-2">
             <Clock className="w-4 h-4 text-white/60" />
             <p className="text-xs text-white/60 uppercase tracking-wider">Unlocks in</p>
           </div>
           <p className="text-4xl font-light tracking-wide text-white">{countdown}</p>
         </div>
+        
+        {/* Unlock Now button (owner only) */}
+        {isOwner && (
+          <button
+            onClick={() => setShowUnlockConfirm(true)}
+            className="flex items-center justify-center gap-2 text-sm text-white/50 hover:text-white/80 transition-colors mb-4"
+          >
+            <Unlock className="w-4 h-4" />
+            <span>Unlock now</span>
+          </button>
+        )}
         
         {/* Capture Button */}
         <button
