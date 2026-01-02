@@ -102,28 +102,30 @@ export default function JourneyDetailSheet({
       
       {/* Top Bar */}
       <div className="relative z-10 flex justify-between items-center p-6">
-        <button 
+        <IconButton 
+          icon={<X className="w-5 h-5" />}
+          label="Close"
           onClick={onClose}
-          className="w-10 h-10 flex items-center justify-center rounded-full bg-black/40 backdrop-blur-md border border-white/10 hover:bg-white/20 hover:border-white/20 active:scale-95 transition-all cursor-pointer"
-        >
-          <X className="w-5 h-5 text-white" />
-        </button>
+          variant="bordered"
+          dark
+        />
         
         {/* Owner-only actions */}
         {isOwner && (
           <div className="flex gap-2">
-            <IconButton icon={<UserPlus className="w-4 h-4" />} label="Share journey" onClick={() => onInvite(journey)} dark />
+            <IconButton icon={<UserPlus className="w-4 h-4" />} label="Share journey" onClick={() => onInvite(journey)} variant="bordered" dark />
             <IconButton 
               icon={<Pencil className="w-4 h-4" />} 
               label="Edit journey" 
               onClick={() => { onClose(); onEdit(journey); }} 
+              variant="bordered"
               dark 
             />
             <IconButton 
               icon={<Trash2 className="w-4 h-4" />} 
               label="Delete journey" 
               onClick={() => { onClose(); onDelete(journey.id); }} 
-              variant="danger"
+              variant="bordered"
               dark 
             />
           </div>
