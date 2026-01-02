@@ -4,10 +4,9 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft, Settings, ChevronRight, Download, Loader2 } from 'lucide-react';
-import { supabase } from '@/lib/supabase';
 import { useToast } from '../components/Toast';
 import { NotificationSettings } from '../components/NotificationPrompt';
-
+import { getCurrentUser, getJourneyCounts, exportUserData, deleteAllUserJourneysData } from '@/lib/services';
 import { APP_VERSION } from '@/lib/constants';
 
 export default function SettingsPage() {
@@ -18,29 +17,14 @@ export default function SettingsPage() {
 
   useEffect(() => {
     async function fetchCounts() {
-      // Get current user first
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: user } = await getCurrentUser();
       if (!user) return;
       
-      const now = new Date().toISOString();
-      
-      // Active journeys - filter by user_id
-      const { count: active } = await supabase
-        .from('journeys')
-        .select('*', { count: 'exact', head: true })
-        .eq('user_id', user.id)
-        .eq('status', 'active')
-        .gt('unlock_date', now);
-      
-      // Archived/unlocked journeys - filter by user_id
-      const { count: archived } = await supabase
-        .from('journeys')
-        .select('*', { count: 'exact', head: true })
-        .eq('user_id', user.id)
-        .or(`status.eq.completed,unlock_date.lte.${now}`);
-      
-      setActiveCount(active || 0);
-      setArchivedCount(archived || 0);
+      const { data: counts } = await getJourneyCounts(user.id);
+      if (counts) {
+        setActiveCount(counts.active);
+        setArchivedCount(counts.archived);
+      }
     }
     fetchCounts();
   }, []);
@@ -54,41 +38,22 @@ export default function SettingsPage() {
     setIsExporting(true);
     
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: user } = await getCurrentUser();
       if (!user) {
         showToast('You must be signed in', 'error');
         setIsExporting(false);
         return;
       }
 
-      // Fetch all journeys
-      const { data: journeys, error: journeysError } = await supabase
-        .from('journeys')
-        .select('*')
-        .or(`user_id.eq.${user.id},shared_with.cs.{${user.id}}`);
-      
-      if (journeysError) throw journeysError;
+      const { data: exportData, error } = await exportUserData(
+        user.id,
+        user.email,
+        user.user_metadata?.display_name
+      );
 
-      // Fetch all memories for those journeys
-      const journeyIds = journeys?.map(j => j.id) || [];
-      const { data: memories, error: memoriesError } = await supabase
-        .from('memories')
-        .select('*')
-        .in('journey_id', journeyIds);
-      
-      if (memoriesError) throw memoriesError;
-
-      // Build export object
-      const exportData = {
-        exported_at: new Date().toISOString(),
-        user: {
-          id: user.id,
-          email: user.email,
-          display_name: user.user_metadata?.display_name || null,
-        },
-        journeys: journeys || [],
-        memories: memories || [],
-      };
+      if (error || !exportData) {
+        throw new Error(error || 'Failed to export');
+      }
 
       // Download as JSON
       const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
@@ -117,11 +82,10 @@ export default function SettingsPage() {
       setIsClearing(true);
       
       try {
-        const { error: memoriesError } = await supabase.from('memories').delete().neq('id', '00000000-0000-0000-0000-000000000000');
-        const { error: journeysError } = await supabase.from('journeys').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+        const { error } = await deleteAllUserJourneysData();
         
-        if (memoriesError || journeysError) {
-          console.error('Clear data error:', memoriesError || journeysError);
+        if (error) {
+          console.error('Clear data error:', error);
           showToast('Failed to clear data', 'error');
           setIsClearing(false);
           return;

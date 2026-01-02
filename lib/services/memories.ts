@@ -8,9 +8,8 @@ import type { Memory } from '@/types';
 export interface CreateMemoryInput {
   journeyId: string;
   type: 'photo' | 'note';
-  content?: string;
-  imageUrl?: string;
-  thumbnailUrl?: string;
+  content?: string;  // For notes
+  imageUrl?: string; // For photos
 }
 
 export interface ServiceResult<T> {
@@ -23,14 +22,16 @@ export interface ServiceResult<T> {
  */
 export async function createMemory(input: CreateMemoryInput): Promise<ServiceResult<Memory>> {
   try {
+    // Map type 'note' to database type 'text'
+    const dbType = input.type === 'note' ? 'text' : 'photo';
+    
     const { data, error } = await supabase
       .from('memories')
       .insert([{
         journey_id: input.journeyId,
-        type: input.type,
-        content: input.content || null,
-        image_url: input.imageUrl || null,
-        thumbnail_url: input.thumbnailUrl || null,
+        type: dbType,
+        note: input.content || null,
+        url: input.imageUrl || null,
       }])
       .select()
       .single();
@@ -162,25 +163,37 @@ export async function deleteAllUserMemories(): Promise<ServiceResult<boolean>> {
 }
 
 /**
- * Delete all journeys for a user (for account deletion in settings)
- * This is a dangerous operation - use with caution
+ * Delete all journeys AND memories for a user (settings clear data)
+ * RLS ensures only the user's data is deleted
  */
-export async function deleteAllUserJourneys(): Promise<ServiceResult<boolean>> {
+export async function deleteAllUserJourneysData(): Promise<ServiceResult<boolean>> {
   try {
-    const { error } = await supabase
+    // Delete memories first
+    const { error: memoriesError } = await supabase
+      .from('memories')
+      .delete()
+      .neq('id', '00000000-0000-0000-0000-000000000000');
+
+    if (memoriesError) {
+      console.error('[MemoryService] Delete all user memories error:', memoriesError);
+      return { data: null, error: memoriesError.message };
+    }
+
+    // Then delete journeys
+    const { error: journeysError } = await supabase
       .from('journeys')
       .delete()
       .neq('id', '00000000-0000-0000-0000-000000000000');
 
-    if (error) {
-      console.error('[MemoryService] Delete all user journeys error:', error);
-      return { data: null, error: error.message };
+    if (journeysError) {
+      console.error('[MemoryService] Delete all user journeys error:', journeysError);
+      return { data: null, error: journeysError.message };
     }
 
     return { data: true, error: null };
   } catch (err) {
-    console.error('[MemoryService] Delete all user journeys exception:', err);
-    return { data: null, error: 'Failed to delete journeys' };
+    console.error('[MemoryService] Delete all user data exception:', err);
+    return { data: null, error: 'Failed to delete data' };
   }
 }
 

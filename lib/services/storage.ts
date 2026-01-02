@@ -21,15 +21,16 @@ export async function uploadMemoryPhoto(
   userId: string,
   journeyId: string,
   file: Blob,
-  filename: string
+  contentType: string = 'image/jpeg'
 ): Promise<ServiceResult<UploadResult>> {
   try {
+    const filename = `${Date.now()}.jpg`;
     const path = `${userId}/${journeyId}/${filename}`;
     
     const { error: uploadError } = await supabase.storage
-      .from('memories')
+      .from('sunroof-media')
       .upload(path, file, {
-        contentType: 'image/webp',
+        contentType,
         upsert: true,
       });
 
@@ -39,7 +40,7 @@ export async function uploadMemoryPhoto(
     }
 
     const { data: urlData } = supabase.storage
-      .from('memories')
+      .from('sunroof-media')
       .getPublicUrl(path);
 
     return {

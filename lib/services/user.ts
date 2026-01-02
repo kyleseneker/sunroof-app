@@ -3,10 +3,30 @@
  */
 
 import { supabase } from '../supabase';
+import type { User } from '@supabase/supabase-js';
 
 export interface ServiceResult<T> {
   data: T | null;
   error: string | null;
+}
+
+/**
+ * Get the current authenticated user
+ */
+export async function getCurrentUser(): Promise<ServiceResult<User>> {
+  try {
+    const { data: { user }, error } = await supabase.auth.getUser();
+    
+    if (error) {
+      console.error('[UserService] Get user error:', error);
+      return { data: null, error: error.message };
+    }
+
+    return { data: user, error: null };
+  } catch (err) {
+    console.error('[UserService] Get user exception:', err);
+    return { data: null, error: 'Failed to get user' };
+  }
 }
 
 export interface UpdateProfileInput {

@@ -9,6 +9,8 @@ export {
   deleteJourney,
   fetchActiveJourneys,
   fetchPastJourneys,
+  getJourneyCounts,
+  exportUserData,
   deleteAllUserJourneys,
   type CreateJourneyInput,
   type UpdateJourneyInput,
@@ -22,6 +24,7 @@ export {
   getMemoryCount,
   deleteAllMemoriesForJourney,
   deleteAllUserMemories,
+  deleteAllUserJourneysData,
   type CreateMemoryInput,
 } from './memories';
 
@@ -37,6 +40,7 @@ export {
 
 // User operations
 export {
+  getCurrentUser,
   updateProfile,
   getProfileStats,
   signOut,

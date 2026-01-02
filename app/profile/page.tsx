@@ -2,9 +2,18 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { supabase } from '@/lib/supabase';
 import { useToast } from '../components/Toast';
 import { formatDate } from '@/lib/utils/dates';
+import { 
+  getCurrentUser, 
+  getProfileStats, 
+  updateProfile, 
+  uploadAvatar, 
+  removeAvatar,
+  signOut as serviceSignOut,
+  deleteAllUserJourneys,
+  deleteAllUserStorage,
+} from '@/lib/services';
 import { 
   ArrowLeft, 
   Mail, 
@@ -64,7 +73,7 @@ export default function ProfilePage() {
 
   useEffect(() => {
     async function loadProfile() {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: user } = await getCurrentUser();
       
       if (!user) {
         router.push('/login');
@@ -75,32 +84,12 @@ export default function ProfilePage() {
       setDisplayName(user.user_metadata?.display_name || user.user_metadata?.full_name || '');
       setAvatarUrl(user.user_metadata?.avatar_url || user.user_metadata?.picture || null);
       
-      // Fetch journeys first
-      const { data: journeys } = await supabase
-        .from('journeys')
-        .select('id, status, unlock_date, created_at')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: true });
+      // Fetch stats using service
+      const { data: statsData } = await getProfileStats(user.id);
       
-      const journeyData = journeys || [];
-      const now = new Date().toISOString();
-      
-      // Now fetch memory count using the journey IDs we already have
-      let memoryCount = 0;
-      if (journeyData.length > 0) {
-        const { count } = await supabase
-          .from('memories')
-          .select('id', { count: 'exact', head: true })
-          .in('journey_id', journeyData.map(j => j.id));
-        memoryCount = count || 0;
+      if (statsData) {
+        setStats(statsData);
       }
-      
-      setStats({
-        totalJourneys: journeyData.length,
-        activeJourneys: journeyData.filter(j => j.status === 'active' && j.unlock_date > now).length,
-        totalMemories: memoryCount,
-        firstJourneyDate: journeyData[0]?.created_at || null,
-      });
       
       setLoading(false);
     }
@@ -112,9 +101,7 @@ export default function ProfilePage() {
     if (!user) return;
     setSavingName(true);
     
-    const { error } = await supabase.auth.updateUser({
-      data: { display_name: displayName.trim() }
-    });
+    const { error } = await updateProfile({ displayName: displayName.trim() });
     
     if (error) {
       showToast('Failed to update name', 'error');
@@ -142,37 +129,23 @@ export default function ProfilePage() {
     setUploadingAvatar(true);
 
     try {
-      // Upload to Supabase storage
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${user.id}/avatar.${fileExt}`;
-      
-      const { error: uploadError } = await supabase.storage
-        .from('avatars')
-        .upload(fileName, file, { upsert: true });
+      // Upload avatar
+      const { data: uploadData, error: uploadError } = await uploadAvatar(user.id, file);
 
-      if (uploadError) {
+      if (uploadError || !uploadData) {
         console.error('Upload error:', uploadError);
         showToast('Failed to upload image', 'error');
         setUploadingAvatar(false);
         return;
       }
 
-      // Get public URL with cache-busting timestamp
-      const { data: { publicUrl } } = supabase.storage
-        .from('avatars')
-        .getPublicUrl(fileName);
-      
-      const urlWithCacheBust = `${publicUrl}?t=${Date.now()}`;
-
       // Update user metadata
-      const { error: updateError } = await supabase.auth.updateUser({
-        data: { avatar_url: urlWithCacheBust }
-      });
+      const { error: updateError } = await updateProfile({ avatarUrl: uploadData.publicUrl });
 
       if (updateError) {
         showToast('Failed to save avatar', 'error');
       } else {
-        setAvatarUrl(urlWithCacheBust);
+        setAvatarUrl(uploadData.publicUrl);
         showToast('Avatar updated!', 'success');
       }
     } catch (err) {
@@ -191,20 +164,11 @@ export default function ProfilePage() {
     setUploadingAvatar(true);
     
     try {
-      // Delete from storage - list files in user's folder and delete them
-      const { data: files } = await supabase.storage
-        .from('avatars')
-        .list(user.id);
-      
-      if (files && files.length > 0) {
-        const filesToDelete = files.map(f => `${user.id}/${f.name}`);
-        await supabase.storage.from('avatars').remove(filesToDelete);
-      }
+      // Remove avatar from storage
+      await removeAvatar(user.id);
 
       // Update user metadata
-      const { error } = await supabase.auth.updateUser({
-        data: { avatar_url: null }
-      });
+      const { error } = await updateProfile({ avatarUrl: null });
 
       if (error) {
         showToast('Failed to remove avatar', 'error');
@@ -221,42 +185,23 @@ export default function ProfilePage() {
   };
 
   const handleSignOut = async () => {
-    await supabase.auth.signOut();
+    await serviceSignOut();
     showToast('Signed out', 'success');
     router.push('/login');
   };
 
   const handleDeleteAccount = async () => {
-    if (deleteConfirmText !== 'DELETE') return;
+    if (deleteConfirmText !== 'DELETE' || !user) return;
     
     try {
       // Delete all user data
-      const { data: journeys } = await supabase
-        .from('journeys')
-        .select('id')
-        .eq('user_id', user.id);
+      await deleteAllUserJourneys(user.id);
       
-      if (journeys) {
-        for (const journey of journeys) {
-          await supabase.from('memories').delete().eq('journey_id', journey.id);
-        }
-        await supabase.from('journeys').delete().eq('user_id', user.id);
-      }
-      
-      // Delete avatar from storage if exists
-      if (avatarUrl) {
-        await supabase.storage.from('avatars').remove([`${user.id}/avatar.jpg`, `${user.id}/avatar.png`, `${user.id}/avatar.webp`]);
-      }
-      
-      // Delete media files from storage
-      const { data: mediaFiles } = await supabase.storage.from('sunroof-media').list(user.id);
-      if (mediaFiles && mediaFiles.length > 0) {
-        const filePaths = mediaFiles.map(f => `${user.id}/${f.name}`);
-        await supabase.storage.from('sunroof-media').remove(filePaths);
-      }
+      // Delete storage files (avatars, media)
+      await deleteAllUserStorage(user.id);
       
       // Sign out
-      await supabase.auth.signOut();
+      await serviceSignOut();
       showToast('Your account has been deleted', 'success');
       router.push('/login');
     } catch (err) {

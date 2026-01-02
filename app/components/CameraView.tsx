@@ -1,7 +1,7 @@
 'use client';
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { supabase } from '@/lib/supabase';
 import { compressImage, getCompressionStats } from '@/lib/imageCompression';
+import { getCurrentUser, uploadMemoryPhoto, createMemory } from '@/lib/services';
 import { getTimeOfDay } from '@/lib/utils/dates';
 import { NOTE_PROMPTS, MAX_FILE_SIZE_BYTES, MAX_NOTE_LENGTH, ALLOWED_IMAGE_TYPES, IMAGE_COMPRESSION, type TimeOfDay } from '@/lib/constants';
 import { X, Camera, FileText, Send, Check, Loader2, Upload, Video, VideoOff, Sparkles } from 'lucide-react';
@@ -52,7 +52,7 @@ export default function CameraView({
 
   // Get user ID for storage paths
   useEffect(() => {
-    supabase.auth.getUser().then(({ data: { user } }) => {
+    getCurrentUser().then(({ data: user }) => {
       if (user) setUserId(user.id);
     });
   }, []);
@@ -186,19 +186,12 @@ export default function CameraView({
         return;
       }
       
-      const fileName = `${userId}/${journeyId}/${Date.now()}.jpg`;
-      
-      const { error: uploadError, data: uploadData } = await supabase.storage
-        .from('sunroof-media')
-        .upload(fileName, blob, { 
-          contentType: 'image/jpeg',
-          cacheControl: '3600',
-          upsert: false
-        });
+      // Upload photo
+      const { data: uploadData, error: uploadError } = await uploadMemoryPhoto(userId, journeyId, blob);
 
-      if (uploadError) {
-        console.error('Upload error details:', JSON.stringify(uploadError, null, 2));
-        setError(`Upload failed: ${uploadError.message || 'Unknown error'}`);
+      if (uploadError || !uploadData) {
+        console.error('Upload error:', uploadError);
+        setError(`Upload failed: ${uploadError || 'Unknown error'}`);
         setTimeout(() => setError(null), 4000);
         setLoading(false);
         return;
@@ -206,15 +199,12 @@ export default function CameraView({
       
       console.log('Upload successful:', uploadData);
 
-      const { data: { publicUrl } } = supabase.storage
-        .from('sunroof-media')
-        .getPublicUrl(fileName);
-
-      const { error: insertError } = await supabase.from('memories').insert([{ 
-        journey_id: journeyId, 
-        type: 'photo', 
-        url: publicUrl 
-      }]);
+      // Create memory record
+      const { error: insertError } = await createMemory({
+        journeyId,
+        type: 'photo',
+        imageUrl: uploadData.publicUrl,
+      });
       
       if (insertError) {
         console.error('Insert error:', insertError);
@@ -272,22 +262,17 @@ export default function CameraView({
       return;
     }
     
-    // Compress the image before upload
-    const fileName = `${userId}/${journeyId}/${Date.now()}.jpg`;
-
     try {
+      // Compress the image before upload
       const compressedBlob = await compressImage(file, IMAGE_COMPRESSION);
       
       const stats = getCompressionStats(file.size, compressedBlob.size);
       console.log(`Image compressed: ${stats.originalKB}KB → ${stats.compressedKB}KB (saved ${stats.percentage}%)`);
       
-      const { error: uploadError } = await supabase.storage
-        .from('sunroof-media')
-        .upload(fileName, compressedBlob, {
-          contentType: 'image/jpeg',
-        });
+      // Upload photo
+      const { data: uploadData, error: uploadError } = await uploadMemoryPhoto(userId, journeyId, compressedBlob);
 
-      if (uploadError) {
+      if (uploadError || !uploadData) {
         console.error('Upload error:', uploadError);
         setError('Upload failed. Check your connection.');
         setTimeout(() => setError(null), 3000);
@@ -296,15 +281,12 @@ export default function CameraView({
         return;
       }
 
-      const { data: { publicUrl } } = supabase.storage
-        .from('sunroof-media')
-        .getPublicUrl(fileName);
-
-      const { error: insertError } = await supabase.from('memories').insert([{ 
-        journey_id: journeyId, 
-        type: 'photo', 
-        url: publicUrl 
-      }]);
+      // Create memory record
+      const { error: insertError } = await createMemory({
+        journeyId,
+        type: 'photo',
+        imageUrl: uploadData.publicUrl,
+      });
       
       if (insertError) {
         console.error('Insert error:', insertError);
@@ -342,11 +324,11 @@ export default function CameraView({
     setError(null);
     
     try {
-      const { error: insertError } = await supabase.from('memories').insert([{ 
-        journey_id: journeyId, 
-        type: 'text', 
-        note: trimmedNote 
-      }]);
+      const { error: insertError } = await createMemory({
+        journeyId,
+        type: 'note',
+        content: trimmedNote,
+      });
       
       if (insertError) {
         console.error('Note insert error:', insertError);

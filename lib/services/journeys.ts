@@ -249,6 +249,75 @@ export async function fetchPastJourneys(userId: string): Promise<ServiceResult<J
 }
 
 /**
+ * Get journey counts for settings page
+ */
+export async function getJourneyCounts(userId: string): Promise<ServiceResult<{ active: number; archived: number }>> {
+  try {
+    const now = new Date().toISOString();
+    
+    const { count: active } = await supabase
+      .from('journeys')
+      .select('*', { count: 'exact', head: true })
+      .eq('user_id', userId)
+      .eq('status', 'active')
+      .gt('unlock_date', now);
+    
+    const { count: archived } = await supabase
+      .from('journeys')
+      .select('*', { count: 'exact', head: true })
+      .eq('user_id', userId)
+      .or(`status.eq.completed,unlock_date.lte.${now}`);
+    
+    return { data: { active: active || 0, archived: archived || 0 }, error: null };
+  } catch (err) {
+    console.error('[JourneyService] Get counts exception:', err);
+    return { data: null, error: 'Failed to get counts' };
+  }
+}
+
+/**
+ * Export all user data (GDPR compliance)
+ */
+export async function exportUserData(userId: string, userEmail?: string, displayName?: string): Promise<ServiceResult<object>> {
+  try {
+    // Fetch all journeys
+    const { data: journeys, error: journeysError } = await supabase
+      .from('journeys')
+      .select('*')
+      .or(`user_id.eq.${userId},shared_with.cs.{${userId}}`);
+    
+    if (journeysError) throw journeysError;
+
+    // Fetch all memories for those journeys
+    const journeyIds = journeys?.map(j => j.id) || [];
+    let memories: unknown[] = [];
+    
+    if (journeyIds.length > 0) {
+      const { data: memoriesData, error: memoriesError } = await supabase
+        .from('memories')
+        .select('*')
+        .in('journey_id', journeyIds);
+      
+      if (memoriesError) throw memoriesError;
+      memories = memoriesData || [];
+    }
+
+    return {
+      data: {
+        exported_at: new Date().toISOString(),
+        user: { id: userId, email: userEmail, display_name: displayName },
+        journeys: journeys || [],
+        memories,
+      },
+      error: null,
+    };
+  } catch (err) {
+    console.error('[JourneyService] Export exception:', err);
+    return { data: null, error: 'Failed to export data' };
+  }
+}
+
+/**
  * Delete all journeys and memories for a user (account deletion)
  */
 export async function deleteAllUserJourneys(userId: string): Promise<ServiceResult<boolean>> {
