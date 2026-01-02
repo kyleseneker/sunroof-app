@@ -510,9 +510,9 @@ export default function Dashboard({ activeJourneys: initialActiveJourneys = [], 
                     style={{ animationDelay: `${index * 100}ms` }}
                   >
                     {/* Dynamic gradient background */}
-                    <div className="absolute inset-0" style={{ background: getJourneyGradient(journey.name).gradient }} />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
-                    <div className="absolute inset-0 opacity-20" style={{
+                    <div className="absolute inset-0 pointer-events-none" style={{ background: getJourneyGradient(journey.name).gradient }} />
+                    <div className="absolute inset-0 pointer-events-none bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
+                    <div className="absolute inset-0 pointer-events-none opacity-20" style={{
                       backgroundImage: `radial-gradient(circle at 25% 25%, rgba(255,255,255,0.1) 0%, transparent 50%),
                                         radial-gradient(circle at 75% 75%, rgba(255,255,255,0.08) 0%, transparent 50%)`
                     }} />
