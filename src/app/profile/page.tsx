@@ -23,7 +23,8 @@ import {
   Loader2,
   Check,
   Pencil,
-  Download
+  Download,
+  Palette
 } from 'lucide-react';
 
 interface Stats {
@@ -363,9 +364,15 @@ export default function ProfilePage() {
           {/* Appearance */}
           <div className="glass rounded-2xl p-4">
             <h3 className="text-sm font-medium text-[var(--fg-muted)] mb-3">Appearance</h3>
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-[var(--fg-base)]">Theme</span>
-              <ThemeToggle showSystemOption />
+            <div className="flex items-center justify-between p-4 rounded-xl bg-[var(--bg-surface)]/50">
+              <div className="flex items-center gap-3">
+                <Palette className="w-5 h-5 text-orange-400" />
+                <div className="text-left">
+                  <span className="block text-[var(--fg-base)]">Theme</span>
+                  <span className="text-xs text-[var(--fg-muted)]">Choose your preferred color scheme</span>
+                </div>
+              </div>
+              <ThemeToggle />
             </div>
           </div>
 
