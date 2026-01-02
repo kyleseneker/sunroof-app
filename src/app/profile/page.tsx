@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { useToast, Avatar } from '@/components/ui';
+import { useToast, Avatar, PageHeader, Section, SectionRow } from '@/components/ui';
 import { NotificationSettings } from '@/components/features';
 import { useTheme } from '@/providers';
 import { formatDate } from '@/lib';
@@ -18,7 +18,6 @@ import {
   exportUserData,
 } from '@/services';
 import { 
-  ArrowLeft, 
   LogOut, 
   Trash2, 
   Loader2,
@@ -263,16 +262,7 @@ export default function ProfilePage() {
 
   return (
     <div className="fixed inset-0 z-50 bg-[var(--bg-base)] text-[var(--fg-base)] flex flex-col safe-top safe-bottom overflow-hidden">
-      {/* Header */}
-      <header className="relative z-10 flex items-center gap-4 p-6 bg-gradient-to-b from-[var(--bg-base)]/80 to-transparent backdrop-blur-md">
-        <button 
-          onClick={() => router.back()}
-          className="w-10 h-10 rounded-full bg-[var(--bg-hover)] flex items-center justify-center hover:bg-[var(--bg-active)] transition-colors"
-        >
-          <ArrowLeft className="w-5 h-5" />
-        </button>
-        <h1 className="text-xl font-medium">Profile</h1>
-      </header>
+      <PageHeader title="Profile" />
 
       {/* Content */}
       <div className="flex-1 overflow-y-auto scrollbar-hide p-6">
@@ -339,8 +329,7 @@ export default function ProfilePage() {
           </div>
 
           {/* Stats */}
-          <div className="glass rounded-2xl p-4">
-            <h3 className="text-sm font-medium text-[var(--fg-muted)] mb-4">Your Stats</h3>
+          <Section title="Your Stats">
             <div className="grid grid-cols-3 gap-3 stagger-children">
               <div className="text-center p-4 bg-gradient-to-br from-orange-500/10 to-orange-500/5 rounded-2xl border border-orange-500/10">
                 <div className="text-3xl font-bold text-orange-400 counter">{stats.totalJourneys}</div>
@@ -355,43 +344,35 @@ export default function ProfilePage() {
                 <div className="text-xs text-[var(--fg-muted)] mt-1">Memories</div>
               </div>
             </div>
-          </div>
+          </Section>
 
           {/* Notifications */}
-          <div className="glass rounded-2xl p-4">
-            <h3 className="text-sm font-medium text-[var(--fg-muted)] mb-3">Notifications</h3>
+          <Section title="Notifications">
             <NotificationSettings />
-          </div>
+          </Section>
 
           {/* Appearance */}
-          <div className="glass rounded-2xl p-4">
-            <h3 className="text-sm font-medium text-[var(--fg-muted)] mb-3">Appearance</h3>
-            <button
+          <Section title="Appearance">
+            <SectionRow
+              icon={<Palette className="w-5 h-5" />}
+              iconColor="text-orange-400"
+              label="Dark Mode"
+              description={resolvedTheme === 'dark' ? 'Currently using dark theme' : 'Currently using light theme'}
               onClick={toggleTheme}
-              className="w-full flex items-center justify-between p-4 rounded-xl bg-[var(--bg-surface)]/50 hover:bg-[var(--bg-muted)]/50 transition-colors"
-            >
-              <div className="flex items-center gap-3">
-                <Palette className="w-5 h-5 text-orange-400" />
-                <div className="text-left">
-                  <span className="block text-[var(--fg-base)]">Dark Mode</span>
-                  <span className="text-xs text-[var(--fg-muted)]">
-                    {resolvedTheme === 'dark' ? 'Currently using dark theme' : 'Currently using light theme'}
-                  </span>
+              rightContent={
+                <div className={`w-12 h-7 rounded-full relative transition-colors ${
+                  resolvedTheme === 'dark' ? 'bg-orange-500' : 'bg-[var(--bg-muted)]'
+                }`}>
+                  <div className={`absolute top-1 w-5 h-5 rounded-full bg-[var(--fg-base)] transition-transform ${
+                    resolvedTheme === 'dark' ? 'translate-x-6' : 'translate-x-1'
+                  }`} />
                 </div>
-              </div>
-              <div className={`w-12 h-7 rounded-full relative transition-colors ${
-                resolvedTheme === 'dark' ? 'bg-orange-500' : 'bg-[var(--bg-muted)]'
-              }`}>
-                <div className={`absolute top-1 w-5 h-5 rounded-full bg-[var(--fg-base)] transition-transform ${
-                  resolvedTheme === 'dark' ? 'translate-x-6' : 'translate-x-1'
-                }`} />
-              </div>
-            </button>
-          </div>
+              }
+            />
+          </Section>
 
           {/* Your Data */}
-          <div className="glass rounded-2xl p-4">
-            <h3 className="text-sm font-medium text-[var(--fg-muted)] mb-3">Your Data</h3>
+          <Section title="Your Data">
             <div className="space-y-2">
               <button
                 onClick={handleExportData}
@@ -409,7 +390,7 @@ export default function ProfilePage() {
                 Download all your journeys and memories as JSON
               </p>
             </div>
-          </div>
+          </Section>
 
           {/* Actions */}
           <div className="space-y-3">
