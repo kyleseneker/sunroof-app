@@ -252,19 +252,19 @@ export default function ProfilePage() {
 
   if (loading) {
     return (
-      <div className="fixed inset-0 bg-black flex items-center justify-center">
-        <Loader2 className="w-6 h-6 animate-spin text-zinc-600" />
+      <div className="fixed inset-0 bg-[var(--bg-base)] flex items-center justify-center">
+        <Loader2 className="w-6 h-6 animate-spin text-[var(--fg-subtle)]" />
       </div>
     );
   }
 
   return (
-    <div className="fixed inset-0 z-50 bg-black text-white flex flex-col safe-top safe-bottom overflow-hidden">
+    <div className="fixed inset-0 z-50 bg-[var(--bg-base)] text-[var(--fg-base)] flex flex-col safe-top safe-bottom overflow-hidden">
       {/* Header */}
-      <header className="relative z-10 flex items-center gap-4 p-6 bg-gradient-to-b from-black/80 to-transparent backdrop-blur-md">
+      <header className="relative z-10 flex items-center gap-4 p-6 bg-gradient-to-b from-[var(--bg-base)]/80 to-transparent backdrop-blur-md">
         <button 
           onClick={() => router.back()}
-          className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-white/10 transition-colors"
+          className="w-10 h-10 rounded-full bg-[var(--bg-hover)] flex items-center justify-center hover:bg-[var(--bg-active)] transition-colors"
         >
           <ArrowLeft className="w-5 h-5" />
         </button>
@@ -308,7 +308,7 @@ export default function ProfilePage() {
                   value={displayName}
                   onChange={(e) => setDisplayName(e.target.value)}
                   placeholder="Your name"
-                  className="bg-zinc-900 border border-zinc-700 rounded-lg px-3 py-2 text-center focus:outline-none focus:border-zinc-500"
+                  className="bg-[var(--bg-surface)] border border-[var(--border-base)] rounded-lg px-3 py-2 text-center focus:outline-none focus:border-[var(--fg-subtle)]"
                   autoFocus
                 />
                 <button
@@ -322,47 +322,47 @@ export default function ProfilePage() {
             ) : (
               <button
                 onClick={() => setIsEditingName(true)}
-                className="flex items-center gap-2 text-xl font-medium hover:text-zinc-300 transition-colors group"
+                className="flex items-center gap-2 text-xl font-medium hover:text-[var(--fg-muted)] transition-colors group"
               >
                 {displayName || 'Add your name'}
                 <Pencil className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity" />
               </button>
             )}
             
-            <p className="text-zinc-500 text-sm mt-1">{user?.email}</p>
-            <p className="text-zinc-600 text-xs mt-0.5">
+            <p className="text-[var(--fg-muted)] text-sm mt-1">{user?.email}</p>
+            <p className="text-[var(--fg-subtle)] text-xs mt-0.5">
               Member since {formatMonthYear(user?.created_at || new Date().toISOString())}
             </p>
           </div>
 
           {/* Stats */}
           <div className="glass rounded-2xl p-4">
-            <h3 className="text-sm font-medium text-zinc-400 mb-4">Your Stats</h3>
+            <h3 className="text-sm font-medium text-[var(--fg-muted)] mb-4">Your Stats</h3>
             <div className="grid grid-cols-3 gap-3 stagger-children">
               <div className="text-center p-4 bg-gradient-to-br from-orange-500/10 to-orange-500/5 rounded-2xl border border-orange-500/10">
                 <div className="text-3xl font-bold text-orange-400 counter">{stats.totalJourneys}</div>
-                <div className="text-xs text-zinc-500 mt-1">Journeys</div>
+                <div className="text-xs text-[var(--fg-muted)] mt-1">Journeys</div>
               </div>
               <div className="text-center p-4 bg-gradient-to-br from-blue-500/10 to-blue-500/5 rounded-2xl border border-blue-500/10">
                 <div className="text-3xl font-bold text-blue-400 counter">{stats.activeJourneys}</div>
-                <div className="text-xs text-zinc-500 mt-1">Active</div>
+                <div className="text-xs text-[var(--fg-muted)] mt-1">Active</div>
               </div>
               <div className="text-center p-4 bg-gradient-to-br from-pink-500/10 to-pink-500/5 rounded-2xl border border-pink-500/10">
                 <div className="text-3xl font-bold text-pink-400 counter">{stats.totalMemories}</div>
-                <div className="text-xs text-zinc-500 mt-1">Memories</div>
+                <div className="text-xs text-[var(--fg-muted)] mt-1">Memories</div>
               </div>
             </div>
           </div>
 
           {/* Notifications */}
           <div className="glass rounded-2xl p-4">
-            <h3 className="text-sm font-medium text-zinc-400 mb-3">Notifications</h3>
+            <h3 className="text-sm font-medium text-[var(--fg-muted)] mb-3">Notifications</h3>
             <NotificationSettings />
           </div>
 
           {/* Appearance */}
           <div className="glass rounded-2xl p-4">
-            <h3 className="text-sm font-medium text-zinc-400 mb-3">Appearance</h3>
+            <h3 className="text-sm font-medium text-[var(--fg-muted)] mb-3">Appearance</h3>
             <div className="flex items-center justify-between">
               <span className="text-sm text-[var(--fg-base)]">Theme</span>
               <ThemeToggle showSystemOption />
@@ -371,7 +371,7 @@ export default function ProfilePage() {
 
           {/* Your Data */}
           <div className="glass rounded-2xl p-4">
-            <h3 className="text-sm font-medium text-zinc-400 mb-3">Your Data</h3>
+            <h3 className="text-sm font-medium text-[var(--fg-muted)] mb-3">Your Data</h3>
             <div className="space-y-2">
               <button
                 onClick={handleExportData}
@@ -385,7 +385,7 @@ export default function ProfilePage() {
                 )}
                 {isExporting ? 'Exporting...' : 'Export All Data'}
               </button>
-              <p className="text-xs text-zinc-600 px-1">
+              <p className="text-xs text-[var(--fg-subtle)] px-1">
                 Download all your journeys and memories as JSON
               </p>
             </div>
@@ -416,7 +416,7 @@ export default function ProfilePage() {
       {/* Delete Confirmation Modal */}
       {showDeleteConfirm && (
         <div 
-          className="fixed inset-0 z-[60] bg-black/90 backdrop-blur-md flex items-center justify-center p-6"
+          className="fixed inset-0 z-[60] bg-[var(--bg-base)]/90 backdrop-blur-md flex items-center justify-center p-6"
           onClick={() => {
             setShowDeleteConfirm(false);
             setDeleteConfirmText('');
@@ -426,17 +426,17 @@ export default function ProfilePage() {
             className="glass rounded-2xl p-6 max-w-sm w-full animate-enter"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="w-14 h-14 rounded-full bg-red-500/10 flex items-center justify-center mx-auto mb-4">
-              <Trash2 className="w-7 h-7 text-red-400" />
+            <div className="w-14 h-14 rounded-full bg-[var(--color-error-subtle)] flex items-center justify-center mx-auto mb-4">
+              <Trash2 className="w-7 h-7 text-[var(--color-error)]" />
             </div>
             
             <h2 className="text-xl font-semibold text-center mb-2">Delete Account?</h2>
-            <p className="text-zinc-500 text-sm text-center mb-6">
+            <p className="text-[var(--fg-muted)] text-sm text-center mb-6">
               This will permanently delete all your journeys and memories. This action cannot be undone.
             </p>
             
             <div className="mb-4">
-              <label className="text-xs text-zinc-500 mb-2 block">
+              <label className="text-xs text-[var(--fg-muted)] mb-2 block">
                 Type DELETE to confirm
               </label>
               <input
@@ -444,7 +444,7 @@ export default function ProfilePage() {
                 value={deleteConfirmText}
                 onChange={(e) => setDeleteConfirmText(e.target.value)}
                 placeholder="DELETE"
-                className="w-full bg-zinc-900 border border-zinc-700 rounded-lg px-4 py-3 text-center font-mono focus:outline-none focus:border-red-500"
+                className="w-full bg-[var(--bg-surface)] border border-[var(--border-base)] rounded-lg px-4 py-3 text-center font-mono focus:outline-none focus:border-[var(--color-error)]"
               />
             </div>
             
@@ -454,14 +454,14 @@ export default function ProfilePage() {
                   setShowDeleteConfirm(false);
                   setDeleteConfirmText('');
                 }}
-                className="flex-1 h-12 bg-white/5 hover:bg-white/10 rounded-xl text-sm font-medium transition-colors"
+                className="flex-1 h-12 bg-[var(--bg-hover)] hover:bg-[var(--bg-active)] rounded-xl text-sm font-medium transition-colors"
               >
                 Cancel
               </button>
               <button
                 onClick={handleDeleteAccount}
                 disabled={deleteConfirmText !== 'DELETE'}
-                className="flex-1 h-12 bg-red-500 hover:bg-red-600 disabled:bg-red-500/30 disabled:cursor-not-allowed rounded-xl text-sm font-medium transition-colors"
+                className="flex-1 h-12 bg-[var(--color-error)] hover:bg-[var(--color-error)]/80 disabled:bg-[var(--color-error)]/30 disabled:cursor-not-allowed rounded-xl text-sm font-medium text-white transition-colors"
               >
                 Delete Forever
               </button>
