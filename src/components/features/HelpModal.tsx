@@ -2,7 +2,7 @@
 
 import { ReactNode } from 'react';
 import { X, Sparkles, Camera, Lock, ImageIcon } from 'lucide-react';
-import { FeatureStep, IconButton } from '@/components/ui';
+import { FeatureStep, IconButton, Button } from '@/components/ui';
 import Image from 'next/image';
 
 interface HelpModalProps {
@@ -63,12 +63,9 @@ export default function HelpModal({ isOpen, onClose, children }: HelpModalProps)
 
           {children}
 
-          <button 
-            onClick={onClose}
-            className="w-full h-14 bg-[var(--fg-base)] text-[var(--fg-inverse)] rounded-full font-semibold text-sm mt-10"
-          >
+          <Button onClick={onClose} fullWidth size="lg" className="mt-10">
             Got it
-          </button>
+          </Button>
         </div>
       </div>
     </div>

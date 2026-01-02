@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
-import { useToast } from '@/components/ui';
+import { useToast, Button } from '@/components/ui';
 import { updateJourney } from '@/services';
 import { hapticSuccess } from '@/lib';
 import type { Journey } from '@/types';
@@ -131,13 +131,16 @@ export default function EditJourneyModal({
               />
             </div>
             
-            <button 
+            <Button 
               onClick={handleSave}
-              disabled={!editName.trim() || isSaving}
-              className="w-full h-14 bg-[var(--fg-base)] text-[var(--fg-inverse)] rounded-full font-semibold text-sm disabled:opacity-40 mt-4"
+              disabled={!editName.trim()}
+              loading={isSaving}
+              fullWidth 
+              size="lg" 
+              className="mt-4"
             >
               {isSaving ? 'Saving...' : 'Save Changes'}
-            </button>
+            </Button>
           </div>
         </div>
       </div>

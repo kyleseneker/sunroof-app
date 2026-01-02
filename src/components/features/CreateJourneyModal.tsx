@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from 'react';
 import { X, MapPin, Timer, UserPlus, Plane } from 'lucide-react';
-import { useToast } from '@/components/ui';
+import { useToast, Button } from '@/components/ui';
 import { createJourney, getUserIdByEmail } from '@/services';
 import { hapticSuccess, DESTINATION_SUGGESTIONS } from '@/lib';
 
@@ -281,13 +281,16 @@ export default function CreateJourneyModal({
               </p>
             </div>
             
-            <button 
+            <Button 
               type="submit"
-              disabled={loading || !tripName}
-              className="w-full h-14 bg-[var(--fg-base)] text-[var(--fg-inverse)] rounded-full font-semibold text-sm tracking-wide disabled:opacity-40 disabled:cursor-not-allowed hover:opacity-90 active:scale-[0.98] transition-all mt-4"
+              disabled={!tripName}
+              loading={loading}
+              fullWidth 
+              size="lg" 
+              className="mt-4"
             >
               {loading ? 'Creating...' : 'Start Journey'}
-            </button>
+            </Button>
           </form>
         </div>
       </div>
