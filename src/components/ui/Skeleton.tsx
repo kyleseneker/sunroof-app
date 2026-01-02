@@ -21,7 +21,7 @@ export default function Skeleton({
   lines = 1,
   animation = 'pulse',
 }: SkeletonProps) {
-  const baseClasses = 'bg-zinc-800';
+  const baseClasses = 'bg-[var(--bg-muted)]';
   
   const animationClasses = {
     pulse: 'skeleton', // Uses existing shimmer animation from globals.css
@@ -72,7 +72,7 @@ export default function Skeleton({
 // Preset skeleton patterns for common use cases
 export function SkeletonCard({ className = '' }: { className?: string }) {
   return (
-    <div className={`rounded-xl bg-zinc-900/50 p-4 ${className}`}>
+    <div className={`rounded-xl bg-[var(--bg-surface)] p-4 ${className}`}>
       <Skeleton variant="rectangular" height={120} className="mb-4" />
       <Skeleton variant="text" width="60%" className="mb-2" />
       <Skeleton variant="text" width="40%" />
@@ -82,7 +82,7 @@ export function SkeletonCard({ className = '' }: { className?: string }) {
 
 export function SkeletonJourneyCard({ className = '' }: { className?: string }) {
   return (
-    <div className={`rounded-2xl overflow-hidden bg-zinc-900/50 ${className}`}>
+    <div className={`rounded-2xl overflow-hidden bg-[var(--bg-surface)] ${className}`}>
       <Skeleton variant="rectangular" height={160} className="w-full" />
       <div className="p-4 space-y-3">
         <Skeleton variant="text" width="70%" height={20} />
@@ -109,7 +109,7 @@ export function SkeletonMemoryGrid({ count = 6, className = '' }: { count?: numb
 
 export function SkeletonListItem({ className = '' }: { className?: string }) {
   return (
-    <div className={`flex items-center gap-3 p-3 rounded-xl bg-zinc-900/50 ${className}`}>
+    <div className={`flex items-center gap-3 p-3 rounded-xl bg-[var(--bg-surface)] ${className}`}>
       <Skeleton variant="circular" width={48} height={48} />
       <div className="flex-1 space-y-2">
         <Skeleton variant="text" width="60%" />
