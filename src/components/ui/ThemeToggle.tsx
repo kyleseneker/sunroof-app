@@ -29,7 +29,7 @@ export default function ThemeToggle({
     return (
       <div
         className={cn(
-          'flex items-center gap-0.5 p-0.5 rounded-full bg-[var(--bg-muted)] border border-[var(--border-base)]',
+          'inline-flex items-center h-7 gap-0.5 p-0.5 rounded-full bg-[var(--bg-muted)] border border-[var(--border-base)]',
           className
         )}
         role="radiogroup"
@@ -38,7 +38,7 @@ export default function ThemeToggle({
         <button
           onClick={() => setTheme('dark')}
           className={cn(
-            'w-6 h-6 flex items-center justify-center rounded-full transition-all',
+            'w-5 h-5 flex items-center justify-center rounded-full transition-all',
             theme === 'dark'
               ? 'bg-[var(--fg-base)] text-[var(--fg-inverse)]'
               : 'text-[var(--fg-subtle)] hover:text-[var(--fg-muted)]'
@@ -53,7 +53,7 @@ export default function ThemeToggle({
         <button
           onClick={() => setTheme('light')}
           className={cn(
-            'w-6 h-6 flex items-center justify-center rounded-full transition-all',
+            'w-5 h-5 flex items-center justify-center rounded-full transition-all',
             theme === 'light'
               ? 'bg-[var(--fg-base)] text-[var(--fg-inverse)]'
               : 'text-[var(--fg-subtle)] hover:text-[var(--fg-muted)]'
@@ -68,7 +68,7 @@ export default function ThemeToggle({
         <button
           onClick={() => setTheme('system')}
           className={cn(
-            'w-6 h-6 flex items-center justify-center rounded-full transition-all',
+            'w-5 h-5 flex items-center justify-center rounded-full transition-all',
             theme === 'system'
               ? 'bg-[var(--fg-base)] text-[var(--fg-inverse)]'
               : 'text-[var(--fg-subtle)] hover:text-[var(--fg-muted)]'
