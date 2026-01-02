@@ -452,7 +452,7 @@ export default function Dashboard({ activeJourneys: initialActiveJourneys = [], 
               {activeJourneys.length > 0 
                 ? `You have ${activeJourneys.length} ${activeJourneys.length === 1 ? 'journey' : 'journeys'} in progress`
                 : pastJourneys.length > 0 
-                  ? 'Ready to start a new adventure?'
+                  ? `${pastJourneys.length} ${pastJourneys.length === 1 ? 'journey' : 'journeys'} in your vault`
                   : 'Welcome to Sunroof'
               }
             </p>
@@ -589,8 +589,8 @@ export default function Dashboard({ activeJourneys: initialActiveJourneys = [], 
                 ))}
               </div>
             </div>
-          ) : (
-            /* Empty state */
+          ) : pastJourneys.length === 0 ? (
+            /* Empty state - first time user */
             <div className="text-center py-12 animate-enter">
               <div className="relative w-40 h-40 mx-auto mb-8 empty-illustration">
                 <div className="absolute inset-0 rounded-full bg-gradient-to-br from-orange-500/20 via-pink-500/10 to-purple-500/20 animate-breathe" />
@@ -620,6 +620,18 @@ export default function Dashboard({ activeJourneys: initialActiveJourneys = [], 
               </button>
               
               <p className="mt-6 text-xs text-zinc-600">Takes 30 seconds • No credit card needed</p>
+            </div>
+          ) : (
+            /* No active journeys but has past journeys - show compact prompt */
+            <div className="text-center py-8 animate-enter">
+              <p className="text-zinc-500 mb-4">No active journeys right now</p>
+              <button 
+                onClick={() => setIsCreating(true)}
+                className="inline-flex items-center gap-2 px-6 py-3 bg-white text-black rounded-full font-medium hover:bg-zinc-200 active:scale-[0.98] transition-all"
+              >
+                <Plus className="w-4 h-4" />
+                <span>Start New Journey</span>
+              </button>
             </div>
           )}
         </section>
