@@ -104,13 +104,6 @@ test.describe('Session Persistence', () => {
     
     await expect(page).toHaveURL(/\/login/);
   });
-
-  test('should redirect settings to login when not authenticated', async ({ page }) => {
-    await page.goto('/settings');
-    
-    // Settings page requires authentication
-    await expect(page).toHaveURL(/\/login/, { timeout: 10000 });
-  });
 });
 
 test.describe('Login Page UI', () => {

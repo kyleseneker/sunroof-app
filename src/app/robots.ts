@@ -6,7 +6,7 @@ export default function robots(): MetadataRoute.Robots {
       {
         userAgent: '*',
         allow: '/',
-        disallow: ['/api/', '/auth/', '/profile', '/settings'],
+        disallow: ['/api/', '/auth/', '/profile'],
       },
     ],
     sitemap: 'https://getsunroof.com/sitemap.xml',

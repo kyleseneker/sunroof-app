@@ -117,12 +117,6 @@ test.describe('Protected Route Redirects', () => {
     await page.goto('/profile');
     await expect(page).toHaveURL(/\/login/);
   });
-
-  test('settings redirects unauthenticated users to login', async ({ page }) => {
-    await page.goto('/settings');
-    // Settings page requires authentication
-    await expect(page).toHaveURL(/\/login/, { timeout: 10000 });
-  });
 });
 
 test.describe('404 Handling', () => {

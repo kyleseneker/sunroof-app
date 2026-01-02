@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useToast, Avatar } from '@/components/ui';
+import { NotificationSettings } from '@/components/features';
 import { formatDate } from '@/lib';
 import { 
   getCurrentUser, 
@@ -13,6 +14,7 @@ import {
   signOut as serviceSignOut,
   deleteAllUserJourneys,
   deleteAllUserStorage,
+  exportUserData,
 } from '@/services';
 import { 
   ArrowLeft, 
@@ -22,7 +24,8 @@ import {
   Trash2, 
   Loader2,
   Check,
-  Pencil
+  Pencil,
+  Download
 } from 'lucide-react';
 
 interface Stats {
@@ -50,6 +53,7 @@ export default function ProfilePage() {
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [deleteConfirmText, setDeleteConfirmText] = useState('');
+  const [isExporting, setIsExporting] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Escape key to close modals
@@ -207,6 +211,41 @@ export default function ProfilePage() {
     }
   };
 
+  const handleExportData = async () => {
+    if (isExporting || !user) return;
+    setIsExporting(true);
+    
+    try {
+      const { data: exportData, error } = await exportUserData(
+        user.id,
+        user.email,
+        user.user_metadata?.display_name
+      );
+
+      if (error || !exportData) {
+        throw new Error(error || 'Failed to export');
+      }
+
+      // Download as JSON
+      const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `sunroof-export-${new Date().toISOString().split('T')[0]}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      showToast('Data exported successfully', 'success');
+    } catch (err) {
+      console.error('Export error:', err);
+      showToast('Failed to export data', 'error');
+    }
+    
+    setIsExporting(false);
+  };
+
   // Format dates with month + year only for profile stats
   const formatMonthYear = (dateStr: string) => formatDate(dateStr, { month: 'short', year: 'numeric' });
 
@@ -328,6 +367,34 @@ export default function ProfilePage() {
                   Joined {formatMonthYear(user?.created_at || new Date().toISOString())}
                 </span>
               </div>
+            </div>
+          </div>
+
+          {/* Notifications */}
+          <div className="glass rounded-2xl p-4">
+            <h3 className="text-sm font-medium text-zinc-400 mb-3">Notifications</h3>
+            <NotificationSettings />
+          </div>
+
+          {/* Your Data */}
+          <div className="glass rounded-2xl p-4">
+            <h3 className="text-sm font-medium text-zinc-400 mb-3">Your Data</h3>
+            <div className="space-y-2">
+              <button
+                onClick={handleExportData}
+                disabled={isExporting}
+                className="w-full flex items-center gap-3 px-4 py-3 rounded-xl bg-blue-500/10 hover:bg-blue-500/20 transition-colors text-sm text-blue-400 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isExporting ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <Download className="w-4 h-4" />
+                )}
+                {isExporting ? 'Exporting...' : 'Export All Data'}
+              </button>
+              <p className="text-xs text-zinc-600 px-1">
+                Download all your journeys and memories as JSON
+              </p>
             </div>
           </div>
 

@@ -1758,10 +1758,6 @@ $$ LANGUAGE sql SECURITY DEFINER;
             <Link href="/terms" className="hover:text-zinc-400 transition-colors">
               Terms
             </Link>
-            <span className="mx-3 text-zinc-700">•</span>
-            <Link href="/settings" className="hover:text-zinc-400 transition-colors">
-              Settings
-            </Link>
           </nav>
           <p className="text-[10px] text-zinc-700">
             © {new Date().getFullYear()} Sunroof. All rights reserved.

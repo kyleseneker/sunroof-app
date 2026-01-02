@@ -115,11 +115,4 @@ test.describe('Protected Routes', () => {
     
     await expect(page).toHaveURL(/\/login/);
   });
-
-  test('should redirect from settings to login when not authenticated', async ({ page }) => {
-    await page.goto('/settings');
-    
-    // Settings page requires authentication
-    await expect(page).toHaveURL(/\/login/, { timeout: 10000 });
-  });
 });
