@@ -150,6 +150,49 @@ export async function deleteAllUserStorage(userId: string): Promise<ServiceResul
 }
 
 /**
+ * Upload a memory audio file
+ */
+export async function uploadMemoryAudio(
+  userId: string,
+  journeyId: string,
+  file: Blob,
+  contentType: string = 'audio/webm'
+): Promise<ServiceResult<UploadResult>> {
+  try {
+    const ext = contentType.includes('webm') ? 'webm' : contentType.includes('mp4') ? 'm4a' : 'wav';
+    const filename = `${Date.now()}.${ext}`;
+    const path = `${userId}/${journeyId}/${filename}`;
+    
+    const { error: uploadError } = await supabase.storage
+      .from('sunroof-media')
+      .upload(path, file, {
+        contentType,
+        upsert: true,
+      });
+
+    if (uploadError) {
+      console.error('[StorageService] Upload audio error:', uploadError);
+      return { data: null, error: uploadError.message };
+    }
+
+    const { data: urlData } = supabase.storage
+      .from('sunroof-media')
+      .getPublicUrl(path);
+
+    return {
+      data: {
+        publicUrl: urlData.publicUrl,
+        path,
+      },
+      error: null,
+    };
+  } catch (err) {
+    console.error('[StorageService] Upload audio exception:', err);
+    return { data: null, error: 'Failed to upload audio' };
+  }
+}
+
+/**
  * Get public URL for a storage path
  */
 export function getPublicUrl(bucket: 'memories' | 'avatars', path: string): string {

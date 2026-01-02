@@ -1,8 +1,9 @@
 'use client';
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { compressImage, getCompressionStats, getTimeOfDay, NOTE_PROMPTS, MAX_FILE_SIZE_BYTES, MAX_NOTE_LENGTH, ALLOWED_IMAGE_TYPES, IMAGE_COMPRESSION } from '@/lib';
-import { getCurrentUser, uploadMemoryPhoto, createMemory } from '@/services';
-import { X, Camera, FileText, Send, Check, Loader2, Upload, Video, VideoOff, Sparkles } from 'lucide-react';
+import { getCurrentUser, uploadMemoryPhoto, uploadMemoryAudio, createMemory } from '@/services';
+import { X, Camera, FileText, Send, Check, Loader2, Upload, Video, VideoOff, Sparkles, Mic } from 'lucide-react';
+import { AudioRecorder } from '@/components/features';
 import type { TimeOfDay } from '@/types';
 
 export default function CameraView({ 
@@ -14,7 +15,7 @@ export default function CameraView({
   journeyName: string; 
   onClose: () => void;
 }) {
-  const [mode, setMode] = useState<'photo' | 'text'>('photo');
+  const [mode, setMode] = useState<'photo' | 'text' | 'audio'>('photo');
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -337,17 +338,76 @@ export default function CameraView({
         return;
       }
       
-      setLoading(false);
-      setNote('');
-      setMode('photo');
-      showSuccess();
-    } catch (err) {
-      console.error('Note exception:', err);
-      setError('Something went wrong. Try again.');
+    setLoading(false);
+    setNote('');
+    setMode('photo');
+    showSuccess();
+  } catch (err) {
+    console.error('Note exception:', err);
+    setError('Something went wrong. Try again.');
+    setTimeout(() => setError(null), 3000);
+    setLoading(false);
+  }
+};
+
+const handleAudioRecordingComplete = async (blob: Blob, duration: number) => {
+  setLoading(true);
+  setError(null);
+
+  if (!userId) {
+    setError('Not authenticated');
+    setTimeout(() => setError(null), 3000);
+    setLoading(false);
+    return;
+  }
+
+  try {
+    // Upload audio
+    const { data: uploadData, error: uploadError } = await uploadMemoryAudio(
+      userId, 
+      journeyId, 
+      blob,
+      blob.type || 'audio/webm'
+    );
+
+    if (uploadError || !uploadData) {
+      console.error('Audio upload error:', uploadError);
+      setError('Upload failed. Check your connection.');
       setTimeout(() => setError(null), 3000);
       setLoading(false);
+      return;
     }
-  };
+
+    // Create memory record
+    const { error: insertError } = await createMemory({
+      journeyId,
+      type: 'audio',
+      audioUrl: uploadData.publicUrl,
+      duration,
+    });
+
+    if (insertError) {
+      console.error('Audio insert error:', insertError);
+      setError('Failed to save audio. Try again.');
+      setTimeout(() => setError(null), 3000);
+      setLoading(false);
+      return;
+    }
+
+    setLoading(false);
+    showSuccess();
+  } catch (err) {
+    console.error('Audio exception:', err);
+    setError('Something went wrong. Try again.');
+    setTimeout(() => setError(null), 3000);
+    setLoading(false);
+  }
+};
+
+const handleAudioError = (message: string) => {
+  setError(message);
+  setTimeout(() => setError(null), 4000);
+};
 
   return (
     <div className="fixed inset-0 bg-black text-white z-50 flex flex-col safe-top safe-bottom">
@@ -392,7 +452,15 @@ export default function CameraView({
 
       {/* Viewfinder Area */}
       <div className="flex-1 relative bg-zinc-950">
-        {mode === 'photo' ? (
+        {mode === 'audio' ? (
+          <div className="absolute inset-0 flex items-center justify-center pt-20">
+            <AudioRecorder
+              onRecordingComplete={handleAudioRecordingComplete}
+              onError={handleAudioError}
+              disabled={loading}
+            />
+          </div>
+        ) : mode === 'photo' ? (
           <div className="absolute inset-0 flex items-center justify-center">
             {/* Desktop webcam view - always rendered but hidden when not active */}
             <video 
@@ -532,7 +600,7 @@ export default function CameraView({
         <div className="p-6 pt-8 bg-gradient-to-t from-black via-black/90 to-transparent">
           
           {/* Mode Switcher */}
-          <div className="flex justify-center gap-8 mb-6">
+          <div className="flex justify-center gap-6 mb-6">
             <button 
               onClick={() => setMode('photo')}
               className={`flex items-center gap-2 text-xs font-semibold uppercase tracking-wider transition-colors ${
@@ -541,6 +609,15 @@ export default function CameraView({
             >
               <Camera className="w-4 h-4" />
               Photo
+            </button>
+            <button 
+              onClick={() => setMode('audio')}
+              className={`flex items-center gap-2 text-xs font-semibold uppercase tracking-wider transition-colors ${
+                mode === 'audio' ? 'text-white' : 'text-zinc-500'
+              }`}
+            >
+              <Mic className="w-4 h-4" />
+              Voice
             </button>
             <button 
               onClick={() => setMode('text')}
@@ -559,6 +636,9 @@ export default function CameraView({
               <div className="w-20 h-20 rounded-full bg-zinc-800 flex items-center justify-center">
                 <Loader2 className="w-8 h-8 animate-spin text-white/60" />
               </div>
+            ) : mode === 'audio' ? (
+              // Audio mode has its own controls in the AudioRecorder component
+              <div className="h-20" />
             ) : mode === 'photo' ? (
               <>
                 {/* File input for mobile camera capture or desktop file upload */}

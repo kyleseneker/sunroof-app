@@ -8,18 +8,23 @@ import type { ServiceResult } from './types';
 
 export interface CreateMemoryInput {
   journeyId: string;
-  type: 'photo' | 'note';
+  type: 'photo' | 'note' | 'audio';
   content?: string;
   imageUrl?: string;
+  audioUrl?: string;
+  duration?: number;
 }
 
 /**
- * Create a new memory (photo or note)
+ * Create a new memory (photo, note, or audio)
  */
 export async function createMemory(input: CreateMemoryInput): Promise<ServiceResult<Memory>> {
   try {
     // Map type 'note' to database type 'text'
-    const dbType = input.type === 'note' ? 'text' : 'photo';
+    const dbType = input.type === 'note' ? 'text' : input.type;
+    
+    // Determine URL based on type
+    const url = input.type === 'audio' ? input.audioUrl : input.imageUrl;
     
     const { data, error } = await supabase
       .from('memories')
@@ -27,7 +32,8 @@ export async function createMemory(input: CreateMemoryInput): Promise<ServiceRes
         journey_id: input.journeyId,
         type: dbType,
         note: input.content || null,
-        url: input.imageUrl || null,
+        url: url || null,
+        duration: input.duration || null,
       }])
       .select()
       .single();

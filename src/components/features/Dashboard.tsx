@@ -12,7 +12,7 @@ import {
 } from '@/services';
 import { useAuth } from '@/providers';
 import { hapticSuccess, getJourneyGradient, formatDate, getTimeUntilUnlock, isJourneyUnlocked, getGreeting, DESTINATION_SUGGESTIONS, MAX_ACTIVE_JOURNEYS } from '@/lib';
-import { Plus, ArrowRight, MapPin, X, Lock, ChevronRight, Sparkles, Trash2, HelpCircle, Camera, Clock, ImageIcon, Pencil, FileText, Plane, Timer, Archive, UserPlus, Users, Loader2, Search, RefreshCw } from 'lucide-react';
+import { Plus, ArrowRight, MapPin, X, Lock, ChevronRight, Sparkles, Trash2, HelpCircle, Camera, Clock, ImageIcon, Pencil, FileText, Plane, Timer, Archive, UserPlus, Users, Loader2, Search, RefreshCw, Mic } from 'lucide-react';
 import { useToast, Avatar } from '@/components/ui';
 import { GalleryView, KeyboardShortcutsHelp, useKeyboardShortcutsHelp, MemoryBadge, ActionSheet } from '@/components/features';
 import Image from 'next/image';
@@ -861,13 +861,15 @@ $$ LANGUAGE sql SECURITY DEFINER;
                       <div className="w-12 h-12 rounded-lg bg-zinc-800 flex items-center justify-center">
                         {memory.type === 'photo' ? (
                           <ImageIcon className="w-5 h-5 text-zinc-500" />
+                        ) : memory.type === 'audio' ? (
+                          <Mic className="w-5 h-5 text-orange-400" />
                         ) : (
                           <FileText className="w-5 h-5 text-zinc-500" />
                         )}
                       </div>
                       <div>
                         <p className="font-medium text-sm">
-                          {memory.type === 'photo' ? 'Photo' : 'Note'}
+                          {memory.type === 'photo' ? 'Photo' : memory.type === 'audio' ? 'Voice Note' : 'Note'}
                         </p>
                         <p className="text-xs text-zinc-500">{formattedDate}</p>
                       </div>
@@ -900,7 +902,7 @@ $$ LANGUAGE sql SECURITY DEFINER;
               </div>
               <h3 className="text-xl font-semibold text-center mb-2">Delete this memory?</h3>
               <p className="text-zinc-500 text-sm text-center mb-6">
-                This {memoryToDelete.type === 'photo' ? 'photo' : 'note'} will be permanently deleted. You won't be able to recover it.
+                This {memoryToDelete.type === 'photo' ? 'photo' : memoryToDelete.type === 'audio' ? 'voice note' : 'note'} will be permanently deleted. You won't be able to recover it.
               </p>
               <div className="flex gap-3">
                 <button

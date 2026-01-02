@@ -27,6 +27,16 @@ export const ALLOWED_IMAGE_TYPES = [
 
 export const ALLOWED_IMAGE_EXTENSIONS = /\.(jpe?g|png|gif|webp|heic|heif)$/i;
 
+// Audio recording
+export const MAX_AUDIO_DURATION_SECONDS = 60;
+export const AUDIO_SAMPLE_RATE = 44100;
+export const ALLOWED_AUDIO_TYPES = [
+  'audio/webm',
+  'audio/mp4',
+  'audio/wav',
+  'audio/ogg',
+] as const;
+
 // Image compression
 export const IMAGE_COMPRESSION = {
   maxWidth: 2048,

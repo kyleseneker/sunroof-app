@@ -35,9 +35,10 @@ export interface Journey {
 export interface Memory {
   id: string;
   journey_id: string;
-  type: 'photo' | 'text';
+  type: 'photo' | 'text' | 'audio';
   url?: string | null;
   note?: string | null;
+  duration?: number | null;
   deleted_at?: string | null;
   created_at: string;
 }

@@ -16,8 +16,10 @@ import {
   Check,
   Share,
   Loader2,
+  Mic,
 } from 'lucide-react';
 import { useToast } from '@/components/ui';
+import { AudioPlayer } from '@/components/features';
 import type { Journey, Memory } from '@/types';
 
 interface GalleryViewProps {
@@ -105,6 +107,7 @@ export default function GalleryView({ journey, onClose, onMemoryDeleted }: Galle
   // Stats
   const photoCount = memories.filter((m) => m.type === 'photo').length;
   const noteCount = memories.filter((m) => m.type === 'text').length;
+  const audioCount = memories.filter((m) => m.type === 'audio').length;
 
   const [isDeleting, setIsDeleting] = useState(false);
 
@@ -376,6 +379,25 @@ export default function GalleryView({ journey, onClose, onMemoryDeleted }: Galle
                   'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiM2NjYiIHN0cm9rZS13aWR0aD0iMiI+PHJlY3QgeD0iMyIgeT0iMyIgd2lkdGg9IjE4IiBoZWlnaHQ9IjE4IiByeD0iMiIvPjxjaXJjbGUgY3g9IjguNSIgY3k9IjguNSIgcj0iMS41Ii8+PHBhdGggZD0ibTIxIDE1LTUtNS01IDV6Ii8+PC9zdmc+';
               }}
             />
+          ) : selectedMemory.type === 'audio' && selectedMemory.url ? (
+            <div className="w-full max-w-md">
+              <div className="text-center mb-6">
+                <div className="w-20 h-20 rounded-full bg-gradient-to-br from-orange-500 to-pink-500 flex items-center justify-center mx-auto mb-4">
+                  <Mic className="w-10 h-10 text-white" />
+                </div>
+                <h3 className="text-lg font-medium text-white mb-1">Voice Note</h3>
+                {selectedMemory.duration && (
+                  <p className="text-sm text-zinc-500">
+                    {Math.floor(selectedMemory.duration / 60)}:{(selectedMemory.duration % 60).toString().padStart(2, '0')}
+                  </p>
+                )}
+              </div>
+              <AudioPlayer 
+                src={selectedMemory.url} 
+                duration={selectedMemory.duration}
+                showWaveform={true}
+              />
+            </div>
           ) : (
             <div className="max-w-md p-8 bg-zinc-900 rounded-2xl">
               <p className="text-xl text-white leading-relaxed">{selectedMemory.note}</p>
@@ -404,7 +426,7 @@ export default function GalleryView({ journey, onClose, onMemoryDeleted }: Galle
           </div>
           <h3 className="text-xl font-semibold text-center mb-2">Delete this memory?</h3>
           <p className="text-zinc-500 text-sm text-center mb-6">
-            This {memoryToDelete.type === 'photo' ? 'photo' : 'note'} will be permanently deleted.
+            This {memoryToDelete.type === 'photo' ? 'photo' : memoryToDelete.type === 'audio' ? 'voice note' : 'note'} will be permanently deleted.
           </p>
           <div className="flex gap-3">
             <button
@@ -506,13 +528,19 @@ export default function GalleryView({ journey, onClose, onMemoryDeleted }: Galle
                 {photoCount} {photoCount === 1 ? 'photo' : 'photos'}
               </span>
             )}
-            {photoCount > 0 && noteCount > 0 && <span> • </span>}
+            {photoCount > 0 && (noteCount > 0 || audioCount > 0) && <span> • </span>}
+            {audioCount > 0 && (
+              <span>
+                {audioCount} {audioCount === 1 ? 'voice note' : 'voice notes'}
+              </span>
+            )}
+            {audioCount > 0 && noteCount > 0 && <span> • </span>}
             {noteCount > 0 && (
               <span>
                 {noteCount} {noteCount === 1 ? 'note' : 'notes'}
               </span>
             )}
-            {photoCount === 0 && noteCount === 0 && <span>No memories</span>}
+            {photoCount === 0 && noteCount === 0 && audioCount === 0 && <span>No memories</span>}
           </p>
         </div>
         {/* AI Recap button */}
@@ -572,9 +600,11 @@ export default function GalleryView({ journey, onClose, onMemoryDeleted }: Galle
             <div className="max-w-lg mx-auto space-y-6">
               <div className="text-center mb-8">
                 <h1 className="text-3xl font-light mb-2">{journey.name}</h1>
-                <p className="text-zinc-500 text-sm">
-                  {photoCount} {photoCount === 1 ? 'photo' : 'photos'} • {noteCount} {noteCount === 1 ? 'note' : 'notes'}
-                </p>
+              <p className="text-zinc-500 text-sm">
+                {photoCount} {photoCount === 1 ? 'photo' : 'photos'}
+                {audioCount > 0 && ` • ${audioCount} ${audioCount === 1 ? 'voice note' : 'voice notes'}`}
+                {noteCount > 0 && ` • ${noteCount} ${noteCount === 1 ? 'note' : 'notes'}`}
+              </p>
               </div>
 
               <div className="glass rounded-2xl p-6">
@@ -667,6 +697,18 @@ export default function GalleryView({ journey, onClose, onMemoryDeleted }: Galle
                             '<div class="w-full h-full bg-zinc-800 flex items-center justify-center"><span class="text-zinc-600 text-xs">Failed to load</span></div>';
                         }}
                       />
+                    ) : memory.type === 'audio' ? (
+                      <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-orange-500/20 to-pink-500/20">
+                        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-orange-500 to-pink-500 flex items-center justify-center mb-2">
+                          <Mic className="w-6 h-6 text-white" />
+                        </div>
+                        <p className="text-xs text-zinc-400">Voice Note</p>
+                        {memory.duration && (
+                          <p className="text-xs text-zinc-500 mt-0.5">
+                            {Math.floor(memory.duration / 60)}:{(memory.duration % 60).toString().padStart(2, '0')}
+                          </p>
+                        )}
+                      </div>
                     ) : (
                       <div className="w-full h-full p-4 flex items-center justify-center">
                         <p className="text-sm text-zinc-300 text-center line-clamp-4">{memory.note}</p>
