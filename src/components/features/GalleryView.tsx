@@ -3,23 +3,9 @@
 import { useState, useEffect } from 'react';
 import { api, getJourneyGradient } from '@/lib';
 import { deleteJourney, deleteMemory, fetchMemoriesForJourney } from '@/services';
-import {
-  X,
-  Trash2,
-  Camera,
-  ArrowUpDown,
-  ChevronLeft,
-  ChevronRight,
-  Sparkles,
-  Download,
-  Copy,
-  Check,
-  Share,
-  Loader2,
-  Mic,
-} from 'lucide-react';
-import { useToast } from '@/components/ui';
-import { AudioPlayer } from '@/components/features';
+import { X, Trash2, Camera, ArrowUpDown, Sparkles, Loader2, Mic } from 'lucide-react';
+import { useToast, ConfirmDialog } from '@/components/ui';
+import { AudioPlayer, MemoryViewer, AIRecapSheet } from '@/components/features';
 import type { Journey, Memory } from '@/types';
 
 interface GalleryViewProps {
@@ -33,17 +19,60 @@ export default function GalleryView({ journey, onClose, onMemoryDeleted }: Galle
   const [memories, setMemories] = useState<Memory[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedMemory, setSelectedMemory] = useState<Memory | null>(null);
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [memoryToDelete, setMemoryToDelete] = useState<Memory | null>(null);
+  const [showDeleteJourneyConfirm, setShowDeleteJourneyConfirm] = useState(false);
   const [sortNewestFirst, setSortNewestFirst] = useState(false);
   const [showCelebration, setShowCelebration] = useState(false);
   const [confetti, setConfetti] = useState<Array<{ id: number; left: number; color: string; delay: number }>>([]);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   // AI Recap state
   const [showRecap, setShowRecap] = useState(false);
   const [recap, setRecap] = useState<string | null>(null);
   const [highlights, setHighlights] = useState<string[]>([]);
   const [recapLoading, setRecapLoading] = useState(false);
+
+  // Fetch memories on mount
+  useEffect(() => {
+    async function loadMemories() {
+      const { data } = await fetchMemoriesForJourney(journey.id);
+      if (data) setMemories(data);
+      setLoading(false);
+    }
+    loadMemories();
+  }, [journey.id]);
+
+  // Check if this journey was recently unlocked (within last hour) for celebration
+  useEffect(() => {
+    const unlockTime = new Date(journey.unlock_date).getTime();
+    const now = Date.now();
+    const hourAgo = now - 60 * 60 * 1000;
+
+    if (unlockTime > hourAgo && unlockTime <= now) {
+      setShowCelebration(true);
+      const colors = ['#f97316', '#22c55e', '#3b82f6', '#a855f7', '#ec4899', '#eab308'];
+      const particles = Array.from({ length: 50 }, (_, i) => ({
+        id: i,
+        left: Math.random() * 100,
+        color: colors[Math.floor(Math.random() * colors.length)],
+        delay: Math.random() * 2,
+      }));
+      setConfetti(particles);
+      setTimeout(() => setShowCelebration(false), 4000);
+    }
+  }, [journey.unlock_date]);
+
+  // Sorted memories
+  const sortedMemories = [...memories].sort((a, b) => {
+    const dateA = new Date(a.created_at).getTime();
+    const dateB = new Date(b.created_at).getTime();
+    return sortNewestFirst ? dateB - dateA : dateA - dateB;
+  });
+
+  // Stats
+  const photoCount = memories.filter((m) => m.type === 'photo').length;
+  const noteCount = memories.filter((m) => m.type === 'text').length;
+  const audioCount = memories.filter((m) => m.type === 'audio').length;
 
   // Fetch AI recap
   const fetchRecap = async () => {
@@ -53,7 +82,6 @@ export default function GalleryView({ journey, onClose, onMemoryDeleted }: Galle
     }
 
     setRecapLoading(true);
-
     try {
       const { data, error } = await api.post<{ recap: string; highlights: string[]; error?: string }>(
         '/api/ai/recap',
@@ -75,56 +103,19 @@ export default function GalleryView({ journey, onClose, onMemoryDeleted }: Galle
     }
   };
 
-  // Check if this journey was recently unlocked (within last hour) for celebration
-  useEffect(() => {
-    const unlockTime = new Date(journey.unlock_date).getTime();
-    const now = Date.now();
-    const hourAgo = now - 60 * 60 * 1000;
-
-    if (unlockTime > hourAgo && unlockTime <= now) {
-      setShowCelebration(true);
-
-      const colors = ['#f97316', '#22c55e', '#3b82f6', '#a855f7', '#ec4899', '#eab308'];
-      const particles = Array.from({ length: 50 }, (_, i) => ({
-        id: i,
-        left: Math.random() * 100,
-        color: colors[Math.floor(Math.random() * colors.length)],
-        delay: Math.random() * 2,
-      }));
-      setConfetti(particles);
-
-      setTimeout(() => setShowCelebration(false), 4000);
-    }
-  }, [journey.unlock_date]);
-
-  // Sorted memories
-  const sortedMemories = [...memories].sort((a, b) => {
-    const dateA = new Date(a.created_at).getTime();
-    const dateB = new Date(b.created_at).getTime();
-    return sortNewestFirst ? dateB - dateA : dateA - dateB;
-  });
-
-  // Stats
-  const photoCount = memories.filter((m) => m.type === 'photo').length;
-  const noteCount = memories.filter((m) => m.type === 'text').length;
-  const audioCount = memories.filter((m) => m.type === 'audio').length;
-
-  const [isDeleting, setIsDeleting] = useState(false);
-
+  // Delete handlers
   const handleDeleteJourney = async () => {
     if (isDeleting) return;
     setIsDeleting(true);
 
     try {
       const { error } = await deleteJourney(journey.id);
-
       if (error) {
         console.error('Delete journey error:', error);
         showToast('Failed to delete journey', 'error');
         setIsDeleting(false);
         return;
       }
-
       window.location.reload();
     } catch (err) {
       console.error('Delete journey exception:', err);
@@ -133,13 +124,12 @@ export default function GalleryView({ journey, onClose, onMemoryDeleted }: Galle
     }
   };
 
-  const handleDeleteMemory = async (memoryId: string) => {
-    if (isDeleting) return;
+  const handleDeleteMemory = async () => {
+    if (!memoryToDelete || isDeleting) return;
     setIsDeleting(true);
 
     try {
-      const { error } = await deleteMemory(memoryId);
-
+      const { error } = await deleteMemory(memoryToDelete.id);
       if (error) {
         console.error('Delete memory error:', error);
         showToast('Failed to delete memory', 'error');
@@ -147,7 +137,7 @@ export default function GalleryView({ journey, onClose, onMemoryDeleted }: Galle
         return;
       }
 
-      setMemories(memories.filter((m) => m.id !== memoryId));
+      setMemories(memories.filter((m) => m.id !== memoryToDelete.id));
       setMemoryToDelete(null);
       setSelectedMemory(null);
       onMemoryDeleted?.();
@@ -159,328 +149,47 @@ export default function GalleryView({ journey, onClose, onMemoryDeleted }: Galle
     }
   };
 
-  useEffect(() => {
-    async function loadMemories() {
-      const { data } = await fetchMemoriesForJourney(journey.id);
-      if (data) setMemories(data);
-      setLoading(false);
-    }
-    loadMemories();
-  }, [journey.id]);
-
-  // Touch swipe handling
-  const [copied, setCopied] = useState(false);
-  const [touchStart, setTouchStart] = useState<number | null>(null);
-  const [touchEnd, setTouchEnd] = useState<number | null>(null);
-  const minSwipeDistance = 50;
-
-  const handleTouchStart = (e: React.TouchEvent) => {
-    setTouchEnd(null);
-    setTouchStart(e.targetTouches[0].clientX);
-  };
-
-  const handleTouchMove = (e: React.TouchEvent) => {
-    setTouchEnd(e.targetTouches[0].clientX);
-  };
-
-  const handleTouchEnd = (goToPrev: () => void, goToNext: () => void) => {
-    if (!touchStart || !touchEnd) return;
-    const distance = touchStart - touchEnd;
-    const isLeftSwipe = distance > minSwipeDistance;
-    const isRightSwipe = distance < -minSwipeDistance;
-    if (isLeftSwipe) goToNext();
-    if (isRightSwipe) goToPrev();
-  };
-
-  const handleCopyNote = async (note: string) => {
-    try {
-      await navigator.clipboard.writeText(note);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    } catch (err) {
-      console.error('Copy failed:', err);
-    }
-  };
-
-  // Keyboard navigation for memory viewer
-  useEffect(() => {
-    if (!selectedMemory) return;
-
-    const handleKeyDown = (e: KeyboardEvent) => {
-      const currentIndex = sortedMemories.findIndex((m) => m.id === selectedMemory.id);
-
-      if (e.key === 'ArrowLeft' && currentIndex > 0) {
-        setSelectedMemory(sortedMemories[currentIndex - 1]);
-      } else if (e.key === 'ArrowRight' && currentIndex < sortedMemories.length - 1) {
-        setSelectedMemory(sortedMemories[currentIndex + 1]);
-      } else if (e.key === 'Escape') {
-        setSelectedMemory(null);
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [selectedMemory, sortedMemories]);
-
-  // --- SELECTED MEMORY VIEWER ---
+  // --- MEMORY VIEWER ---
   if (selectedMemory) {
-    const memoryDate = new Date(selectedMemory.created_at);
-    const formattedDate = memoryDate.toLocaleDateString('en-US', {
-      weekday: 'short',
-      month: 'short',
-      day: 'numeric',
-      hour: 'numeric',
-      minute: '2-digit',
-    });
-
-    const currentIndex = sortedMemories.findIndex((m) => m.id === selectedMemory.id);
-    const hasPrev = currentIndex > 0;
-    const hasNext = currentIndex < sortedMemories.length - 1;
-
-    const goToPrev = () => {
-      if (hasPrev) setSelectedMemory(sortedMemories[currentIndex - 1]);
-    };
-    const goToNext = () => {
-      if (hasNext) setSelectedMemory(sortedMemories[currentIndex + 1]);
-    };
-
-    const handleDownload = async () => {
-      if (selectedMemory.type === 'photo' && selectedMemory.url) {
-        try {
-          const response = await fetch(selectedMemory.url);
-          const blob = await response.blob();
-          const url = window.URL.createObjectURL(blob);
-          const a = document.createElement('a');
-          a.href = url;
-          a.download = `sunroof-${Date.now()}.jpg`;
-          document.body.appendChild(a);
-          a.click();
-          document.body.removeChild(a);
-          window.URL.revokeObjectURL(url);
-        } catch (err) {
-          console.error('Download failed:', err);
-        }
-      }
-    };
-
-    const handleShare = async () => {
-      try {
-        if (selectedMemory.type === 'photo' && selectedMemory.url) {
-          if (navigator.share && navigator.canShare) {
-            const response = await fetch(selectedMemory.url);
-            const blob = await response.blob();
-            const file = new File([blob], 'sunroof-memory.jpg', { type: 'image/jpeg' });
-
-            if (navigator.canShare({ files: [file] })) {
-              await navigator.share({
-                files: [file],
-                title: 'Sunroof Memory',
-                text: `A memory from ${journey.name}`,
-              });
-              return;
-            }
-          }
-          if (navigator.share) {
-            await navigator.share({
-              title: 'Sunroof Memory',
-              text: `A memory from ${journey.name}`,
-              url: selectedMemory.url,
-            });
-          }
-        } else if (selectedMemory.type === 'text' && selectedMemory.note) {
-          if (navigator.share) {
-            await navigator.share({
-              title: 'Sunroof Memory',
-              text: selectedMemory.note,
-            });
-          }
-        }
-      } catch (err) {
-        console.log('Share cancelled or failed:', err);
-      }
-    };
-
     return (
-      <div
-        className="fixed inset-0 z-50 bg-black flex flex-col"
-        onTouchStart={handleTouchStart}
-        onTouchMove={handleTouchMove}
-        onTouchEnd={() => handleTouchEnd(goToPrev, goToNext)}
-      >
-        {/* Header */}
-        <div className="flex justify-between items-center p-6 bg-gradient-to-b from-black/80 to-transparent absolute top-0 left-0 right-0 z-10 safe-top">
-          <button
-            className="w-10 h-10 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center"
-            onClick={() => setSelectedMemory(null)}
-          >
-            <X className="w-5 h-5" />
-          </button>
-          <div className="flex gap-2">
-            {typeof navigator !== 'undefined' && 'share' in navigator && (
-              <button
-                className="w-10 h-10 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center hover:bg-white/20 transition-colors"
-                onClick={handleShare}
-              >
-                <Share className="w-4 h-4 text-zinc-400" />
-              </button>
-            )}
-            {selectedMemory.type === 'photo' && (
-              <button
-                className="w-10 h-10 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center hover:bg-white/20 transition-colors"
-                onClick={handleDownload}
-              >
-                <Download className="w-4 h-4 text-zinc-400" />
-              </button>
-            )}
-            {selectedMemory.type === 'text' && (
-              <button
-                className="w-10 h-10 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center hover:bg-white/20 transition-colors"
-                onClick={() => handleCopyNote(selectedMemory.note || '')}
-              >
-                {copied ? <Check className="w-4 h-4 text-green-400" /> : <Copy className="w-4 h-4 text-zinc-400" />}
-              </button>
-            )}
-            <button
-              className="w-10 h-10 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center hover:bg-red-500/20 transition-colors"
-              onClick={() => setMemoryToDelete(selectedMemory)}
-            >
-              <Trash2 className="w-4 h-4 text-zinc-400" />
-            </button>
-          </div>
-        </div>
-
-        {/* Navigation arrows (desktop only) */}
-        {hasPrev && (
-          <button
-            onClick={goToPrev}
-            className="absolute left-4 top-1/2 -translate-y-1/2 z-10 w-12 h-12 rounded-full bg-white/10 backdrop-blur-md items-center justify-center hover:bg-white/20 transition-colors hidden md:flex"
-          >
-            <ChevronLeft className="w-6 h-6" />
-          </button>
-        )}
-        {hasNext && (
-          <button
-            onClick={goToNext}
-            className="absolute right-4 top-1/2 -translate-y-1/2 z-10 w-12 h-12 rounded-full bg-white/10 backdrop-blur-md items-center justify-center hover:bg-white/20 transition-colors hidden md:flex"
-          >
-            <ChevronRight className="w-6 h-6" />
-          </button>
-        )}
-
-        {/* Content */}
-        <div className="flex-1 flex items-center justify-center p-4">
-          {selectedMemory.type === 'photo' && selectedMemory.url ? (
-            <img
-              src={selectedMemory.url}
-              alt=""
-              className="max-w-full max-h-full object-contain rounded-lg"
-              onError={(e) => {
-                e.currentTarget.src =
-                  'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiM2NjYiIHN0cm9rZS13aWR0aD0iMiI+PHJlY3QgeD0iMyIgeT0iMyIgd2lkdGg9IjE4IiBoZWlnaHQ9IjE4IiByeD0iMiIvPjxjaXJjbGUgY3g9IjguNSIgY3k9IjguNSIgcj0iMS41Ii8+PHBhdGggZD0ibTIxIDE1LTUtNS01IDV6Ii8+PC9zdmc+';
-              }}
-            />
-          ) : selectedMemory.type === 'audio' && selectedMemory.url ? (
-            <div className="w-full max-w-md">
-              <div className="text-center mb-6">
-                <div className="w-20 h-20 rounded-full bg-gradient-to-br from-orange-500 to-pink-500 flex items-center justify-center mx-auto mb-4">
-                  <Mic className="w-10 h-10 text-white" />
-                </div>
-                <h3 className="text-lg font-medium text-white mb-1">Voice Note</h3>
-                {selectedMemory.duration && (
-                  <p className="text-sm text-zinc-500">
-                    {Math.floor(selectedMemory.duration / 60)}:{(selectedMemory.duration % 60).toString().padStart(2, '0')}
-                  </p>
-                )}
-              </div>
-              <AudioPlayer 
-                src={selectedMemory.url} 
-                duration={selectedMemory.duration}
-                showWaveform={true}
-              />
-            </div>
-          ) : (
-            <div className="max-w-md p-8 bg-zinc-900 rounded-2xl">
-              <p className="text-xl text-white leading-relaxed">{selectedMemory.note}</p>
-            </div>
-          )}
-        </div>
-
-        {/* Footer */}
-        <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black/80 to-transparent safe-bottom">
-          <p className="text-center text-sm text-zinc-500">{formattedDate}</p>
-          <p className="text-center text-xs text-zinc-600 mt-1">
-            {currentIndex + 1} of {sortedMemories.length}
-          </p>
-        </div>
-      </div>
-    );
-  }
-
-  // --- DELETE SINGLE MEMORY CONFIRMATION ---
-  if (memoryToDelete) {
-    return (
-      <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-6">
-        <div className="w-full max-w-sm bg-zinc-900 rounded-3xl p-6 animate-enter">
-          <div className="w-14 h-14 mx-auto mb-4 rounded-full bg-red-500/10 flex items-center justify-center">
-            <Trash2 className="w-6 h-6 text-red-400" />
-          </div>
-          <h3 className="text-xl font-semibold text-center mb-2">Delete this memory?</h3>
-          <p className="text-zinc-500 text-sm text-center mb-6">
-            This {memoryToDelete.type === 'photo' ? 'photo' : memoryToDelete.type === 'audio' ? 'voice note' : 'note'} will be permanently deleted.
-          </p>
-          <div className="flex gap-3">
-            <button
-              onClick={() => setMemoryToDelete(null)}
-              className="flex-1 h-12 rounded-full bg-zinc-800 text-white font-medium hover:bg-zinc-700 transition-colors"
-            >
-              Cancel
-            </button>
-            <button
-              onClick={() => handleDeleteMemory(memoryToDelete.id)}
-              className="flex-1 h-12 rounded-full bg-red-500 text-white font-medium hover:bg-red-600 transition-colors"
-            >
-              Delete
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // --- DELETE JOURNEY CONFIRMATION ---
-  if (showDeleteConfirm) {
-    return (
-      <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-6">
-        <div className="w-full max-w-sm bg-zinc-900 rounded-3xl p-6 animate-enter">
-          <div className="w-14 h-14 mx-auto mb-4 rounded-full bg-red-500/10 flex items-center justify-center">
-            <Trash2 className="w-6 h-6 text-red-400" />
-          </div>
-          <h3 className="text-xl font-semibold text-center mb-2">Delete &ldquo;{journey.name}&rdquo;?</h3>
-          <p className="text-zinc-500 text-sm text-center mb-6">
-            This will permanently delete this journey and all {memories.length} memories. This cannot be undone.
-          </p>
-          <div className="flex gap-3">
-            <button
-              onClick={() => setShowDeleteConfirm(false)}
-              className="flex-1 h-12 rounded-full bg-zinc-800 text-white font-medium hover:bg-zinc-700 transition-colors"
-            >
-              Cancel
-            </button>
-            <button
-              onClick={handleDeleteJourney}
-              className="flex-1 h-12 rounded-full bg-red-500 text-white font-medium hover:bg-red-600 transition-colors"
-            >
-              Delete
-            </button>
-          </div>
-        </div>
-      </div>
+      <MemoryViewer
+        memory={selectedMemory}
+        memories={sortedMemories}
+        journeyName={journey.name}
+        onClose={() => setSelectedMemory(null)}
+        onDelete={(m) => setMemoryToDelete(m)}
+        onNavigate={(m) => setSelectedMemory(m)}
+      />
     );
   }
 
   // --- MAIN GALLERY VIEW ---
   return (
     <div className="fixed inset-0 z-40 bg-black flex flex-col safe-top safe-bottom">
+      {/* Delete Memory Confirmation */}
+      <ConfirmDialog
+        isOpen={!!memoryToDelete}
+        onClose={() => setMemoryToDelete(null)}
+        onConfirm={handleDeleteMemory}
+        title="Delete this memory?"
+        description={`This ${memoryToDelete?.type === 'photo' ? 'photo' : memoryToDelete?.type === 'audio' ? 'voice note' : 'note'} will be permanently deleted.`}
+        confirmLabel={isDeleting ? 'Deleting...' : 'Delete'}
+        variant="danger"
+        loading={isDeleting}
+      />
+
+      {/* Delete Journey Confirmation */}
+      <ConfirmDialog
+        isOpen={showDeleteJourneyConfirm}
+        onClose={() => setShowDeleteJourneyConfirm(false)}
+        onConfirm={handleDeleteJourney}
+        title={`Delete "${journey.name}"?`}
+        description={`This will permanently delete this journey and all ${memories.length} memories. This cannot be undone.`}
+        confirmLabel={isDeleting ? 'Deleting...' : 'Delete'}
+        variant="danger"
+        loading={isDeleting}
+      />
+
       {/* Gradient header accent */}
       <div
         className="absolute top-0 left-0 right-0 h-32 opacity-40"
@@ -523,26 +232,15 @@ export default function GalleryView({ journey, onClose, onMemoryDeleted }: Galle
         <div className="flex-1">
           <h1 className="text-xl font-medium">{journey.name}</h1>
           <p className="text-xs text-zinc-500">
-            {photoCount > 0 && (
-              <span>
-                {photoCount} {photoCount === 1 ? 'photo' : 'photos'}
-              </span>
-            )}
+            {photoCount > 0 && <span>{photoCount} {photoCount === 1 ? 'photo' : 'photos'}</span>}
             {photoCount > 0 && (noteCount > 0 || audioCount > 0) && <span> • </span>}
-            {audioCount > 0 && (
-              <span>
-                {audioCount} {audioCount === 1 ? 'voice note' : 'voice notes'}
-              </span>
-            )}
+            {audioCount > 0 && <span>{audioCount} {audioCount === 1 ? 'voice note' : 'voice notes'}</span>}
             {audioCount > 0 && noteCount > 0 && <span> • </span>}
-            {noteCount > 0 && (
-              <span>
-                {noteCount} {noteCount === 1 ? 'note' : 'notes'}
-              </span>
-            )}
+            {noteCount > 0 && <span>{noteCount} {noteCount === 1 ? 'note' : 'notes'}</span>}
             {photoCount === 0 && noteCount === 0 && audioCount === 0 && <span>No memories</span>}
           </p>
         </div>
+        
         {/* AI Recap button */}
         {memories.length > 0 && (
           <button
@@ -558,6 +256,7 @@ export default function GalleryView({ journey, onClose, onMemoryDeleted }: Galle
             {recapLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
           </button>
         )}
+        
         <button
           onClick={() => setSortNewestFirst(!sortNewestFirst)}
           className={`w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-white/10 transition-colors ${
@@ -567,81 +266,27 @@ export default function GalleryView({ journey, onClose, onMemoryDeleted }: Galle
         >
           <ArrowUpDown className="w-4 h-4" />
         </button>
+        
         <button
-          onClick={() => setShowDeleteConfirm(true)}
+          onClick={() => setShowDeleteJourneyConfirm(true)}
           className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-red-500/10 transition-colors"
         >
           <Trash2 className="w-4 h-4 text-zinc-500" />
         </button>
       </header>
 
-      {/* AI Recap Modal */}
-      {showRecap && recap && (
-        <div className="absolute inset-0 z-50 bg-black/95 backdrop-blur-md flex flex-col safe-top safe-bottom animate-enter">
-          <div className="flex items-center justify-between p-6 border-b border-zinc-900/50">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
-                <Sparkles className="w-5 h-5 text-white" />
-              </div>
-              <div>
-                <h2 className="text-lg font-medium">Journey Recap</h2>
-                <p className="text-xs text-zinc-500">AI-generated summary</p>
-              </div>
-            </div>
-            <button
-              onClick={() => setShowRecap(false)}
-              className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-white/10 transition-colors"
-            >
-              <X className="w-5 h-5" />
-            </button>
-          </div>
-
-          <div className="flex-1 overflow-y-auto p-6 scrollbar-hide">
-            <div className="max-w-lg mx-auto space-y-6">
-              <div className="text-center mb-8">
-                <h1 className="text-3xl font-light mb-2">{journey.name}</h1>
-              <p className="text-zinc-500 text-sm">
-                {photoCount} {photoCount === 1 ? 'photo' : 'photos'}
-                {audioCount > 0 && ` • ${audioCount} ${audioCount === 1 ? 'voice note' : 'voice notes'}`}
-                {noteCount > 0 && ` • ${noteCount} ${noteCount === 1 ? 'note' : 'notes'}`}
-              </p>
-              </div>
-
-              <div className="glass rounded-2xl p-6">
-                <p className="text-lg leading-relaxed text-zinc-200 whitespace-pre-wrap">{recap}</p>
-              </div>
-
-              {highlights.length > 0 && (
-                <div>
-                  <h3 className="text-sm font-medium text-zinc-400 mb-3 flex items-center gap-2">
-                    <Sparkles className="w-4 h-4 text-amber-400" />
-                    Highlights
-                  </h3>
-                  <div className="space-y-2">
-                    {highlights.map((highlight, i) => (
-                      <div
-                        key={i}
-                        className="flex items-start gap-3 p-4 rounded-xl bg-gradient-to-r from-amber-500/10 to-orange-500/5 border border-amber-500/20"
-                      >
-                        <span className="text-amber-400 text-lg">✦</span>
-                        <p className="text-zinc-300">{highlight}</p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              <div className="flex gap-3 pt-4">
-                <button
-                  onClick={() => setShowRecap(false)}
-                  className="flex-1 h-12 bg-white text-black rounded-full font-semibold text-sm hover:bg-zinc-100 active:scale-[0.98] transition-all"
-                >
-                  View Memories
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
+      {/* AI Recap Sheet */}
+      {recap && (
+        <AIRecapSheet
+          isOpen={showRecap}
+          onClose={() => setShowRecap(false)}
+          journeyName={journey.name}
+          recap={recap}
+          highlights={highlights}
+          photoCount={photoCount}
+          audioCount={audioCount}
+          noteCount={noteCount}
+        />
       )}
 
       {/* Sort indicator */}
@@ -716,9 +361,7 @@ export default function GalleryView({ journey, onClose, onMemoryDeleted }: Galle
                     )}
                   </button>
                   <div className="absolute bottom-2 left-2 px-2 py-1 rounded-md bg-black/60 backdrop-blur-sm pointer-events-none">
-                    <p className="text-[10px] text-white/80">
-                      {tileDay} • {tileTime}
-                    </p>
+                    <p className="text-[10px] text-white/80">{tileDay} • {tileTime}</p>
                   </div>
                   <button
                     onClick={(e) => {
@@ -738,4 +381,3 @@ export default function GalleryView({ journey, onClose, onMemoryDeleted }: Galle
     </div>
   );
 }
-

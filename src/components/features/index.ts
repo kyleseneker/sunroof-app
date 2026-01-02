@@ -27,4 +27,6 @@ export { default as InviteCollaboratorModal } from './InviteCollaboratorModal';
 export { default as ManageMemoriesSheet } from './ManageMemoriesSheet';
 export { default as JourneyDetailSheet } from './JourneyDetailSheet';
 export { default as HelpModal } from './HelpModal';
+export { default as MemoryViewer } from './MemoryViewer';
+export { default as AIRecapSheet } from './AIRecapSheet';
 
