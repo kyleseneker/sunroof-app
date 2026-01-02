@@ -2,8 +2,9 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { useToast, Avatar, ThemeToggle } from '@/components/ui';
+import { useToast, Avatar } from '@/components/ui';
 import { NotificationSettings } from '@/components/features';
+import { useTheme } from '@/providers';
 import { formatDate } from '@/lib';
 import { 
   getCurrentUser, 
@@ -36,6 +37,7 @@ interface Stats {
 export default function ProfilePage() {
   const router = useRouter();
   const { showToast } = useToast();
+  const { resolvedTheme, toggleTheme } = useTheme();
   
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -364,16 +366,27 @@ export default function ProfilePage() {
           {/* Appearance */}
           <div className="glass rounded-2xl p-4">
             <h3 className="text-sm font-medium text-[var(--fg-muted)] mb-3">Appearance</h3>
-            <div className="flex items-center justify-between p-4 rounded-xl bg-[var(--bg-surface)]/50">
+            <button
+              onClick={toggleTheme}
+              className="w-full flex items-center justify-between p-4 rounded-xl bg-[var(--bg-surface)]/50 hover:bg-[var(--bg-muted)]/50 transition-colors"
+            >
               <div className="flex items-center gap-3">
                 <Palette className="w-5 h-5 text-orange-400" />
                 <div className="text-left">
                   <span className="block text-[var(--fg-base)]">Dark Mode</span>
-                  <span className="text-xs text-[var(--fg-muted)]">Toggle between light and dark</span>
+                  <span className="text-xs text-[var(--fg-muted)]">
+                    {resolvedTheme === 'dark' ? 'Currently using dark theme' : 'Currently using light theme'}
+                  </span>
                 </div>
               </div>
-              <ThemeToggle showSystemOption />
-            </div>
+              <div className={`w-12 h-7 rounded-full relative transition-colors ${
+                resolvedTheme === 'dark' ? 'bg-orange-500' : 'bg-[var(--bg-muted)]'
+              }`}>
+                <div className={`absolute top-1 w-5 h-5 rounded-full bg-[var(--fg-base)] transition-transform ${
+                  resolvedTheme === 'dark' ? 'translate-x-6' : 'translate-x-1'
+                }`} />
+              </div>
+            </button>
           </div>
 
           {/* Your Data */}
