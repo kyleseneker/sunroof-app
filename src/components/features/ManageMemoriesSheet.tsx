@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { X, Lock, Trash2, ImageIcon, FileText, Mic } from 'lucide-react';
-import { useToast, ConfirmDialog } from '@/components/ui';
+import { useToast, ConfirmDialog, IconButton } from '@/components/ui';
 import { fetchMemoriesForJourney, deleteMemory } from '@/services';
 import { hapticSuccess } from '@/lib';
 import type { Journey } from '@/types';
@@ -91,12 +91,7 @@ export default function ManageMemoriesSheet({
     <div className="fixed inset-0 z-50 bg-[var(--bg-base)] flex flex-col safe-top safe-bottom">
       {/* Header */}
       <header className="flex items-center gap-4 p-6 border-b border-[var(--border-base)]">
-        <button 
-          onClick={onClose}
-          className="w-10 h-10 rounded-full bg-[var(--bg-hover)] flex items-center justify-center"
-        >
-          <X className="w-5 h-5 text-[var(--fg-muted)]" />
-        </button>
+        <IconButton icon={<X className="w-5 h-5" />} label="Close" onClick={onClose} />
         <div className="flex-1">
           <h1 className="text-xl font-medium text-[var(--fg-base)]">Manage Memories</h1>
           <p className="text-xs text-[var(--fg-muted)]">{journey.name} • {lockedMemories.length} memories</p>
@@ -162,12 +157,12 @@ export default function ManageMemoriesSheet({
                       <p className="text-xs text-[var(--fg-muted)]">{formattedDate}</p>
                     </div>
                   </div>
-                  <button
-                    onClick={() => setMemoryToDelete(memory)}
-                    className="w-10 h-10 rounded-full bg-[var(--bg-muted)] flex items-center justify-center hover:bg-[var(--color-error-subtle)] transition-colors"
-                  >
-                    <Trash2 className="w-4 h-4 text-[var(--fg-muted)]" />
-                  </button>
+                  <IconButton 
+                    icon={<Trash2 className="w-4 h-4" />} 
+                    label="Delete memory" 
+                    onClick={() => setMemoryToDelete(memory)} 
+                    variant="danger"
+                  />
                 </div>
               );
             })}

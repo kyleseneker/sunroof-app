@@ -4,6 +4,7 @@ import { ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
 import { ArrowLeft } from 'lucide-react';
 import { cn } from '@/lib';
+import IconButton from './IconButton';
 
 interface PageHeaderProps {
   title: string;
@@ -39,13 +40,7 @@ export default function PageHeader({
         className
       )}
     >
-      <button 
-        onClick={handleBack}
-        className="w-10 h-10 rounded-full bg-[var(--bg-hover)] flex items-center justify-center hover:bg-[var(--bg-active)] transition-colors"
-        aria-label="Go back"
-      >
-        <ArrowLeft className="w-5 h-5" />
-      </button>
+      <IconButton icon={<ArrowLeft className="w-5 h-5" />} label="Go back" onClick={handleBack} />
       <h1 className="text-xl font-medium flex-1">{title}</h1>
       {rightContent && (
         <div className="flex items-center gap-2">
@@ -55,4 +50,3 @@ export default function PageHeader({
     </header>
   );
 }
-

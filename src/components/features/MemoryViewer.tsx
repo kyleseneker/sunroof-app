@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { X, Trash2, ChevronLeft, ChevronRight, Download, Copy, Check, Share, Mic } from 'lucide-react';
+import { IconButton } from '@/components/ui';
 import { AudioPlayer } from '@/components/features';
 import type { Memory } from '@/types';
 
@@ -151,43 +152,23 @@ export default function MemoryViewer({
     >
       {/* Header */}
       <div className="flex justify-between items-center p-6 bg-gradient-to-b from-black/80 to-transparent absolute top-0 left-0 right-0 z-10 safe-top">
-        <button
-          className="w-10 h-10 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center"
-          onClick={onClose}
-        >
-          <X className="w-5 h-5" />
-        </button>
+        <IconButton icon={<X className="w-5 h-5" />} label="Close" onClick={onClose} dark />
         <div className="flex gap-2">
           {typeof navigator !== 'undefined' && 'share' in navigator && (
-            <button
-              className="w-10 h-10 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center hover:bg-white/20 transition-colors"
-              onClick={handleShare}
-            >
-              <Share className="w-4 h-4 text-zinc-400" />
-            </button>
+            <IconButton icon={<Share className="w-4 h-4" />} label="Share" onClick={handleShare} dark />
           )}
           {memory.type === 'photo' && (
-            <button
-              className="w-10 h-10 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center hover:bg-white/20 transition-colors"
-              onClick={handleDownload}
-            >
-              <Download className="w-4 h-4 text-zinc-400" />
-            </button>
+            <IconButton icon={<Download className="w-4 h-4" />} label="Download" onClick={handleDownload} dark />
           )}
           {memory.type === 'text' && (
-            <button
-              className="w-10 h-10 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center hover:bg-white/20 transition-colors"
-              onClick={() => handleCopyNote(memory.note || '')}
-            >
-              {copied ? <Check className="w-4 h-4 text-green-400" /> : <Copy className="w-4 h-4 text-zinc-400" />}
-            </button>
+            <IconButton 
+              icon={copied ? <Check className="w-4 h-4 text-green-400" /> : <Copy className="w-4 h-4" />} 
+              label="Copy note" 
+              onClick={() => handleCopyNote(memory.note || '')} 
+              dark 
+            />
           )}
-          <button
-            className="w-10 h-10 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center hover:bg-red-500/20 transition-colors"
-            onClick={() => onDelete(memory)}
-          >
-            <Trash2 className="w-4 h-4 text-zinc-400" />
-          </button>
+          <IconButton icon={<Trash2 className="w-4 h-4" />} label="Delete" onClick={() => onDelete(memory)} variant="danger" dark />
         </div>
       </div>
 

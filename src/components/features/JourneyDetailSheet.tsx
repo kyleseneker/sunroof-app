@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { X, Lock, Pencil, Trash2, UserPlus, Users, ChevronRight, Clock, Camera } from 'lucide-react';
 import { getEmailByUserId, updateJourney } from '@/services';
-import { useToast } from '@/components/ui';
+import { useToast, IconButton } from '@/components/ui';
 import { getTimeUntilUnlock, getJourneyGradient, hapticSuccess } from '@/lib';
 import type { Journey } from '@/types';
 
@@ -112,36 +112,20 @@ export default function JourneyDetailSheet({
         {/* Owner-only actions */}
         {isOwner && (
           <div className="flex gap-2">
-            {/* Share button */}
-            <button
-              onClick={() => onInvite(journey)}
-              className="w-10 h-10 rounded-full bg-black/40 backdrop-blur-md border border-white/10 flex items-center justify-center hover:bg-white/20 hover:border-white/20 active:scale-95 transition-all cursor-pointer"
-              title="Share journey"
-            >
-              <UserPlus className="w-4 h-4 text-white" />
-            </button>
-            {/* Edit button */}
-            <button
-              onClick={() => {
-                onClose();
-                onEdit(journey);
-              }}
-              className="w-10 h-10 rounded-full bg-black/40 backdrop-blur-md border border-white/10 flex items-center justify-center hover:bg-white/20 hover:border-white/20 active:scale-95 transition-all cursor-pointer"
-              title="Edit journey"
-            >
-              <Pencil className="w-4 h-4 text-white" />
-            </button>
-            {/* Delete button */}
-            <button
-              onClick={() => {
-                onClose();
-                onDelete(journey.id);
-              }}
-              className="w-10 h-10 rounded-full bg-black/40 backdrop-blur-md border border-white/10 flex items-center justify-center hover:bg-red-500/30 hover:border-red-500/30 active:scale-95 transition-all cursor-pointer"
-              title="Delete journey"
-            >
-              <Trash2 className="w-4 h-4 text-white" />
-            </button>
+            <IconButton icon={<UserPlus className="w-4 h-4" />} label="Share journey" onClick={() => onInvite(journey)} dark />
+            <IconButton 
+              icon={<Pencil className="w-4 h-4" />} 
+              label="Edit journey" 
+              onClick={() => { onClose(); onEdit(journey); }} 
+              dark 
+            />
+            <IconButton 
+              icon={<Trash2 className="w-4 h-4" />} 
+              label="Delete journey" 
+              onClick={() => { onClose(); onDelete(journey.id); }} 
+              variant="danger"
+              dark 
+            />
           </div>
         )}
       </div>

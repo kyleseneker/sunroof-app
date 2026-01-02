@@ -8,7 +8,7 @@ import {
 import { useAuth } from '@/providers';
 import { hapticSuccess, getJourneyGradient, formatDate, getTimeUntilUnlock, isJourneyUnlocked, getGreeting, MAX_ACTIVE_JOURNEYS } from '@/lib';
 import { Plus, ArrowRight, X, Lock, ChevronRight, Sparkles, Trash2, HelpCircle, Camera, ImageIcon, Pencil, Timer, Archive, Search, RefreshCw } from 'lucide-react';
-import { useToast, Avatar, ConfirmDialog } from '@/components/ui';
+import { useToast, Avatar, ConfirmDialog, IconButton } from '@/components/ui';
 import { 
   GalleryView, 
   KeyboardShortcutsHelp, 

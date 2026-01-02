@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { Play, Pause, Volume2, VolumeX } from 'lucide-react';
+import { IconButton } from '@/components/ui';
 
 interface AudioPlayerProps {
   src: string;
@@ -212,16 +213,12 @@ export default function AudioPlayer({
         </div>
 
         {/* Mute Button */}
-        <button
+        <IconButton 
+          icon={isMuted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
+          label={isMuted ? 'Unmute' : 'Mute'}
           onClick={toggleMute}
-          className="w-10 h-10 rounded-full bg-zinc-800 flex items-center justify-center hover:bg-zinc-700 transition-colors"
-        >
-          {isMuted ? (
-            <VolumeX className="w-4 h-4 text-zinc-400" />
-          ) : (
-            <Volume2 className="w-4 h-4 text-zinc-400" />
-          )}
-        </button>
+          dark
+        />
       </div>
     </div>
   );

@@ -1,6 +1,7 @@
 'use client';
 
 import { X, Sparkles } from 'lucide-react';
+import { IconButton } from '@/components/ui';
 
 interface AIRecapSheetProps {
   isOpen: boolean;
@@ -37,12 +38,7 @@ export default function AIRecapSheet({
             <p className="text-xs text-zinc-500">AI-generated summary</p>
           </div>
         </div>
-        <button
-          onClick={onClose}
-          className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-white/10 transition-colors"
-        >
-          <X className="w-5 h-5" />
-        </button>
+        <IconButton icon={<X className="w-5 h-5" />} label="Close" onClick={onClose} dark />
       </div>
 
       <div className="flex-1 overflow-y-auto p-6 scrollbar-hide">
