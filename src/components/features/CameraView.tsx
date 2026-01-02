@@ -613,8 +613,8 @@ const handleAudioError = (message: string) => {
           <div className="w-10" />
         </div>
         
-        {/* Location & Weather Context Indicator */}
-        {!contextLoading && (locationContext || weatherContext) && (
+        {/* Location & Weather Context Indicator (photo mode only) */}
+        {mode === 'photo' && !contextLoading && (locationContext || weatherContext) && (
           <div className="flex justify-center -mt-2 pb-2">
             <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-black/40 backdrop-blur-md border border-white/10 text-[11px]">
               {locationContext && (
