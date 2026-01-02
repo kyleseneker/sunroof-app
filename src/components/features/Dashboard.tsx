@@ -617,7 +617,7 @@ $$ LANGUAGE sql SECURITY DEFINER;
   // --- CREATE MODAL ---
   if (isCreating) {
     return (
-      <div className="fixed inset-0 z-50 bg-black flex flex-col safe-top safe-bottom">
+      <div className="fixed inset-0 z-50 bg-[var(--bg-base)] flex flex-col safe-top safe-bottom">
         <div className="flex-1 flex flex-col p-6 animate-enter">
           <button 
             onClick={() => {
@@ -625,9 +625,9 @@ $$ LANGUAGE sql SECURITY DEFINER;
               setShareEmails([]);
               setShareEmailInput('');
             }} 
-            className="self-end w-10 h-10 flex items-center justify-center rounded-full bg-white/5 mb-8"
+            className="self-end w-10 h-10 flex items-center justify-center rounded-full bg-[var(--bg-hover)] mb-8"
           >
-            <X className="w-5 h-5 text-white/60" />
+            <X className="w-5 h-5 text-[var(--fg-muted)]" />
         </button>
         
           <div className="flex-1 flex flex-col justify-center max-w-sm mx-auto w-full">
@@ -635,13 +635,13 @@ $$ LANGUAGE sql SECURITY DEFINER;
               <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-orange-500/20 to-pink-500/20 flex items-center justify-center">
                 <Plane className="w-6 h-6 text-orange-400" />
               </div>
-              <h2 className="text-3xl font-light tracking-tight text-white">New Journey</h2>
+              <h2 className="text-3xl font-light tracking-tight text-[var(--fg-base)]">New Journey</h2>
             </div>
-            <p className="text-zinc-500 text-sm mb-10 ml-[60px]">Where are you headed?</p>
+            <p className="text-[var(--fg-muted)] text-sm mb-10 ml-[60px]">Where are you headed?</p>
             
             <form onSubmit={handleCreate} className="space-y-8">
           <div>
-                <label className="flex items-center gap-2 text-[11px] uppercase tracking-[0.2em] text-zinc-500 font-medium mb-3">
+                <label className="flex items-center gap-2 text-[11px] uppercase tracking-[0.2em] text-[var(--fg-muted)] font-medium mb-3">
                   <MapPin className="w-3 h-3" />
                   Destination
                 </label>
@@ -652,12 +652,12 @@ $$ LANGUAGE sql SECURITY DEFINER;
                   value={tripName}
                   onChange={(e) => setTripName(e.target.value)}
                   maxLength={50}
-                  className="w-full bg-zinc-900/50 border border-zinc-800 focus:border-orange-400 rounded-2xl px-5 py-4 text-2xl font-light text-white placeholder:text-zinc-600 focus:outline-none focus:bg-black/50 transition-all input-premium"
+                  className="w-full bg-[var(--bg-surface)]/50 border border-[var(--border-base)] focus:border-orange-400 rounded-2xl px-5 py-4 text-2xl font-light text-[var(--fg-base)] placeholder:text-[var(--fg-subtle)] focus:outline-none focus:bg-[var(--bg-base)]/50 transition-all input-premium"
                 />
           </div>
 
               <div>
-                <label className="flex items-center gap-2 text-[11px] uppercase tracking-[0.2em] text-zinc-500 font-medium mb-3">
+                <label className="flex items-center gap-2 text-[11px] uppercase tracking-[0.2em] text-[var(--fg-muted)] font-medium mb-3">
                   <Timer className="w-3 h-3" />
                   Unlock After
                 </label>
@@ -674,8 +674,8 @@ $$ LANGUAGE sql SECURITY DEFINER;
                         }}
                         className={`flex-1 py-3 rounded-xl text-sm font-medium transition-all ${
                           isSelected
-                            ? 'bg-white text-black' 
-                            : 'bg-zinc-900 text-zinc-400 hover:bg-zinc-800'
+                            ? 'bg-[var(--fg-base)] text-[var(--fg-inverse)]' 
+                            : 'bg-[var(--bg-surface)] text-[var(--fg-muted)] hover:bg-[var(--bg-muted)]'
                         }`}
                       >
                         {days}d
@@ -684,7 +684,7 @@ $$ LANGUAGE sql SECURITY DEFINER;
                   })}
                 </div>
                 <div className="flex items-center gap-3">
-                  <span className="text-sm text-zinc-600">or</span>
+                  <span className="text-sm text-[var(--fg-subtle)]">or</span>
                   <input
                     type="date"
                     value={customDate}
@@ -704,21 +704,20 @@ $$ LANGUAGE sql SECURITY DEFINER;
                       }
                     }}
                     min={new Date().toISOString().split('T')[0]}
-                    className={`flex-1 py-3 px-4 rounded-xl text-sm font-medium transition-all bg-zinc-900 border-2 ${
+                    className={`flex-1 py-3 px-4 rounded-xl text-sm font-medium transition-all bg-[var(--bg-surface)] border-2 ${
                       customDate 
-                        ? 'border-white text-white' 
-                        : 'border-transparent text-zinc-500'
+                        ? 'border-[var(--fg-base)] text-[var(--fg-base)]' 
+                        : 'border-transparent text-[var(--fg-muted)]'
                     }`}
-                    style={{ colorScheme: 'dark' }}
                   />
                 </div>
               </div>
 
               {/* Share With (Optional) */}
               <div>
-                <label className="flex items-center gap-2 text-[11px] uppercase tracking-[0.2em] text-zinc-500 font-medium mb-3">
+                <label className="flex items-center gap-2 text-[11px] uppercase tracking-[0.2em] text-[var(--fg-muted)] font-medium mb-3">
                   <UserPlus className="w-3 h-3" />
-                  Share With <span className="text-zinc-700 normal-case tracking-normal">(optional)</span>
+                  Share With <span className="text-[var(--fg-subtle)] normal-case tracking-normal">(optional)</span>
                 </label>
                 
                 {/* Added emails */}
@@ -727,13 +726,13 @@ $$ LANGUAGE sql SECURITY DEFINER;
                     {shareEmails.map((email, i) => (
                       <div 
                         key={i} 
-                        className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-blue-500/20 text-blue-300 text-xs"
+                        className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-blue-500/20 text-blue-400 text-xs"
                       >
                         <span>{email}</span>
                         <button
                           type="button"
                           onClick={() => setShareEmails(shareEmails.filter((_, idx) => idx !== i))}
-                          className="hover:text-white transition-colors"
+                          className="hover:text-blue-300 transition-colors"
                         >
                           <X className="w-3 h-3" />
                         </button>
@@ -758,7 +757,7 @@ $$ LANGUAGE sql SECURITY DEFINER;
                         }
                       }
                     }}
-                    className="flex-1 bg-zinc-900 border border-zinc-800 rounded-xl py-3 px-4 text-sm text-white placeholder:text-zinc-600 focus:outline-none focus:border-zinc-700 transition-colors"
+                    className="flex-1 bg-[var(--bg-surface)] border border-[var(--border-base)] rounded-xl py-3 px-4 text-sm text-[var(--fg-base)] placeholder:text-[var(--fg-subtle)] focus:outline-none focus:border-[var(--fg-subtle)] transition-colors"
                   />
                   <button
                     type="button"
@@ -775,7 +774,7 @@ $$ LANGUAGE sql SECURITY DEFINER;
                     Add
                   </button>
                 </div>
-                <p className="text-xs text-zinc-600 mt-2">
+                <p className="text-xs text-[var(--fg-subtle)] mt-2">
                   They'll be invited when the journey is created
                 </p>
               </div>
@@ -783,7 +782,7 @@ $$ LANGUAGE sql SECURITY DEFINER;
               <button 
                 type="submit"
                 disabled={loading || !tripName}
-                className="w-full h-14 bg-white text-black rounded-full font-semibold text-sm tracking-wide disabled:opacity-40 disabled:cursor-not-allowed hover:bg-zinc-100 active:scale-[0.98] transition-all mt-4"
+                className="w-full h-14 bg-[var(--fg-base)] text-[var(--fg-inverse)] rounded-full font-semibold text-sm tracking-wide disabled:opacity-40 disabled:cursor-not-allowed hover:opacity-90 active:scale-[0.98] transition-all mt-4"
               >
                 {loading ? 'Creating...' : 'Start Journey'}
           </button>
