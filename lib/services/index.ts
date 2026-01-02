@@ -2,6 +2,9 @@
  * Service Layer
  */
 
+// Common types
+export { type ServiceResult, success, failure } from './types';
+
 // Journey operations
 export {
   createJourney,
@@ -48,7 +51,3 @@ export {
   getEmailByUserId,
   type UpdateProfileInput,
 } from './user';
-
-// Common types
-export type { ServiceResult } from './journeys';
-

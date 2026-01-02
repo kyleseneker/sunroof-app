@@ -4,6 +4,7 @@
 
 import { supabase } from '../supabase';
 import type { Journey } from '@/types';
+import type { ServiceResult } from './types';
 
 export interface CreateJourneyInput {
   userId: string;
@@ -20,11 +21,6 @@ export interface UpdateJourneyInput {
   unlockDate?: string;
   status?: 'active' | 'completed';
   sharedWith?: string[];
-}
-
-export interface ServiceResult<T> {
-  data: T | null;
-  error: string | null;
 }
 
 /**

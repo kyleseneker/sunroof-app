@@ -4,11 +4,7 @@
 
 import { supabase } from '../supabase';
 import type { User } from '@supabase/supabase-js';
-
-export interface ServiceResult<T> {
-  data: T | null;
-  error: string | null;
-}
+import type { ServiceResult } from './types';
 
 /**
  * Get the current authenticated user

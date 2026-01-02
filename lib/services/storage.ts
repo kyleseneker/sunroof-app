@@ -3,11 +3,7 @@
  */
 
 import { supabase } from '../supabase';
-
-export interface ServiceResult<T> {
-  data: T | null;
-  error: string | null;
-}
+import type { ServiceResult } from './types';
 
 export interface UploadResult {
   publicUrl: string;

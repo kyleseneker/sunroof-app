@@ -4,17 +4,13 @@
 
 import { supabase } from '../supabase';
 import type { Memory } from '@/types';
+import type { ServiceResult } from './types';
 
 export interface CreateMemoryInput {
   journeyId: string;
   type: 'photo' | 'note';
-  content?: string;  // For notes
-  imageUrl?: string; // For photos
-}
-
-export interface ServiceResult<T> {
-  data: T | null;
-  error: string | null;
+  content?: string;
+  imageUrl?: string;
 }
 
 /**
