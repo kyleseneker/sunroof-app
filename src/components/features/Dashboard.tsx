@@ -859,11 +859,11 @@ $$ LANGUAGE sql SECURITY DEFINER;
                     <div className="flex items-center gap-4">
                       <div className="w-12 h-12 rounded-lg bg-[var(--bg-muted)] flex items-center justify-center">
                         {memory.type === 'photo' ? (
-                          <ImageIcon className="w-5 h-5 text-[var(--fg-muted)]" />
+                          <ImageIcon className="w-5 h-5 text-pink-400" />
                         ) : memory.type === 'audio' ? (
                           <Mic className="w-5 h-5 text-orange-400" />
                         ) : (
-                          <FileText className="w-5 h-5 text-[var(--fg-muted)]" />
+                          <FileText className="w-5 h-5 text-blue-400" />
                         )}
                       </div>
                       <div>
