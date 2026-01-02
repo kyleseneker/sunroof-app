@@ -1484,12 +1484,12 @@ $$ LANGUAGE sql SECURITY DEFINER;
         {(activeJourneys.length > 0 || pastJourneys.length > 0) && (
           <div className="mb-8 animate-enter">
             {/* Greeting */}
-            <h1 className="text-2xl font-light mb-1">
-              {getGreeting()}, <span className="text-white">{user?.user_metadata?.display_name?.split(' ')[0] || 'traveler'}</span>
+            <h1 className="text-2xl font-light mb-1 text-[var(--fg-muted)]">
+              {getGreeting()}, <span className="text-[var(--fg-base)]">{user?.user_metadata?.display_name?.split(' ')[0] || 'traveler'}</span>
             </h1>
             
             {/* Contextual subtitle */}
-            <p className="text-zinc-500 text-sm mb-4">
+            <p className="text-[var(--fg-muted)] text-sm mb-4">
               {activeJourneys.length > 0 
                 ? `You have ${activeJourneys.length} ${activeJourneys.length === 1 ? 'journey' : 'journeys'} in progress`
                 : pastJourneys.length > 0 
