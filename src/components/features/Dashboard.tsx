@@ -796,21 +796,21 @@ $$ LANGUAGE sql SECURITY DEFINER;
   // --- MANAGE LOCKED MEMORIES VIEW ---
   if (managingMemories) {
   return (
-      <div className="fixed inset-0 z-50 bg-black flex flex-col safe-top safe-bottom">
+      <div className="fixed inset-0 z-50 bg-[var(--bg-base)] flex flex-col safe-top safe-bottom">
         {/* Header */}
-        <header className="flex items-center gap-4 p-6 border-b border-zinc-900">
+        <header className="flex items-center gap-4 p-6 border-b border-[var(--border-base)]">
           <button 
             onClick={() => {
               setManagingMemories(null);
               setLockedMemories([]);
             }}
-            className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center"
+            className="w-10 h-10 rounded-full bg-[var(--bg-hover)] flex items-center justify-center"
           >
-            <X className="w-5 h-5" />
+            <X className="w-5 h-5 text-[var(--fg-muted)]" />
           </button>
           <div className="flex-1">
-            <h1 className="text-xl font-medium">Manage Memories</h1>
-            <p className="text-xs text-zinc-500">{managingMemories.name} • {lockedMemories.length} memories</p>
+            <h1 className="text-xl font-medium text-[var(--fg-base)]">Manage Memories</h1>
+            <p className="text-xs text-[var(--fg-muted)]">{managingMemories.name} • {lockedMemories.length} memories</p>
           </div>
       </header>
 
@@ -822,7 +822,7 @@ $$ LANGUAGE sql SECURITY DEFINER;
               {[...Array(4)].map((_, i) => (
                 <div 
                   key={i} 
-                  className="flex items-center gap-3 p-3 rounded-xl bg-zinc-900/50"
+                  className="flex items-center gap-3 p-3 rounded-xl bg-[var(--bg-surface)]"
                   style={{ animationDelay: `${i * 100}ms` }}
                 >
                   <div className="w-12 h-12 rounded-lg skeleton" />
@@ -835,10 +835,10 @@ $$ LANGUAGE sql SECURITY DEFINER;
             </div>
           ) : lockedMemories.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full text-center">
-              <div className="w-16 h-16 rounded-full bg-zinc-900 flex items-center justify-center mb-4">
-                <Lock className="w-6 h-6 text-zinc-600" />
+              <div className="w-16 h-16 rounded-full bg-[var(--bg-surface)] flex items-center justify-center mb-4">
+                <Lock className="w-6 h-6 text-[var(--fg-subtle)]" />
               </div>
-              <p className="text-zinc-500">No memories captured yet</p>
+              <p className="text-[var(--fg-muted)]">No memories captured yet</p>
             </div>
           ) : (
             <div className="space-y-2">
@@ -853,31 +853,31 @@ $$ LANGUAGE sql SECURITY DEFINER;
                 return (
                   <div 
                     key={memory.id}
-                    className="flex items-center justify-between p-4 bg-zinc-900 rounded-xl animate-enter"
+                    className="flex items-center justify-between p-4 bg-[var(--bg-surface)] rounded-xl animate-enter"
                     style={{ animationDelay: `${i * 30}ms`, opacity: 0 }}
                   >
                     <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 rounded-lg bg-zinc-800 flex items-center justify-center">
+                      <div className="w-12 h-12 rounded-lg bg-[var(--bg-muted)] flex items-center justify-center">
                         {memory.type === 'photo' ? (
-                          <ImageIcon className="w-5 h-5 text-zinc-500" />
+                          <ImageIcon className="w-5 h-5 text-[var(--fg-muted)]" />
                         ) : memory.type === 'audio' ? (
                           <Mic className="w-5 h-5 text-orange-400" />
                         ) : (
-                          <FileText className="w-5 h-5 text-zinc-500" />
+                          <FileText className="w-5 h-5 text-[var(--fg-muted)]" />
                         )}
                       </div>
                       <div>
-                        <p className="font-medium text-sm">
+                        <p className="font-medium text-sm text-[var(--fg-base)]">
                           {memory.type === 'photo' ? 'Photo' : memory.type === 'audio' ? 'Voice Note' : 'Note'}
                         </p>
-                        <p className="text-xs text-zinc-500">{formattedDate}</p>
+                        <p className="text-xs text-[var(--fg-muted)]">{formattedDate}</p>
                       </div>
                     </div>
                     <button
                       onClick={() => setMemoryToDelete(memory)}
-                      className="w-10 h-10 rounded-full bg-zinc-800 flex items-center justify-center hover:bg-red-500/20 transition-colors"
+                      className="w-10 h-10 rounded-full bg-[var(--bg-muted)] flex items-center justify-center hover:bg-[var(--color-error-subtle)] transition-colors"
                     >
-                      <Trash2 className="w-4 h-4 text-zinc-500" />
+                      <Trash2 className="w-4 h-4 text-[var(--fg-muted)]" />
                     </button>
                   </div>
                 );
@@ -889,31 +889,31 @@ $$ LANGUAGE sql SECURITY DEFINER;
         {/* Delete Memory Confirmation */}
         {memoryToDelete && (
           <div 
-            className="absolute inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-6"
+            className="absolute inset-0 z-50 bg-[var(--bg-base)]/80 backdrop-blur-sm flex items-center justify-center p-6"
             onClick={() => setMemoryToDelete(null)}
           >
             <div 
-              className="w-full max-w-sm bg-zinc-900 rounded-3xl p-6 animate-enter"
+              className="w-full max-w-sm bg-[var(--bg-surface)] rounded-3xl p-6 animate-enter"
               onClick={(e) => e.stopPropagation()}
             >
-              <div className="w-14 h-14 mx-auto mb-4 rounded-full bg-red-500/10 flex items-center justify-center">
-                <Trash2 className="w-6 h-6 text-red-400" />
+              <div className="w-14 h-14 mx-auto mb-4 rounded-full bg-[var(--color-error-subtle)] flex items-center justify-center">
+                <Trash2 className="w-6 h-6 text-[var(--color-error)]" />
               </div>
-              <h3 className="text-xl font-semibold text-center mb-2">Delete this memory?</h3>
-              <p className="text-zinc-500 text-sm text-center mb-6">
+              <h3 className="text-xl font-semibold text-center mb-2 text-[var(--fg-base)]">Delete this memory?</h3>
+              <p className="text-[var(--fg-muted)] text-sm text-center mb-6">
                 This {memoryToDelete.type === 'photo' ? 'photo' : memoryToDelete.type === 'audio' ? 'voice note' : 'note'} will be permanently deleted. You won't be able to recover it.
               </p>
               <div className="flex gap-3">
                 <button
                   onClick={() => setMemoryToDelete(null)}
-                  className="flex-1 h-12 rounded-full bg-zinc-800 text-white font-medium hover:bg-zinc-700 transition-colors"
+                  className="flex-1 h-12 rounded-full bg-[var(--bg-muted)] text-[var(--fg-base)] font-medium hover:bg-[var(--bg-hover)] transition-colors"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={() => handleDeleteLockedMemory(memoryToDelete.id)}
                   disabled={isDeletingMemory}
-                  className="flex-1 h-12 rounded-full bg-red-500 text-white font-medium hover:bg-red-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex-1 h-12 rounded-full bg-[var(--color-error)] text-white font-medium hover:opacity-90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {isDeletingMemory ? 'Deleting...' : 'Delete'}
                 </button>
@@ -929,7 +929,7 @@ $$ LANGUAGE sql SECURITY DEFINER;
   if (showInviteModal && journeyToShare) {
     return (
       <div 
-        className="fixed inset-0 z-[60] bg-black/90 backdrop-blur-md flex items-center justify-center p-6 safe-top safe-bottom"
+        className="fixed inset-0 z-[60] bg-[var(--bg-base)]/90 backdrop-blur-md flex items-center justify-center p-6 safe-top safe-bottom"
         onClick={() => {
           setShowInviteModal(false);
           setInviteEmail('');
@@ -937,39 +937,39 @@ $$ LANGUAGE sql SECURITY DEFINER;
         }}
       >
         <div 
-          className="glass rounded-2xl p-6 max-w-sm w-full animate-enter border border-white/10"
+          className="bg-[var(--bg-surface)] rounded-2xl p-6 max-w-sm w-full animate-enter border border-[var(--border-base)]"
           onClick={(e) => e.stopPropagation()}
         >
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-blue-500/10 flex items-center justify-center">
-                <UserPlus className="w-5 h-5 text-blue-400" />
+              <div className="w-10 h-10 rounded-full bg-[var(--color-info-subtle)] flex items-center justify-center">
+                <UserPlus className="w-5 h-5 text-[var(--color-info)]" />
               </div>
-              <h2 className="text-lg font-medium">Share Journey</h2>
+              <h2 className="text-lg font-medium text-[var(--fg-base)]">Share Journey</h2>
             </div>
             <button 
               onClick={() => {
                 setShowInviteModal(false);
                 setInviteEmail('');
               }}
-              className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center"
+              className="w-8 h-8 rounded-full bg-[var(--bg-hover)] flex items-center justify-center"
             >
-              <X className="w-4 h-4" />
+              <X className="w-4 h-4 text-[var(--fg-muted)]" />
             </button>
           </div>
           
-          <p className="text-sm text-zinc-500 mb-4">
-            Invite someone to contribute to <span className="text-white">{journeyToShare.name}</span>. 
+          <p className="text-sm text-[var(--fg-muted)] mb-4">
+            Invite someone to contribute to <span className="text-[var(--fg-base)]">{journeyToShare.name}</span>. 
             They&apos;ll be able to add memories and see the journey unlock.
           </p>
           
           {/* Current collaborators */}
           {(journeyToShare.shared_with?.length || 0) > 0 && (
-            <div className="mb-4 p-3 rounded-xl bg-white/5">
-              <p className="text-xs text-zinc-500 mb-2">Already shared with:</p>
+            <div className="mb-4 p-3 rounded-xl bg-[var(--bg-hover)]">
+              <p className="text-xs text-[var(--fg-muted)] mb-2">Already shared with:</p>
               <div className="flex flex-wrap gap-2">
                 {journeyToShare.shared_with?.map((userId, i) => (
-                  <div key={i} className="px-3 py-1 rounded-full bg-blue-500/20 text-blue-300 text-xs">
+                  <div key={i} className="px-3 py-1 rounded-full bg-[var(--color-info-subtle)] text-[var(--color-info)] text-xs">
                     Collaborator {i + 1}
                   </div>
                 ))}
@@ -983,7 +983,7 @@ $$ LANGUAGE sql SECURITY DEFINER;
               placeholder="Enter their email address"
               value={inviteEmail}
               onChange={(e) => setInviteEmail(e.target.value)}
-              className="w-full h-12 px-4 bg-zinc-900 border border-zinc-700 rounded-xl text-white placeholder:text-zinc-600 focus:outline-none focus:border-blue-500 mb-4"
+              className="w-full h-12 px-4 bg-[var(--bg-muted)] border border-[var(--border-base)] rounded-xl text-[var(--fg-base)] placeholder:text-[var(--fg-subtle)] focus:outline-none focus:border-[var(--color-info)] mb-4"
               autoFocus
             />
             
@@ -994,14 +994,14 @@ $$ LANGUAGE sql SECURITY DEFINER;
                   setShowInviteModal(false);
                   setInviteEmail('');
                 }}
-                className="flex-1 h-12 bg-white/5 rounded-xl font-medium hover:bg-white/10 transition-colors"
+                className="flex-1 h-12 bg-[var(--bg-hover)] text-[var(--fg-base)] rounded-xl font-medium hover:bg-[var(--bg-active)] transition-colors"
               >
                 Cancel
               </button>
               <button
                 type="submit"
                 disabled={!inviteEmail.trim() || inviteLoading}
-                className="flex-1 h-12 bg-blue-500 rounded-xl font-medium disabled:opacity-40 disabled:cursor-not-allowed hover:bg-blue-600 transition-colors flex items-center justify-center gap-2"
+                className="flex-1 h-12 bg-[var(--color-info)] text-white rounded-xl font-medium disabled:opacity-40 disabled:cursor-not-allowed hover:opacity-90 transition-colors flex items-center justify-center gap-2"
               >
                 {inviteLoading ? (
                   <Loader2 className="w-4 h-4 animate-spin" />
@@ -1098,7 +1098,7 @@ $$ LANGUAGE sql SECURITY DEFINER;
           </div>
           
           {/* Journey Name */}
-          <h1 className="text-4xl font-bold mb-2">{focusedJourney.name}</h1>
+          <h1 className="text-4xl font-bold mb-2 text-white">{focusedJourney.name}</h1>
           
           {/* Memory count with manage link */}
           <button 
@@ -1106,7 +1106,7 @@ $$ LANGUAGE sql SECURITY DEFINER;
               setManagingMemories(focusedJourney);
               fetchLockedMemories(focusedJourney.id);
             }}
-            className="text-zinc-400 mb-4 flex items-center gap-2 hover:text-white transition-colors"
+            className="text-white/70 mb-4 flex items-center gap-2 hover:text-white transition-colors"
           >
             <span>{focusedJourney.memory_count || 0} {(focusedJourney.memory_count || 0) === 1 ? 'memory' : 'memories'} captured</span>
             {(focusedJourney.memory_count || 0) > 0 && (
@@ -1117,7 +1117,7 @@ $$ LANGUAGE sql SECURITY DEFINER;
           {/* Shared with indicator */}
           {(focusedJourney.shared_with?.length || 0) > 0 && (
             <div className="mb-8">
-              <div className="flex items-center gap-2 text-zinc-500 mb-3">
+              <div className="flex items-center gap-2 text-white/60 mb-3">
                 <Users className="w-4 h-4" />
                 <span className="text-sm">
                   Shared with {focusedJourney.shared_with?.length} {focusedJourney.shared_with?.length === 1 ? 'person' : 'people'}
@@ -1127,9 +1127,9 @@ $$ LANGUAGE sql SECURITY DEFINER;
                 {focusedJourney.shared_with?.map(userId => (
                   <div 
                     key={userId}
-                    className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-zinc-800/50 border border-zinc-700/50"
+                    className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-black/30 backdrop-blur-sm border border-white/10"
                   >
-                    <span className="text-sm text-zinc-300">
+                    <span className="text-sm text-white/80">
                       {collaboratorEmails[userId] || 'Loading...'}
                     </span>
                     {isOwner(focusedJourney) && (
@@ -1138,7 +1138,7 @@ $$ LANGUAGE sql SECURITY DEFINER;
                         className="w-4 h-4 flex items-center justify-center rounded-full hover:bg-red-500/20 transition-colors"
                         title="Remove collaborator"
                       >
-                        <X className="w-3 h-3 text-zinc-500 hover:text-red-400" />
+                        <X className="w-3 h-3 text-white/50 hover:text-red-400" />
                       </button>
                     )}
                   </div>
@@ -1152,10 +1152,10 @@ $$ LANGUAGE sql SECURITY DEFINER;
           {/* Countdown */}
           <div className="glass rounded-2xl p-6 mb-6">
             <div className="flex items-center gap-2 mb-2">
-              <Clock className="w-4 h-4 text-zinc-500" />
-              <p className="text-xs text-zinc-500 uppercase tracking-wider">Unlocks in</p>
+              <Clock className="w-4 h-4 text-white/60" />
+              <p className="text-xs text-white/60 uppercase tracking-wider">Unlocks in</p>
             </div>
-            <p className="text-4xl font-light tracking-wide">{countdown}</p>
+            <p className="text-4xl font-light tracking-wide text-white">{countdown}</p>
           </div>
           
           {/* Capture Button */}
@@ -1277,21 +1277,21 @@ $$ LANGUAGE sql SECURITY DEFINER;
   // --- EDIT JOURNEY MODAL ---
   if (editingJourney) {
     return (
-      <div className="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex flex-col safe-top safe-bottom">
+      <div className="fixed inset-0 z-50 bg-[var(--bg-base)]/90 backdrop-blur-md flex flex-col safe-top safe-bottom">
         <div className="flex-1 flex flex-col p-6 animate-enter">
           <button 
             onClick={() => setEditingJourney(null)} 
-            className="self-end w-10 h-10 flex items-center justify-center rounded-full bg-white/5 mb-6"
+            className="self-end w-10 h-10 flex items-center justify-center rounded-full bg-[var(--bg-hover)] mb-6"
           >
-            <X className="w-5 h-5 text-white/60" />
+            <X className="w-5 h-5 text-[var(--fg-muted)]" />
           </button>
           
           <div className="flex-1 flex flex-col justify-center max-w-sm mx-auto w-full">
-            <h2 className="text-3xl font-light tracking-tight text-white mb-8">Edit Journey</h2>
+            <h2 className="text-3xl font-light tracking-tight text-[var(--fg-base)] mb-8">Edit Journey</h2>
             
             <div className="space-y-6">
               <div>
-                <label className="text-[11px] uppercase tracking-[0.2em] text-zinc-500 font-medium mb-3 block">
+                <label className="text-[11px] uppercase tracking-[0.2em] text-[var(--fg-muted)] font-medium mb-3 block">
                   Name
                 </label>
                 <input 
@@ -1299,12 +1299,12 @@ $$ LANGUAGE sql SECURITY DEFINER;
                   value={editName}
                   onChange={(e) => setEditName(e.target.value)}
                   maxLength={50}
-                  className="w-full bg-zinc-900 rounded-xl py-3 px-4 text-lg text-white focus:outline-none focus:ring-2 focus:ring-white/20"
+                  className="w-full bg-[var(--bg-surface)] rounded-xl py-3 px-4 text-lg text-[var(--fg-base)] focus:outline-none focus:ring-2 focus:ring-[var(--fg-base)]/20"
                 />
               </div>
               
               <div>
-                <label className="text-[11px] uppercase tracking-[0.2em] text-zinc-500 font-medium mb-3 block">
+                <label className="text-[11px] uppercase tracking-[0.2em] text-[var(--fg-muted)] font-medium mb-3 block">
                   Unlock Date
                 </label>
                 <input 
@@ -1312,15 +1312,14 @@ $$ LANGUAGE sql SECURITY DEFINER;
                   value={editDate}
                   onChange={(e) => setEditDate(e.target.value)}
                   min={new Date().toISOString().split('T')[0]}
-                  className="w-full bg-zinc-900 rounded-xl py-3 px-4 text-lg text-white focus:outline-none focus:ring-2 focus:ring-white/20"
-                  style={{ colorScheme: 'dark' }}
+                  className="w-full bg-[var(--bg-surface)] rounded-xl py-3 px-4 text-lg text-[var(--fg-base)] focus:outline-none focus:ring-2 focus:ring-[var(--fg-base)]/20"
                 />
               </div>
               
               <button 
                 onClick={handleEditJourney}
                 disabled={!editName.trim() || isSaving}
-                className="w-full h-14 bg-white text-black rounded-full font-semibold text-sm disabled:opacity-40 mt-4"
+                className="w-full h-14 bg-[var(--fg-base)] text-[var(--fg-inverse)] rounded-full font-semibold text-sm disabled:opacity-40 mt-4"
               >
                 {isSaving ? 'Saving...' : 'Save Changes'}
               </button>
@@ -1335,31 +1334,31 @@ $$ LANGUAGE sql SECURITY DEFINER;
   if (deleteConfirm) {
     return (
       <div 
-        className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-6"
+        className="fixed inset-0 z-50 bg-[var(--bg-base)]/80 backdrop-blur-sm flex items-center justify-center p-6"
         onClick={() => setDeleteConfirm(null)}
       >
         <div 
-          className="w-full max-w-sm bg-zinc-900 rounded-3xl p-6 animate-enter"
+          className="w-full max-w-sm bg-[var(--bg-surface)] rounded-3xl p-6 animate-enter"
           onClick={(e) => e.stopPropagation()}
         >
-          <div className="w-14 h-14 mx-auto mb-4 rounded-full bg-red-500/10 flex items-center justify-center">
-            <Trash2 className="w-6 h-6 text-red-400" />
+          <div className="w-14 h-14 mx-auto mb-4 rounded-full bg-[var(--color-error-subtle)] flex items-center justify-center">
+            <Trash2 className="w-6 h-6 text-[var(--color-error)]" />
           </div>
-          <h3 className="text-xl font-semibold text-center mb-2">Delete Journey?</h3>
-          <p className="text-zinc-500 text-sm text-center mb-6">
+          <h3 className="text-xl font-semibold text-center mb-2 text-[var(--fg-base)]">Delete Journey?</h3>
+          <p className="text-[var(--fg-muted)] text-sm text-center mb-6">
             This will permanently delete this journey and all its memories. This cannot be undone.
           </p>
           <div className="flex gap-3">
             <button
               onClick={() => setDeleteConfirm(null)}
-              className="flex-1 h-12 rounded-full bg-zinc-800 text-white font-medium hover:bg-zinc-700 transition-colors"
+              className="flex-1 h-12 rounded-full bg-[var(--bg-muted)] text-[var(--fg-base)] font-medium hover:bg-[var(--bg-hover)] transition-colors"
             >
               Cancel
             </button>
             <button
               onClick={() => handleDeleteJourney(deleteConfirm)}
               disabled={isDeleting}
-              className="flex-1 h-12 rounded-full bg-red-500 text-white font-medium hover:bg-red-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex-1 h-12 rounded-full bg-[var(--color-error)] text-white font-medium hover:opacity-90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isDeleting ? 'Deleting...' : 'Delete'}
             </button>
