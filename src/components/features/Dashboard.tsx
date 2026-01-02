@@ -7,7 +7,7 @@ import {
 } from '@/services';
 import { useAuth } from '@/providers';
 import { hapticSuccess, getJourneyGradient, formatDate, getTimeUntilUnlock, isJourneyUnlocked, getGreeting, MAX_ACTIVE_JOURNEYS } from '@/lib';
-import { Plus, ArrowRight, X, Lock, ChevronRight, Sparkles, Trash2, HelpCircle, Camera, ImageIcon, Pencil, Timer, Archive, Search, RefreshCw, EllipsisVertical } from 'lucide-react';
+import { Plus, ArrowRight, X, Lock, ChevronRight, Sparkles, Trash2, HelpCircle, Camera, ImageIcon, Pencil, Timer, Archive, Search, RefreshCw, EllipsisVertical, UserPlus } from 'lucide-react';
 import { useToast, Avatar, ConfirmDialog, IconButton } from '@/components/ui';
 import { 
   GalleryView, 
@@ -546,10 +546,18 @@ export default function Dashboard({ activeJourneys: initialActiveJourneys = [], 
                         ) : (
                           <div className="flex gap-1">
                             <IconButton 
+                              icon={<UserPlus className="w-3.5 h-3.5" />}
+                              label="Share journey"
+                              onClick={(e) => { e.stopPropagation(); setInviteJourney(journey); }}
+                              variant="bordered"
+                              size="sm"
+                              dark
+                            />
+                            <IconButton 
                               icon={<Pencil className="w-3.5 h-3.5" />}
                               label="Edit journey"
                               onClick={(e) => { e.stopPropagation(); setEditingJourney(journey); }}
-                              variant="ghost"
+                              variant="bordered"
                               size="sm"
                               dark
                             />
@@ -557,7 +565,7 @@ export default function Dashboard({ activeJourneys: initialActiveJourneys = [], 
                               icon={<Trash2 className="w-3.5 h-3.5" />}
                               label="Delete journey"
                               onClick={(e) => { e.stopPropagation(); setDeleteConfirm(journey.id); }}
-                              variant="danger"
+                              variant="bordered"
                               size="sm"
                               dark
                             />
