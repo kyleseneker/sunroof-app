@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { X, Command, Keyboard } from 'lucide-react';
 import { useKeyboardShortcuts } from '@/hooks';
+import { IconButton } from '@/components/ui';
 
 interface Shortcut {
   keys: string[];
@@ -92,12 +93,14 @@ export function KeyboardShortcutsHelp({ isOpen, onClose }: KeyboardShortcutsHelp
               <p className="text-xs text-zinc-500">Press any key to get started</p>
             </div>
           </div>
-          <button
+          <IconButton 
+            icon={<X className="w-4 h-4" />}
+            label="Close shortcuts"
             onClick={onClose}
-            className="w-8 h-8 rounded-full bg-zinc-800 flex items-center justify-center hover:bg-zinc-700 transition-colors"
-          >
-            <X className="w-4 h-4 text-zinc-400" />
-          </button>
+            variant="ghost"
+            size="sm"
+            dark
+          />
         </div>
 
         {/* Shortcuts List */}

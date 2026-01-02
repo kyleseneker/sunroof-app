@@ -362,15 +362,18 @@ export default function GalleryView({ journey, onClose, onMemoryDeleted }: Galle
                   <div className="absolute bottom-2 left-2 px-2 py-1 rounded-md bg-black/60 backdrop-blur-sm pointer-events-none">
                     <p className="text-[10px] text-white/80">{tileDay} • {tileTime}</p>
                   </div>
-                  <button
+                  <IconButton 
+                    icon={<Trash2 className="w-3 h-3" />}
+                    label="Delete memory"
                     onClick={(e) => {
                       e.stopPropagation();
                       setMemoryToDelete(memory);
                     }}
-                    className="absolute top-2 right-2 w-7 h-7 rounded-full bg-black/50 backdrop-blur-sm flex items-center justify-center opacity-70 hover:opacity-100 hover:bg-red-500/80 transition-all active:scale-95"
-                  >
-                    <Trash2 className="w-3 h-3 text-white" />
-                  </button>
+                    variant="danger"
+                    size="sm"
+                    dark
+                    className="absolute top-2 right-2 opacity-70 hover:opacity-100"
+                  />
                 </div>
               );
             })}

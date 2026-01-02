@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Bell, BellOff, X } from 'lucide-react';
-import { Toggle } from '@/components/ui';
+import { Toggle, IconButton } from '@/components/ui';
 import { 
   registerServiceWorker, 
   checkNotificationPermission, 
@@ -97,12 +97,13 @@ export default function NotificationPrompt({ onDismiss, compact = false }: Notif
           </div>
         </div>
         
-        <button
+        <IconButton 
+          icon={<X className="w-4 h-4" />}
+          label="Dismiss"
           onClick={handleDismiss}
-          className="w-8 h-8 rounded-full flex items-center justify-center text-[var(--fg-subtle)] hover:text-[var(--fg-muted)] hover:bg-[var(--bg-hover)] transition-colors"
-        >
-          <X className="w-4 h-4" />
-        </button>
+          variant="ghost"
+          size="sm"
+        />
       </div>
     </div>
   );

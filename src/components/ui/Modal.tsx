@@ -8,6 +8,7 @@ import { ReactNode, useEffect, useRef } from 'react';
 import { X } from 'lucide-react';
 import { useFocusTrap } from '@/hooks';
 import { cn } from '@/lib';
+import IconButton from './IconButton';
 
 interface ModalProps {
   isOpen: boolean;
@@ -113,13 +114,14 @@ export default function Modal({
               </div>
             )}
             {showCloseButton && (
-              <button
+              <IconButton 
+                icon={<X className="w-4 h-4" />}
+                label="Close modal"
                 onClick={onClose}
-                className="w-8 h-8 rounded-full bg-[var(--bg-hover)] flex items-center justify-center hover:bg-[var(--bg-active)] transition-colors ml-auto focus-ring"
-                aria-label="Close modal"
-              >
-                <X className="w-4 h-4 text-[var(--fg-muted)]" />
-              </button>
+                variant="ghost"
+                size="sm"
+                className="ml-auto"
+              />
             )}
           </div>
         )}

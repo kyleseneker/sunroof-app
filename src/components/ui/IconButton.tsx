@@ -4,7 +4,7 @@ import { forwardRef, ButtonHTMLAttributes, ReactNode } from 'react';
 import { Loader2 } from 'lucide-react';
 import { cn } from '@/lib';
 
-type IconButtonVariant = 'default' | 'ghost' | 'danger' | 'active';
+type IconButtonVariant = 'default' | 'ghost' | 'danger' | 'active' | 'bordered' | 'success';
 type IconButtonSize = 'sm' | 'md' | 'lg';
 
 interface IconButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
@@ -21,6 +21,8 @@ const variantStyles: Record<IconButtonVariant, string> = {
   ghost: 'bg-transparent text-[var(--fg-muted)] hover:bg-[var(--bg-hover)] hover:text-[var(--fg-base)]',
   danger: 'bg-[var(--bg-surface)] text-[var(--fg-muted)] hover:bg-red-500/20 hover:text-red-400',
   active: 'bg-orange-500/20 text-orange-400',
+  bordered: 'bg-[var(--bg-hover)] text-[var(--fg-muted)] border border-[var(--border-base)] hover:bg-[var(--bg-active)] hover:text-[var(--fg-base)]',
+  success: 'bg-emerald-500 text-white hover:bg-emerald-600',
 };
 
 // Dark-mode friendly variants (for dark overlays like galleries)
@@ -29,6 +31,8 @@ const darkVariantStyles: Record<IconButtonVariant, string> = {
   ghost: 'bg-transparent text-zinc-400 hover:bg-white/10 hover:text-white',
   danger: 'bg-white/10 text-zinc-400 hover:bg-red-500/20 hover:text-red-400 backdrop-blur-md',
   active: 'bg-orange-500/20 text-orange-400 backdrop-blur-md',
+  bordered: 'bg-black/40 text-white border border-white/10 hover:bg-white/20 hover:border-white/20 backdrop-blur-md',
+  success: 'bg-emerald-500 text-white hover:bg-emerald-600',
 };
 
 const sizeStyles: Record<IconButtonSize, { button: string; icon: string }> = {

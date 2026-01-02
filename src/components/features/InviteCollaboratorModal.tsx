@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { X, UserPlus, Loader2 } from 'lucide-react';
-import { useToast } from '@/components/ui';
+import { useToast, IconButton } from '@/components/ui';
 import { updateJourney, getUserIdByEmail } from '@/services';
 import { hapticSuccess } from '@/lib';
 import type { Journey } from '@/types';
@@ -119,12 +119,13 @@ $$ LANGUAGE sql SECURITY DEFINER;
             </div>
             <h2 className="text-lg font-medium text-[var(--fg-base)]">Share Journey</h2>
           </div>
-          <button 
+          <IconButton 
+            icon={<X className="w-4 h-4" />}
+            label="Close"
             onClick={handleClose}
-            className="w-8 h-8 rounded-full bg-[var(--bg-hover)] flex items-center justify-center"
-          >
-            <X className="w-4 h-4 text-[var(--fg-muted)]" />
-          </button>
+            variant="ghost"
+            size="sm"
+          />
         </div>
         
         <p className="text-sm text-[var(--fg-muted)] mb-4">

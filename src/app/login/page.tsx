@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from 'react';
 import { supabase } from '@/lib';
 import { Mail, ArrowRight, Loader2, HelpCircle } from 'lucide-react';
 import { HelpModal } from '@/components/features';
+import { IconButton } from '@/components/ui';
 import Image from 'next/image';
 
 export default function LoginPage() {
@@ -323,12 +324,13 @@ export default function LoginPage() {
             <Image src="/icon.svg" alt="Sunroof" width={28} height={28} />
             <span className="text-[11px] font-semibold tracking-[0.25em] uppercase text-zinc-400">Sunroof</span>
           </div>
-          <button 
+          <IconButton 
+            icon={<HelpCircle className="w-4 h-4" />}
+            label="How Sunroof works"
             onClick={() => setShowHelp(true)}
-            className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center hover:bg-white/10 transition-all"
-          >
-            <HelpCircle className="w-4 h-4 text-zinc-500" />
-          </button>
+            variant="bordered"
+            dark
+          />
         </div>
 
         {/* Middle: Login Form */}

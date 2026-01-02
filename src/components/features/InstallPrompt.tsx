@@ -1,6 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { Download, X, Smartphone } from 'lucide-react';
+import { IconButton } from '@/components/ui';
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
@@ -91,12 +92,15 @@ export default function InstallPrompt() {
             </p>
           </div>
           
-          <button 
+          <IconButton 
+            icon={<X className="w-4 h-4" />}
+            label="Dismiss"
             onClick={handleDismiss}
-            className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center shrink-0 -mt-1 -mr-1"
-          >
-            <X className="w-4 h-4 text-zinc-500" />
-          </button>
+            variant="ghost"
+            size="sm"
+            dark
+            className="shrink-0 -mt-1 -mr-1"
+          />
         </div>
         
         {!isIOS && deferredPrompt && (

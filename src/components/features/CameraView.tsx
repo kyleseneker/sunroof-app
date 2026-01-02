@@ -4,6 +4,7 @@ import { compressImage, getCompressionStats, getTimeOfDay, NOTE_PROMPTS, MAX_FIL
 import { getCurrentUser, uploadMemoryPhoto, uploadMemoryAudio, createMemory } from '@/services';
 import { X, Camera, FileText, Send, Check, Loader2, Upload, Sparkles, Mic, SwitchCamera, ImageIcon } from 'lucide-react';
 import { AudioRecorder } from '@/components/features';
+import { IconButton } from '@/components/ui';
 import type { TimeOfDay } from '@/types';
 
 export default function CameraView({ 
@@ -553,12 +554,13 @@ const handleAudioError = (message: string) => {
       {/* Top Bar */}
       <div className="absolute top-0 left-0 right-0 z-30 safe-top">
         <div className="flex justify-between items-center p-6 bg-gradient-to-b from-black/80 via-black/40 to-transparent">
-          <button 
+          <IconButton 
+            icon={<X className="w-5 h-5" />}
+            label="Close camera"
             onClick={onClose}
-            className="w-10 h-10 rounded-full bg-black/40 backdrop-blur-md border border-white/10 flex items-center justify-center active:scale-95 transition-transform"
-          >
-            <X className="w-5 h-5" />
-          </button>
+            variant="bordered"
+            dark
+          />
           
           <div className="px-4 py-2 rounded-full bg-black/40 backdrop-blur-md border border-white/10">
             <span className="text-[11px] font-semibold tracking-[0.15em] uppercase">{journeyName}</span>
@@ -656,22 +658,28 @@ const handleAudioError = (message: string) => {
             
             {/* Flip camera button - only show if multiple cameras and camera is active */}
             {hasMultipleCameras && cameraActive && cameraReady && (
-              <button
+              <IconButton 
+                icon={<SwitchCamera className="w-5 h-5" />}
+                label="Switch camera"
                 onClick={flipCamera}
-                className="absolute top-24 right-6 z-20 w-12 h-12 rounded-full bg-black/40 backdrop-blur-md border border-white/10 flex items-center justify-center active:scale-95 transition-transform"
-              >
-                <SwitchCamera className="w-5 h-5 text-white" />
-              </button>
+                variant="bordered"
+                size="lg"
+                dark
+                className="absolute top-24 right-6 z-20"
+              />
             )}
             
             {/* Gallery/upload button */}
             {cameraActive && cameraReady && (
-              <button
+              <IconButton 
+                icon={<ImageIcon className="w-5 h-5" />}
+                label="Upload from gallery"
                 onClick={() => fileInputRef.current?.click()}
-                className="absolute top-24 left-6 z-20 w-12 h-12 rounded-full bg-black/40 backdrop-blur-md border border-white/10 flex items-center justify-center active:scale-95 transition-transform"
-              >
-                <ImageIcon className="w-5 h-5 text-white" />
-              </button>
+                variant="bordered"
+                size="lg"
+                dark
+                className="absolute top-24 left-6 z-20"
+              />
             )}
             
             {/* Zoom controls */}

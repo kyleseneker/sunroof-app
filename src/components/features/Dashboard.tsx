@@ -7,7 +7,7 @@ import {
 } from '@/services';
 import { useAuth } from '@/providers';
 import { hapticSuccess, getJourneyGradient, formatDate, getTimeUntilUnlock, isJourneyUnlocked, getGreeting, MAX_ACTIVE_JOURNEYS } from '@/lib';
-import { Plus, ArrowRight, X, Lock, ChevronRight, Sparkles, Trash2, HelpCircle, Camera, ImageIcon, Pencil, Timer, Archive, Search, RefreshCw } from 'lucide-react';
+import { Plus, ArrowRight, X, Lock, ChevronRight, Sparkles, Trash2, HelpCircle, Camera, ImageIcon, Pencil, Timer, Archive, Search, RefreshCw, EllipsisVertical } from 'lucide-react';
 import { useToast, Avatar, ConfirmDialog, IconButton } from '@/components/ui';
 import { 
   GalleryView, 
@@ -349,20 +349,23 @@ export default function Dashboard({ activeJourneys: initialActiveJourneys = [], 
         <div className="flex items-center gap-2">
           {/* Search Button */}
           {(activeJourneys.length > 0 || pastJourneys.length > 0) && (
-            <button 
+            <IconButton 
+              icon={<Search className="w-4 h-4" />}
+              label="Search journeys"
               onClick={() => setShowSearch(!showSearch)}
-              className={`w-10 h-10 rounded-full border border-[var(--border-base)] flex items-center justify-center hover:bg-[var(--bg-active)] active:scale-95 transition-all cursor-pointer ${showSearch ? 'bg-[var(--bg-active)]' : 'bg-[var(--bg-hover)]'}`}
-            >
-              <Search className="w-4 h-4 text-[var(--fg-muted)]" />
-            </button>
+              variant="bordered"
+              active={showSearch}
+            />
           )}
-          <button 
+          <IconButton 
+            icon={<HelpCircle className="w-4 h-4" />}
+            label="Help"
             onClick={() => setShowHelp(true)}
-            className="w-10 h-10 rounded-full bg-[var(--bg-hover)] border border-[var(--border-base)] flex items-center justify-center hover:bg-[var(--bg-active)] active:scale-95 transition-all cursor-pointer"
-          >
-            <HelpCircle className="w-4 h-4 text-[var(--fg-muted)]" />
-          </button>
-          <button 
+            variant="bordered"
+          />
+          <IconButton 
+            icon={<Plus className="w-4 h-4" />}
+            label="Create journey"
             onClick={() => {
               if (canCreateJourney) {
                 setIsCreating(true);
@@ -370,10 +373,8 @@ export default function Dashboard({ activeJourneys: initialActiveJourneys = [], 
                 showToast(`Maximum ${MAX_ACTIVE_JOURNEYS} active journeys allowed`, 'error');
               }
             }}
-            className="w-10 h-10 rounded-full bg-[var(--bg-hover)] border border-[var(--border-base)] flex items-center justify-center hover:bg-[var(--bg-active)] active:scale-95 transition-all cursor-pointer"
-          >
-            <Plus className="w-4 h-4 text-[var(--fg-base)]" />
-          </button>
+            variant="bordered"
+          />
           {/* Profile Avatar */}
           <Link 
             href="/profile"
@@ -535,29 +536,31 @@ export default function Dashboard({ activeJourneys: initialActiveJourneys = [], 
                       {/* Owner-only action buttons */}
                       {isOwner(journey) && (
                         isMobile ? (
-                          <button
+                          <IconButton 
+                            icon={<EllipsisVertical className="w-5 h-5" />}
+                            label="Journey options"
                             onClick={(e) => { e.stopPropagation(); setActionSheetJourney(journey); }}
-                            className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center active:bg-white/20 transition-colors"
-                            aria-label="Journey options"
-                          >
-                            <svg className="w-5 h-5 text-white/60" fill="currentColor" viewBox="0 0 20 20">
-                              <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" />
-                            </svg>
-                          </button>
+                            variant="ghost"
+                            dark
+                          />
                         ) : (
                           <div className="flex gap-1">
-                            <button
+                            <IconButton 
+                              icon={<Pencil className="w-3.5 h-3.5" />}
+                              label="Edit journey"
                               onClick={(e) => { e.stopPropagation(); setEditingJourney(journey); }}
-                              className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center hover:bg-white/10 transition-colors"
-                            >
-                              <Pencil className="w-3.5 h-3.5 text-zinc-500" />
-                            </button>
-                            <button
+                              variant="ghost"
+                              size="sm"
+                              dark
+                            />
+                            <IconButton 
+                              icon={<Trash2 className="w-3.5 h-3.5" />}
+                              label="Delete journey"
                               onClick={(e) => { e.stopPropagation(); setDeleteConfirm(journey.id); }}
-                              className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center hover:bg-red-500/20 transition-colors"
-                            >
-                              <Trash2 className="w-3.5 h-3.5 text-zinc-500" />
-                            </button>
+                              variant="danger"
+                              size="sm"
+                              dark
+                            />
                           </div>
                         )
                       )}

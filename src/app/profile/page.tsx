@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { useToast, Avatar, PageHeader, Section, SectionRow, Toggle, StatCard } from '@/components/ui';
+import { useToast, Avatar, PageHeader, Section, SectionRow, Toggle, StatCard, IconButton } from '@/components/ui';
 import { NotificationSettings } from '@/components/features';
 import { useTheme } from '@/providers';
 import { formatDate } from '@/lib';
@@ -304,13 +304,14 @@ export default function ProfilePage() {
                   className="bg-[var(--bg-surface)] border border-[var(--border-base)] rounded-lg px-3 py-2 text-center focus:outline-none focus:border-[var(--fg-subtle)]"
                   autoFocus
                 />
-                <button
+                <IconButton 
+                  icon={<Check className="w-4 h-4" />}
+                  label="Save name"
                   onClick={handleSaveName}
                   disabled={savingName}
-                  className="w-10 h-10 rounded-full bg-emerald-500 flex items-center justify-center hover:bg-emerald-600 transition-colors disabled:opacity-50"
-                >
-                  {savingName ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
-                </button>
+                  loading={savingName}
+                  variant="success"
+                />
               </div>
             ) : (
               <button
