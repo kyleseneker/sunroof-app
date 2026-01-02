@@ -144,28 +144,28 @@ export function NotificationSettings() {
     <button
       onClick={handleToggle}
       disabled={loading || permission === 'denied'}
-      className="w-full flex items-center justify-between p-4 rounded-xl bg-[var(--bg-surface)]/50 hover:bg-[var(--bg-muted)]/50 transition-colors disabled:opacity-50"
+      className="w-full flex items-center justify-between gap-3 p-4 rounded-xl bg-[var(--bg-surface)]/50 hover:bg-[var(--bg-muted)]/50 transition-colors disabled:opacity-50"
     >
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-3 min-w-0">
         {permission === 'granted' ? (
-          <Bell className="w-5 h-5 text-purple-400" />
+          <Bell className="w-5 h-5 text-purple-400 shrink-0" />
         ) : (
-          <BellOff className="w-5 h-5 text-[var(--fg-muted)]" />
+          <BellOff className="w-5 h-5 text-[var(--fg-muted)] shrink-0" />
         )}
-        <div className="text-left">
+        <div className="text-left min-w-0">
           <span className="block text-[var(--fg-base)]">Push Notifications</span>
-          <span className="text-xs text-[var(--fg-muted)]">
+          <span className="text-xs text-[var(--fg-muted)] truncate block">
             {permission === 'granted' 
-              ? 'You\'ll be notified when journeys unlock'
+              ? 'Notified when journeys unlock'
               : permission === 'denied'
               ? 'Blocked in browser settings'
-              : 'Get notified when memories are ready'
+              : 'Get notified when ready'
             }
           </span>
         </div>
       </div>
       
-      <div className={`w-12 h-7 rounded-full relative transition-colors ${
+      <div className={`w-12 h-7 rounded-full relative transition-colors shrink-0 ${
         permission === 'granted' ? 'bg-purple-500' : 'bg-[var(--bg-muted)]'
       }`}>
         <div className={`absolute top-1 w-5 h-5 rounded-full bg-[var(--fg-base)] transition-transform ${

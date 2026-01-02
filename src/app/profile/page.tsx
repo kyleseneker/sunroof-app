@@ -364,15 +364,15 @@ export default function ProfilePage() {
           {/* Appearance */}
           <div className="glass rounded-2xl p-4">
             <h3 className="text-sm font-medium text-[var(--fg-muted)] mb-3">Appearance</h3>
-            <div className="flex items-center justify-between p-4 rounded-xl bg-[var(--bg-surface)]/50">
-              <div className="flex items-center gap-3">
-                <Palette className="w-5 h-5 text-orange-400" />
-                <div className="text-left">
+            <div className="flex items-center justify-between gap-3 p-4 rounded-xl bg-[var(--bg-surface)]/50">
+              <div className="flex items-center gap-3 min-w-0">
+                <Palette className="w-5 h-5 text-orange-400 shrink-0" />
+                <div className="text-left min-w-0">
                   <span className="block text-[var(--fg-base)]">Theme</span>
-                  <span className="text-xs text-[var(--fg-muted)]">Choose your preferred color scheme</span>
+                  <span className="text-xs text-[var(--fg-muted)] truncate block">Choose your color scheme</span>
                 </div>
               </div>
-              <ThemeToggle />
+              <ThemeToggle className="shrink-0" />
             </div>
           </div>
 
