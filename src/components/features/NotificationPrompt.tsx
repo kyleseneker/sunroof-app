@@ -150,7 +150,7 @@ export function NotificationSettings() {
         {permission === 'granted' ? (
           <Bell className="w-5 h-5 text-purple-400" />
         ) : (
-          <BellOff className="w-5 h-5 text-[var(--fg-muted)]" />
+          <BellOff className="w-5 h-5 text-purple-400" />
         )}
         <div className="text-left">
           <span className="block text-[var(--fg-base)]">Push Notifications</span>
