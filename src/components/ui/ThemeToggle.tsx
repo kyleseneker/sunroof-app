@@ -38,7 +38,7 @@ export default function ThemeToggle({
         <button
           onClick={() => setTheme('dark')}
           className={cn(
-            'p-2 rounded-full transition-all',
+            'w-8 h-8 flex items-center justify-center rounded-full transition-all',
             theme === 'dark'
               ? 'bg-[var(--bg-muted)] text-[var(--fg-base)]'
               : 'text-[var(--fg-subtle)] hover:text-[var(--fg-muted)]'
@@ -53,7 +53,7 @@ export default function ThemeToggle({
         <button
           onClick={() => setTheme('light')}
           className={cn(
-            'p-2 rounded-full transition-all',
+            'w-8 h-8 flex items-center justify-center rounded-full transition-all',
             theme === 'light'
               ? 'bg-[var(--bg-muted)] text-[var(--fg-base)]'
               : 'text-[var(--fg-subtle)] hover:text-[var(--fg-muted)]'
@@ -68,7 +68,7 @@ export default function ThemeToggle({
         <button
           onClick={() => setTheme('system')}
           className={cn(
-            'p-2 rounded-full transition-all',
+            'w-8 h-8 flex items-center justify-center rounded-full transition-all',
             theme === 'system'
               ? 'bg-[var(--bg-muted)] text-[var(--fg-base)]'
               : 'text-[var(--fg-subtle)] hover:text-[var(--fg-muted)]'
