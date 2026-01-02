@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { X, Trash2, ChevronLeft, ChevronRight, Download, Copy, Check, Share, Mic } from 'lucide-react';
+import { X, Trash2, ChevronLeft, ChevronRight, Download, Copy, Check, Share, Mic, MapPin } from 'lucide-react';
 import { IconButton } from '@/components/ui';
 import { AudioPlayer } from '@/components/features';
 import type { Memory } from '@/types';
@@ -230,6 +230,25 @@ export default function MemoryViewer({
 
       {/* Footer */}
       <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black/80 to-transparent safe-bottom">
+        {/* Location & Weather */}
+        {(memory.location_name || memory.weather) && (
+          <div className="flex justify-center items-center gap-3 mb-2 text-sm">
+            {memory.location_name && (
+              <span className="flex items-center gap-1 text-zinc-400">
+                <MapPin className="w-3.5 h-3.5" />
+                {memory.location_name}
+              </span>
+            )}
+            {memory.location_name && memory.weather && (
+              <span className="text-zinc-600">•</span>
+            )}
+            {memory.weather && (
+              <span className="text-zinc-400">
+                {memory.weather.icon} {memory.weather.temp}°F {memory.weather.condition}
+              </span>
+            )}
+          </div>
+        )}
         <p className="text-center text-sm text-zinc-500">{formattedDate}</p>
         <p className="text-center text-xs text-zinc-600 mt-1">
           {currentIndex + 1} of {memories.length}

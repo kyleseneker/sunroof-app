@@ -1,8 +1,9 @@
 'use client';
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { compressImage, getCompressionStats, getTimeOfDay, NOTE_PROMPTS, MAX_FILE_SIZE_BYTES, MAX_NOTE_LENGTH, ALLOWED_IMAGE_TYPES, IMAGE_COMPRESSION } from '@/lib';
+import { compressImage, getCompressionStats, getTimeOfDay, NOTE_PROMPTS, MAX_FILE_SIZE_BYTES, MAX_NOTE_LENGTH, ALLOWED_IMAGE_TYPES, IMAGE_COMPRESSION, getLocationContext, getWeather } from '@/lib';
+import type { MemoryLocation, MemoryWeather } from '@/types';
 import { getCurrentUser, uploadMemoryPhoto, uploadMemoryAudio, createMemory } from '@/services';
-import { X, Camera, FileText, Send, Check, Loader2, Upload, Sparkles, Mic, SwitchCamera, ImageIcon } from 'lucide-react';
+import { X, Camera, FileText, Send, Check, Loader2, Upload, Sparkles, Mic, SwitchCamera, ImageIcon, MapPin } from 'lucide-react';
 import { AudioRecorder } from '@/components/features';
 import { IconButton } from '@/components/ui';
 import type { TimeOfDay } from '@/types';
@@ -52,6 +53,11 @@ export default function CameraView({
   const [supportsZoom, setSupportsZoom] = useState(false);
   const lastPinchDistance = useRef<number | null>(null);
   
+  // Location & weather context (captured on mount)
+  const [locationContext, setLocationContext] = useState<MemoryLocation | null>(null);
+  const [weatherContext, setWeatherContext] = useState<MemoryWeather | null>(null);
+  const [contextLoading, setContextLoading] = useState(true);
+  
 
   const showSuccess = () => {
     // Haptic feedback on success
@@ -67,6 +73,28 @@ export default function CameraView({
     getCurrentUser().then(({ data: user }) => {
       if (user) setUserId(user.id);
     });
+  }, []);
+
+  // Fetch location and weather context on mount
+  useEffect(() => {
+    async function fetchContext() {
+      try {
+        // Get location first
+        const location = await getLocationContext();
+        setLocationContext(location);
+        
+        // If we have location, fetch weather
+        if (location) {
+          const weather = await getWeather(location.latitude, location.longitude);
+          setWeatherContext(weather);
+        }
+      } catch (err) {
+        console.warn('[CameraView] Context fetch error:', err);
+      } finally {
+        setContextLoading(false);
+      }
+    }
+    fetchContext();
   }, []);
 
   // Escape key to close
@@ -338,11 +366,15 @@ export default function CameraView({
       
       console.log('Upload successful:', uploadData);
 
-      // Create memory record
+      // Create memory record with location and weather
       const { error: insertError } = await createMemory({
         journeyId,
         type: 'photo',
         imageUrl: uploadData.publicUrl,
+        latitude: locationContext?.latitude,
+        longitude: locationContext?.longitude,
+        locationName: locationContext?.name,
+        weather: weatherContext || undefined,
       });
       
       if (insertError) {
@@ -362,7 +394,7 @@ export default function CameraView({
       setLoading(false);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [journeyId, facingMode, userId]);
+  }, [journeyId, facingMode, userId, locationContext, weatherContext]);
 
   const handleCapture = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files?.length) return;
@@ -420,11 +452,15 @@ export default function CameraView({
         return;
       }
 
-      // Create memory record
+      // Create memory record with location and weather
       const { error: insertError } = await createMemory({
         journeyId,
         type: 'photo',
         imageUrl: uploadData.publicUrl,
+        latitude: locationContext?.latitude,
+        longitude: locationContext?.longitude,
+        locationName: locationContext?.name,
+        weather: weatherContext || undefined,
       });
       
       if (insertError) {
@@ -467,6 +503,10 @@ export default function CameraView({
         journeyId,
         type: 'note',
         content: trimmedNote,
+        latitude: locationContext?.latitude,
+        longitude: locationContext?.longitude,
+        locationName: locationContext?.name,
+        weather: weatherContext || undefined,
       });
       
       if (insertError) {
@@ -517,12 +557,16 @@ const handleAudioRecordingComplete = async (blob: Blob, duration: number) => {
       return;
     }
 
-    // Create memory record
+    // Create memory record with location and weather
     const { error: insertError } = await createMemory({
       journeyId,
       type: 'audio',
       audioUrl: uploadData.publicUrl,
       duration,
+      latitude: locationContext?.latitude,
+      longitude: locationContext?.longitude,
+      locationName: locationContext?.name,
+      weather: weatherContext || undefined,
     });
 
     if (insertError) {
@@ -568,6 +612,28 @@ const handleAudioError = (message: string) => {
           
           <div className="w-10" />
         </div>
+        
+        {/* Location & Weather Context Indicator */}
+        {!contextLoading && (locationContext || weatherContext) && (
+          <div className="flex justify-center -mt-2 pb-2">
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-black/40 backdrop-blur-md border border-white/10 text-[11px]">
+              {locationContext && (
+                <span className="flex items-center gap-1 text-white/70">
+                  <MapPin className="w-3 h-3" />
+                  {locationContext.name || 'Location captured'}
+                </span>
+              )}
+              {locationContext && weatherContext && (
+                <span className="text-white/30">•</span>
+              )}
+              {weatherContext && (
+                <span className="text-white/70">
+                  {weatherContext.icon} {weatherContext.temp}°F
+                </span>
+              )}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Success Toast */}

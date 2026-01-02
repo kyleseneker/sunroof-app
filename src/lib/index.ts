@@ -60,8 +60,24 @@ export {
 
 // Supabase client (client-side only)
 export { supabase } from './supabase';
-// Note: Use createServerSupabaseClient from '@/lib/supabase-server' directly in server components
 
 // Constants
 export * from './constants';
+
+// Location services
+export {
+  getCurrentPosition,
+  reverseGeocode,
+  getLocationContext,
+  formatCoordinates,
+  type GeolocationResult,
+} from './location';
+
+// Weather services
+export {
+  getWeather,
+  formatTemperature,
+  formatWeatherCompact,
+  formatWeatherFull,
+} from './weather';
 

@@ -13,6 +13,15 @@ export interface CreateMemoryInput {
   imageUrl?: string;
   audioUrl?: string;
   duration?: number;
+  latitude?: number;
+  longitude?: number;
+  locationName?: string;
+  weather?: {
+    temp: number;
+    condition: string;
+    icon: string;
+    humidity?: number;
+  };
 }
 
 /**
@@ -34,6 +43,10 @@ export async function createMemory(input: CreateMemoryInput): Promise<ServiceRes
         note: input.content || null,
         url: url || null,
         duration: input.duration || null,
+        latitude: input.latitude || null,
+        longitude: input.longitude || null,
+        location_name: input.locationName || null,
+        weather: input.weather || null,
       }])
       .select()
       .single();

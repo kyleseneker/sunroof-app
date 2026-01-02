@@ -360,7 +360,12 @@ export default function GalleryView({ journey, onClose, onMemoryDeleted }: Galle
                     )}
                   </button>
                   <div className="absolute bottom-2 left-2 px-2 py-1 rounded-md bg-black/60 backdrop-blur-sm pointer-events-none">
-                    <p className="text-[10px] text-white/80">{tileDay} • {tileTime}</p>
+                    <p className="text-[10px] text-white/80">
+                      {tileDay} • {tileTime}
+                      {memory.weather && (
+                        <span className="ml-1.5">{memory.weather.icon} {memory.weather.temp}°</span>
+                      )}
+                    </p>
                   </div>
                   <IconButton 
                     icon={<Trash2 className="w-3 h-3" />}

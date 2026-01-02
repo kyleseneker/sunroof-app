@@ -32,6 +32,19 @@ export interface Journey {
   memory_count?: number;
 }
 
+export interface MemoryWeather {
+  temp: number;
+  condition: string;
+  icon: string;
+  humidity?: number;
+}
+
+export interface MemoryLocation {
+  latitude: number;
+  longitude: number;
+  name?: string;
+}
+
 export interface Memory {
   id: string;
   journey_id: string;
@@ -39,6 +52,10 @@ export interface Memory {
   url?: string | null;
   note?: string | null;
   duration?: number | null;
+  latitude?: number | null;
+  longitude?: number | null;
+  location_name?: string | null;
+  weather?: MemoryWeather | null;
   deleted_at?: string | null;
   created_at: string;
 }
