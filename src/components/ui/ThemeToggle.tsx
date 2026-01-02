@@ -25,11 +25,11 @@ export default function ThemeToggle({
   const { theme, resolvedTheme, setTheme, toggleTheme } = useTheme();
 
   if (showSystemOption) {
-    // Three-way toggle: Dark / Light / System
+    // Three-way toggle: Dark / Light / System - compact version
     return (
       <div
         className={cn(
-          'inline-flex items-center h-7 gap-0.5 p-0.5 rounded-full bg-[var(--bg-muted)] border border-[var(--border-base)]',
+          'inline-flex items-center h-6 rounded-full bg-[var(--bg-muted)] border border-[var(--border-base)] p-px',
           className
         )}
         role="radiogroup"
@@ -47,9 +47,8 @@ export default function ThemeToggle({
           aria-checked={theme === 'dark'}
           aria-label="Dark theme"
         >
-          <Moon className="w-3 h-3" />
+          <Moon className="w-2.5 h-2.5" />
         </button>
-        
         <button
           onClick={() => setTheme('light')}
           className={cn(
@@ -62,9 +61,8 @@ export default function ThemeToggle({
           aria-checked={theme === 'light'}
           aria-label="Light theme"
         >
-          <Sun className="w-3 h-3" />
+          <Sun className="w-2.5 h-2.5" />
         </button>
-        
         <button
           onClick={() => setTheme('system')}
           className={cn(
@@ -77,7 +75,7 @@ export default function ThemeToggle({
           aria-checked={theme === 'system'}
           aria-label="System theme"
         >
-          <Monitor className="w-3 h-3" />
+          <Monitor className="w-2.5 h-2.5" />
         </button>
       </div>
     );
