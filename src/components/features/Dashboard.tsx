@@ -8,7 +8,7 @@ import {
 import { useAuth } from '@/providers';
 import { hapticSuccess, getJourneyGradient, formatDate, getTimeUntilUnlock, isJourneyUnlocked, getGreeting, MAX_ACTIVE_JOURNEYS } from '@/lib';
 import { Plus, ArrowRight, X, Lock, ChevronRight, Sparkles, Trash2, HelpCircle, Camera, ImageIcon, Pencil, Timer, Archive, Search, RefreshCw, EllipsisVertical, UserPlus } from 'lucide-react';
-import { useToast, Avatar, ConfirmDialog, IconButton } from '@/components/ui';
+import { useToast, Avatar, ConfirmDialog, IconButton, Badge } from '@/components/ui';
 import { 
   GalleryView, 
   KeyboardShortcutsHelp, 
@@ -524,7 +524,7 @@ export default function Dashboard({ activeJourneys: initialActiveJourneys = [], 
                             Unlocks in {getTimeUntilUnlock(journey.unlock_date)}
                           </p>
                           {!isOwner(journey) && (
-                            <span className="px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-400 text-[10px] font-medium">Shared</span>
+                            <Badge variant="info">Shared</Badge>
                           )}
                         </div>
                         {(journey.memory_count ?? 0) > 0 && (
@@ -659,7 +659,7 @@ export default function Dashboard({ activeJourneys: initialActiveJourneys = [], 
                     <div className="flex items-center gap-2">
                       <h3 className="font-medium text-white truncate">{journey.name}</h3>
                       {!isOwner(journey) && (
-                        <span className="px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-400 text-[10px] font-medium shrink-0">Shared</span>
+                        <Badge variant="info">Shared</Badge>
                       )}
                     </div>
                     <p className="text-xs text-zinc-500">
