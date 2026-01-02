@@ -67,7 +67,6 @@ export async function getProfileStats(userId: string): Promise<ServiceResult<{
   totalJourneys: number;
   activeJourneys: number;
   totalMemories: number;
-  firstJourneyDate: string | null;
 }>> {
   try {
     const now = new Date().toISOString();
@@ -75,9 +74,8 @@ export async function getProfileStats(userId: string): Promise<ServiceResult<{
     // Fetch journeys
     const { data: journeyData, error: journeyError } = await supabase
       .from('journeys')
-      .select('id, status, unlock_date, created_at')
-      .eq('user_id', userId)
-      .order('created_at', { ascending: true });
+      .select('id, status, unlock_date')
+      .eq('user_id', userId);
 
     if (journeyError) {
       console.error('[UserService] Fetch journeys error:', journeyError);
@@ -100,7 +98,6 @@ export async function getProfileStats(userId: string): Promise<ServiceResult<{
         totalJourneys: journeyData?.length || 0,
         activeJourneys: journeyData?.filter(j => j.status === 'active' && j.unlock_date > now).length || 0,
         totalMemories: memoryCount,
-        firstJourneyDate: journeyData?.[0]?.created_at || null,
       },
       error: null,
     };

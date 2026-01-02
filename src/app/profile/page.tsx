@@ -29,7 +29,6 @@ interface Stats {
   totalJourneys: number;
   activeJourneys: number;
   totalMemories: number;
-  firstJourneyDate: string | null;
 }
 
 export default function ProfilePage() {
@@ -42,7 +41,6 @@ export default function ProfilePage() {
     totalJourneys: 0,
     activeJourneys: 0,
     totalMemories: 0,
-    firstJourneyDate: null,
   });
   
   const [displayName, setDisplayName] = useState('');
@@ -300,7 +298,7 @@ export default function ProfilePage() {
           {/* Stats */}
           <div className="glass rounded-2xl p-4">
             <h3 className="text-sm font-medium text-zinc-400 mb-4">Your Stats</h3>
-            <div className="grid grid-cols-2 gap-3 stagger-children">
+            <div className="grid grid-cols-3 gap-3 stagger-children">
               <div className="text-center p-4 bg-gradient-to-br from-orange-500/10 to-orange-500/5 rounded-2xl border border-orange-500/10">
                 <div className="text-3xl font-bold text-orange-400 counter">{stats.totalJourneys}</div>
                 <div className="text-xs text-zinc-500 mt-1">Journeys</div>
@@ -312,12 +310,6 @@ export default function ProfilePage() {
               <div className="text-center p-4 bg-gradient-to-br from-pink-500/10 to-pink-500/5 rounded-2xl border border-pink-500/10">
                 <div className="text-3xl font-bold text-pink-400 counter">{stats.totalMemories}</div>
                 <div className="text-xs text-zinc-500 mt-1">Memories</div>
-              </div>
-              <div className="text-center p-4 bg-gradient-to-br from-emerald-500/10 to-emerald-500/5 rounded-2xl border border-emerald-500/10">
-                <div className="text-lg font-bold text-emerald-400">
-                  {stats.firstJourneyDate ? formatMonthYear(stats.firstJourneyDate) : 'N/A'}
-                </div>
-                <div className="text-xs text-zinc-500 mt-1">Member Since</div>
               </div>
             </div>
           </div>
