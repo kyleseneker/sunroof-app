@@ -37,15 +37,9 @@ export default function ThemeToggle({
         aria-label={`Switch to ${isDark ? 'light' : 'dark'} mode`}
       >
         <div className={cn(
-          'absolute top-1 w-5 h-5 rounded-full bg-[var(--fg-base)] transition-transform flex items-center justify-center',
+          'absolute top-1 w-5 h-5 rounded-full bg-[var(--fg-base)] transition-transform',
           isDark ? 'translate-x-6' : 'translate-x-1'
-        )}>
-          {isDark ? (
-            <Moon className="w-3 h-3 text-[var(--fg-inverse)]" />
-          ) : (
-            <Sun className="w-3 h-3 text-[var(--fg-inverse)]" />
-          )}
-        </div>
+        )} />
       </button>
     );
   }
