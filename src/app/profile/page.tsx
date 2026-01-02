@@ -372,7 +372,7 @@ export default function ProfilePage() {
                   <span className="text-xs text-[var(--fg-muted)] truncate block">Choose your color scheme</span>
                 </div>
               </div>
-              <ThemeToggle className="shrink-0" />
+              <ThemeToggle showSystemOption className="shrink-0" />
             </div>
           </div>
 
