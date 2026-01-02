@@ -1,8 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { supabase } from '@/lib/supabase';
 import { api } from '@/lib/api/client';
+import { deleteJourney, deleteMemory, fetchMemoriesForJourney } from '@/lib/services';
 import { getJourneyGradient } from '@/lib/utils/gradients';
 import {
   X,
@@ -122,8 +122,7 @@ export default function GalleryView({ journey, onClose, onMemoryDeleted }: Galle
     setIsDeleting(true);
 
     try {
-      await supabase.from('memories').delete().eq('journey_id', journey.id);
-      const { error } = await supabase.from('journeys').delete().eq('id', journey.id);
+      const { error } = await deleteJourney(journey.id);
 
       if (error) {
         console.error('Delete journey error:', error);
@@ -145,7 +144,7 @@ export default function GalleryView({ journey, onClose, onMemoryDeleted }: Galle
     setIsDeleting(true);
 
     try {
-      const { error } = await supabase.from('memories').delete().eq('id', memoryId);
+      const { error } = await deleteMemory(memoryId);
 
       if (error) {
         console.error('Delete memory error:', error);
@@ -167,17 +166,12 @@ export default function GalleryView({ journey, onClose, onMemoryDeleted }: Galle
   };
 
   useEffect(() => {
-    async function fetchMemories() {
-      const { data } = await supabase
-        .from('memories')
-        .select('*')
-        .eq('journey_id', journey.id)
-        .order('created_at', { ascending: true });
-
+    async function loadMemories() {
+      const { data } = await fetchMemoriesForJourney(journey.id);
       if (data) setMemories(data);
       setLoading(false);
     }
-    fetchMemories();
+    loadMemories();
   }, [journey.id]);
 
   // Touch swipe handling

@@ -1,7 +1,15 @@
 'use client';
 import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
-import { supabase } from '@/lib/supabase';
-import { fetchPastJourneysWithCounts } from '@/lib/supabase-queries';
+import { 
+  createJourney, 
+  updateJourney,
+  deleteJourney, 
+  fetchPastJourneys as fetchPastJourneysService,
+  fetchMemoriesForJourney,
+  deleteMemory,
+  getUserIdByEmail,
+  getEmailByUserId,
+} from '@/lib/services';
 import { useAuth } from '@/lib/auth';
 import { hapticSuccess } from '@/lib/haptics';
 import { Plus, ArrowRight, MapPin, X, Lock, ChevronRight, Sparkles, Trash2, HelpCircle, Camera, Clock, ImageIcon, Pencil, FileText, Plane, Timer, Archive, UserPlus, Users, Loader2, Search, RefreshCw } from 'lucide-react';
@@ -100,12 +108,10 @@ export default function Dashboard({ activeJourneys: initialActiveJourneys = [], 
   // Fetch locked memories for management (without content)
   const fetchLockedMemories = async (journeyId: string) => {
     setLoadingMemories(true);
-    const { data } = await supabase
-      .from('memories')
-      .select('id, type, created_at')
-      .eq('journey_id', journeyId)
-      .order('created_at', { ascending: false });
-    setLockedMemories(data || []);
+    const { data } = await fetchMemoriesForJourney(journeyId);
+    // Only keep id, type, created_at for locked view (hide content)
+    const lockedData = (data || []).map(m => ({ id: m.id, type: m.type, created_at: m.created_at }));
+    setLockedMemories(lockedData);
     setLoadingMemories(false);
   };
 
@@ -117,7 +123,7 @@ export default function Dashboard({ activeJourneys: initialActiveJourneys = [], 
     setIsDeletingMemory(true);
     
     try {
-      const { error } = await supabase.from('memories').delete().eq('id', memoryId);
+      const { error } = await deleteMemory(memoryId);
       
       if (error) {
         showToast('Failed to delete memory', 'error');
@@ -158,7 +164,7 @@ export default function Dashboard({ activeJourneys: initialActiveJourneys = [], 
   const fetchPastJourneys = useCallback(async () => {
     if (!user) return;
     
-    const { data, error } = await fetchPastJourneysWithCounts(user.id);
+    const { data, error } = await fetchPastJourneysService(user.id);
     
     if (error) {
       console.error('Error fetching past journeys:', error);
@@ -217,8 +223,8 @@ export default function Dashboard({ activeJourneys: initialActiveJourneys = [], 
       const sharedWithIds: string[] = [];
       if (shareEmails.length > 0) {
         for (const email of shareEmails) {
-          const { data, error } = await supabase.rpc('get_user_id_by_email', { email_input: email });
-          if (!error && data) {
+          const { data } = await getUserIdByEmail(email);
+          if (data) {
             sharedWithIds.push(data);
           }
           // If user not found, skip silently (they may not have signed up yet)
@@ -226,13 +232,12 @@ export default function Dashboard({ activeJourneys: initialActiveJourneys = [], 
       }
 
       // Note: cover_url is no longer stored - gradients are generated dynamically from journey name
-      const { error } = await supabase.from('journeys').insert([{
+      const { error } = await createJourney({
+        userId: user?.id || '',
         name: cleanName,
-      unlock_date: unlockDate.toISOString(),
-        status: 'active',
-        user_id: user?.id,
-        shared_with: sharedWithIds.length > 0 ? sharedWithIds : null
-      }]);
+        unlockDate: unlockDate.toISOString(),
+        sharedWith: sharedWithIds.length > 0 ? sharedWithIds : undefined,
+      });
 
       if (error) {
         console.error('Create journey error:', error);
@@ -408,8 +413,8 @@ export default function Dashboard({ activeJourneys: initialActiveJourneys = [], 
       if (unknownIds.length === 0) return;
       
       for (const id of unknownIds) {
-        const { data, error } = await supabase.rpc('get_email_by_user_id', { user_id_input: id });
-        if (!error && data) {
+        const { data } = await getEmailByUserId(id);
+        if (data) {
           setCollaboratorEmails(prev => ({ ...prev, [id]: data }));
         }
       }
@@ -425,10 +430,10 @@ export default function Dashboard({ activeJourneys: initialActiveJourneys = [], 
     
     const updatedSharedWith = (journey.shared_with || []).filter(id => id !== userIdToRemove);
     
-    const { error } = await supabase
-      .from('journeys')
-      .update({ shared_with: updatedSharedWith.length > 0 ? updatedSharedWith : null })
-      .eq('id', journeyId);
+    const { error } = await updateJourney({
+      id: journeyId,
+      sharedWith: updatedSharedWith.length > 0 ? updatedSharedWith : [],
+    });
     
     if (error) {
       showToast('Failed to remove collaborator', 'error');
@@ -436,11 +441,11 @@ export default function Dashboard({ activeJourneys: initialActiveJourneys = [], 
     }
     
     // Update local state
-    const updateJourney = (j: Journey) => 
+    const applyJourneyUpdate = (j: Journey) => 
       j.id === journeyId ? { ...j, shared_with: updatedSharedWith.length > 0 ? updatedSharedWith : undefined } : j;
     
-    setActiveJourneys(prev => prev.map(updateJourney));
-    setPastJourneys(prev => prev.map(updateJourney));
+    setActiveJourneys(prev => prev.map(applyJourneyUpdate));
+    setPastJourneys(prev => prev.map(applyJourneyUpdate));
     if (focusedJourney?.id === journeyId) {
       setFocusedJourney({ ...focusedJourney, shared_with: updatedSharedWith.length > 0 ? updatedSharedWith : undefined });
     }
@@ -463,15 +468,12 @@ export default function Dashboard({ activeJourneys: initialActiveJourneys = [], 
       // First, check if this email is already shared
       const currentShared = journeyToShare.shared_with || [];
       
-      // Get user ID from email (using auth.users is restricted, so we use a different approach)
-      // We'll use a custom RPC or just store emails for now
-      const { data: existingUser, error: lookupError } = await supabase.rpc('get_user_id_by_email', {
-        email_input: inviteEmail.trim().toLowerCase()
-      });
+      // Get user ID from email
+      const { data: existingUser, error: lookupError } = await getUserIdByEmail(inviteEmail.trim().toLowerCase());
       
       if (lookupError) {
         // If RPC doesn't exist, show a helpful message
-        if (lookupError.message.includes('function') || lookupError.message.includes('does not exist')) {
+        if (lookupError.includes('function') || lookupError.includes('does not exist')) {
           showToast('Sharing feature requires database setup. See console for SQL.', 'error');
           console.log(`
 -- Run this SQL in Supabase to enable email lookup:
@@ -502,10 +504,10 @@ $$ LANGUAGE sql SECURITY DEFINER;
       }
       
       // Add to shared_with array
-      const { error: updateError } = await supabase
-        .from('journeys')
-        .update({ shared_with: [...currentShared, existingUser] })
-        .eq('id', journeyToShare.id);
+      const { error: updateError } = await updateJourney({
+        id: journeyToShare.id,
+        sharedWith: [...currentShared, existingUser],
+      });
       
       if (updateError) {
         showToast('Failed to share journey', 'error');
@@ -543,10 +545,7 @@ $$ LANGUAGE sql SECURITY DEFINER;
     setIsDeleting(true);
     
     try {
-      // Delete all memories for this journey first
-      await supabase.from('memories').delete().eq('journey_id', journeyId);
-      // Then delete the journey
-      const { error } = await supabase.from('journeys').delete().eq('id', journeyId);
+      const { error } = await deleteJourney(journeyId);
       
       if (error) {
         showToast('Failed to delete journey', 'error');
@@ -577,7 +576,7 @@ $$ LANGUAGE sql SECURITY DEFINER;
     
     setIsSaving(true);
     
-    const updates: any = { name: cleanName };
+    let unlockDateStr: string | undefined;
     if (editDate) {
       const newDate = new Date(editDate);
       newDate.setHours(23, 59, 59, 999);
@@ -589,14 +588,15 @@ $$ LANGUAGE sql SECURITY DEFINER;
         return;
       }
       
-      updates.unlock_date = newDate.toISOString();
+      unlockDateStr = newDate.toISOString();
     }
     
     try {
-      const { error } = await supabase
-        .from('journeys')
-        .update(updates)
-        .eq('id', editingJourney.id);
+      const { error } = await updateJourney({
+        id: editingJourney.id,
+        name: cleanName,
+        unlockDate: unlockDateStr,
+      });
       
       if (error) {
         console.error('Edit journey error:', error);
