@@ -2,36 +2,42 @@
  * Core Types for Sunroof App
  */
 
+export interface UserMetadata {
+  display_name?: string;
+  avatar_url?: string;
+  full_name?: string;
+  picture?: string;
+  email_verified?: boolean;
+}
+
 export interface User {
   id: string;
   email?: string;
-  user_metadata?: {
-    avatar_url?: string;
-    full_name?: string;
-  };
+  user_metadata?: UserMetadata;
   created_at?: string;
 }
+
+export type JourneyStatus = 'active' | 'completed';
 
 export interface Journey {
   id: string;
   user_id: string;
   name: string;
-  destination?: string;
+  destination?: string | null;
   unlock_date: string;
-  status: 'active' | 'unlocked' | 'archived' | 'completed' | string;
-  shared_with?: string[];
+  status: JourneyStatus;
+  shared_with?: string[] | null;
   deleted_at?: string | null;
   created_at: string;
   memory_count?: number;
-  cover_url?: string;
 }
 
 export interface Memory {
   id: string;
   journey_id: string;
   type: 'photo' | 'text';
-  url?: string;
-  note?: string;
+  url?: string | null;
+  note?: string | null;
   deleted_at?: string | null;
   created_at: string;
 }

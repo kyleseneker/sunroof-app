@@ -19,20 +19,12 @@ import {
   Loader2,
 } from 'lucide-react';
 import { useToast } from './Toast';
-import type { Journey } from '@/types';
+import type { Journey, Memory } from '@/types';
 
 interface GalleryViewProps {
   journey: Journey;
   onClose: () => void;
   onMemoryDeleted?: () => void;
-}
-
-interface Memory {
-  id: string;
-  type: 'photo' | 'text';
-  url?: string;
-  note?: string;
-  created_at: string;
 }
 
 export default function GalleryView({ journey, onClose, onMemoryDeleted }: GalleryViewProps) {
@@ -375,7 +367,7 @@ export default function GalleryView({ journey, onClose, onMemoryDeleted }: Galle
 
         {/* Content */}
         <div className="flex-1 flex items-center justify-center p-4">
-          {selectedMemory.type === 'photo' ? (
+          {selectedMemory.type === 'photo' && selectedMemory.url ? (
             <img
               src={selectedMemory.url}
               alt=""
@@ -666,7 +658,7 @@ export default function GalleryView({ journey, onClose, onMemoryDeleted }: Galle
                     onClick={() => setSelectedMemory(memory)}
                     className="w-full aspect-square rounded-xl overflow-hidden bg-zinc-900 hover:opacity-90 transition-opacity"
                   >
-                    {memory.type === 'photo' ? (
+                    {memory.type === 'photo' && memory.url ? (
                       <img
                         src={memory.url}
                         alt=""

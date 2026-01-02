@@ -2,8 +2,59 @@
  * Error handling utilities and custom error classes
  */
 
-// Error classes
+// Standardized error messages
+export const ErrorMessages = {
+  // Auth
+  AUTH_REQUIRED: 'You must be signed in',
+  AUTH_FAILED: 'Authentication failed. Please try again.',
+  
+  // Network/Connection
+  NETWORK_ERROR: 'Network error. Please check your connection.',
+  TIMEOUT: 'Request timed out. Please try again.',
+  CONNECTION_ERROR: 'Check your connection and try again.',
+  
+  // CRUD operations
+  CREATE_FAILED: (resource: string) => `Couldn't create ${resource}. Check your connection and try again.`,
+  UPDATE_FAILED: (resource: string) => `Failed to update ${resource}`,
+  DELETE_FAILED: (resource: string) => `Failed to delete ${resource}`,
+  FETCH_FAILED: (resource: string) => `Failed to load ${resource}`,
+  
+  // User actions
+  SAVE_FAILED: 'Failed to save changes',
+  UPLOAD_FAILED: 'Failed to upload. Please try again.',
+  EXPORT_FAILED: 'Failed to export data',
+  
+  // Validation
+  REQUIRED_FIELD: (field: string) => `Please enter ${field}`,
+  TOO_LONG: (field: string, max: number) => `${field} is too long (max ${max} characters)`,
+  INVALID_DATE: 'Please select a valid date',
+  DATE_MUST_BE_FUTURE: 'Date must be in the future',
+  INVALID_FILE_TYPE: 'Please select an image file',
+  FILE_TOO_LARGE: (maxMB: number) => `File must be under ${maxMB}MB`,
+  
+  // Feature-specific
+  MAX_JOURNEYS: (max: number) => `Maximum ${max} active journeys allowed`,
+  USER_NOT_FOUND: 'No account found. They\'ll need to sign up first.',
+  ALREADY_SHARED: 'Already shared with this person',
+  SHARING_UNAVAILABLE: 'Sharing feature requires database setup.',
+  
+  // Generic
+  GENERIC: 'Something went wrong. Please try again.',
+} as const;
 
+// Success messages
+export const SuccessMessages = {
+  CREATED: (resource: string) => `${resource} created!`,
+  UPDATED: (resource: string) => `${resource} updated!`,
+  DELETED: (resource: string) => `${resource} deleted`,
+  SAVED: 'Changes saved',
+  UPLOADED: 'Upload complete',
+  EXPORTED: 'Data exported successfully',
+  COPIED: 'Copied to clipboard',
+  SIGNED_OUT: 'Signed out',
+} as const;
+
+// Error classes
 export class AppError extends Error {
   public readonly statusCode: number;
   public readonly isOperational: boolean;
@@ -76,7 +127,6 @@ export class ExternalServiceError extends AppError {
 }
 
 // Utilities
-
 export function isAppError(error: unknown): error is AppError {
   return error instanceof AppError;
 }
@@ -165,7 +215,6 @@ export function createErrorResponse(error: unknown): {
 }
 
 // Result type for explicit error handling
-
 export type Result<T, E = Error> = 
   | { ok: true; value: T }
   | { ok: false; error: E };

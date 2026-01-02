@@ -2,7 +2,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth';
-import { fetchActiveJourneysWithCounts } from '@/lib/supabase-queries';
+import { fetchActiveJourneys } from '@/lib/services';
 import CameraView from './components/CameraView';
 import Dashboard from './components/Dashboard';
 import Intro from './components/Intro';
@@ -27,14 +27,14 @@ export default function Home() {
     }
   }, [user, authLoading, router]);
 
-  // Fetch active journeys with memory counts (optimized - single query for counts)
-  const fetchActiveJourneys = useCallback(async () => {
+  // Fetch active journeys with memory counts
+  const loadActiveJourneys = useCallback(async () => {
     if (!user) return;
     
     setFetchError(false);
     
     try {
-      const { data, error } = await fetchActiveJourneysWithCounts(user.id);
+      const { data, error } = await fetchActiveJourneys(user.id);
       
       if (error) {
         console.error('Error fetching journeys:', error);
@@ -74,17 +74,17 @@ export default function Home() {
       const introSeen = safeGetItem('sunroof_intro');
       if (introSeen) setHasSeenIntro(true);
 
-      await fetchActiveJourneys();
+      await loadActiveJourneys();
       setLoading(false);
     }
     checkSession();
-  }, [fetchActiveJourneys, user]);
+  }, [loadActiveJourneys, user]);
 
   // Refetch data when user returns to the app (visibility change)
   useEffect(() => {
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'visible' && hasSeenIntro) {
-        fetchActiveJourneys();
+        loadActiveJourneys();
       }
     };
     
@@ -92,7 +92,7 @@ export default function Home() {
     return () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
-  }, [fetchActiveJourneys, hasSeenIntro]);
+  }, [loadActiveJourneys, hasSeenIntro]);
 
   const handleIntroComplete = () => {
     safeSetItem('sunroof_intro', 'true');
@@ -148,7 +148,7 @@ export default function Home() {
         <button 
           onClick={() => {
             setLoading(true);
-            fetchActiveJourneys().finally(() => setLoading(false));
+            loadActiveJourneys().finally(() => setLoading(false));
           }}
           className="px-6 py-3 bg-white text-black rounded-full font-medium hover:bg-zinc-200 active:scale-95 transition-all"
         >
@@ -172,7 +172,7 @@ export default function Home() {
           setViewMode('dashboard');
           setSelectedJourney(null);
           // Refetch journeys to get updated memory counts
-          await fetchActiveJourneys();
+          await loadActiveJourneys();
         }} 
       />
     );
