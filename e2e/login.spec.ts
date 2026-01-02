@@ -10,15 +10,15 @@ test.describe('Login Page', () => {
     // Check email input
     await expect(page.getByPlaceholder('your@email.com')).toBeVisible();
     
-    // Check continue button
-    await expect(page.getByRole('button', { name: /continue/i })).toBeVisible();
+    // Check continue button (be specific to avoid matching both email and google buttons)
+    await expect(page.getByRole('button', { name: /continue with email/i })).toBeVisible();
   });
 
   test('should show validation for empty email', async ({ page }) => {
     await page.goto('/login');
     
     // Button should be disabled when email is empty
-    const continueButton = page.getByRole('button', { name: /continue/i });
+    const continueButton = page.getByRole('button', { name: /continue with email/i });
     await expect(continueButton).toBeDisabled();
   });
 
@@ -28,7 +28,7 @@ test.describe('Login Page', () => {
     const emailInput = page.getByPlaceholder('your@email.com');
     await emailInput.fill('test@example.com');
     
-    const continueButton = page.getByRole('button', { name: /continue/i });
+    const continueButton = page.getByRole('button', { name: /continue with email/i });
     await expect(continueButton).toBeEnabled();
   });
 
@@ -119,6 +119,7 @@ test.describe('Protected Routes', () => {
   test('should redirect from settings to login when not authenticated', async ({ page }) => {
     await page.goto('/settings');
     
-    await expect(page).toHaveURL(/\/login/);
+    // Settings page requires authentication
+    await expect(page).toHaveURL(/\/login/, { timeout: 10000 });
   });
 });

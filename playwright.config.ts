@@ -20,9 +20,14 @@ export default defineConfig({
       use: { ...devices['Desktop Chrome'] },
     },
     {
-      name: 'Mobile Safari',
-      use: { ...devices['iPhone 14'] },
+      name: 'Mobile Chrome',
+      use: { ...devices['Pixel 5'] },
     },
+    // Uncomment to test on Mobile Safari (requires: npx playwright install webkit)
+    // {
+    //   name: 'Mobile Safari',
+    //   use: { ...devices['iPhone 14'] },
+    // },
   ],
 
   webServer: {

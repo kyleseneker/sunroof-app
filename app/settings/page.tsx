@@ -14,20 +14,28 @@ export default function SettingsPage() {
   const { showToast } = useToast();
   const [activeCount, setActiveCount] = useState(0);
   const [archivedCount, setArchivedCount] = useState(0);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    async function fetchCounts() {
+    async function checkAuthAndFetchCounts() {
       const { data: user } = await getCurrentUser();
-      if (!user) return;
+      
+      // Redirect to login if not authenticated
+      if (!user) {
+        router.push('/login');
+        return;
+      }
       
       const { data: counts } = await getJourneyCounts(user.id);
       if (counts) {
         setActiveCount(counts.active);
         setArchivedCount(counts.archived);
       }
+      
+      setLoading(false);
     }
-    fetchCounts();
-  }, []);
+    checkAuthAndFetchCounts();
+  }, [router]);
 
   const [isClearing, setIsClearing] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
@@ -100,6 +108,15 @@ export default function SettingsPage() {
       }
     }
   };
+
+  // Show loading state while checking auth
+  if (loading) {
+    return (
+      <div className="fixed inset-0 bg-black flex items-center justify-center">
+        <Loader2 className="w-6 h-6 animate-spin text-zinc-600" />
+      </div>
+    );
+  }
 
   return (
     <div className="fixed inset-0 bg-black text-white flex flex-col safe-top safe-bottom overflow-hidden">

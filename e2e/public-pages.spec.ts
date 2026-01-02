@@ -59,7 +59,7 @@ test.describe('Responsive Design', () => {
     await page.goto('/login');
     
     await expect(page.getByPlaceholder('your@email.com')).toBeVisible();
-    await expect(page.getByRole('button', { name: /continue/i })).toBeVisible();
+    await expect(page.getByRole('button', { name: /continue with email/i })).toBeVisible();
   });
 
   test('login page renders on tablet', async ({ page }) => {
@@ -125,7 +125,7 @@ test.describe('Accessibility', () => {
     await page.keyboard.press('Tab');
     
     // The button should now be focusable since email is filled
-    const continueButton = page.getByRole('button', { name: /continue/i });
+    const continueButton = page.getByRole('button', { name: /continue with email/i });
     await expect(continueButton).toBeEnabled();
   });
 
