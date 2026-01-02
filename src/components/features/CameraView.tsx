@@ -44,6 +44,13 @@ export default function CameraView({
   // Track if device has multiple cameras
   const [hasMultipleCameras, setHasMultipleCameras] = useState(false);
   
+  // Zoom state
+  const [zoomLevel, setZoomLevel] = useState(1);
+  const [minZoom, setMinZoom] = useState(1);
+  const [maxZoom, setMaxZoom] = useState(1);
+  const [supportsZoom, setSupportsZoom] = useState(false);
+  const lastPinchDistance = useRef<number | null>(null);
+  
 
   const showSuccess = () => {
     // Haptic feedback on success
@@ -103,6 +110,26 @@ export default function CameraView({
       });
       streamRef.current = stream;
       
+      // Check zoom capabilities
+      const videoTrack = stream.getVideoTracks()[0];
+      if (videoTrack) {
+        try {
+          const capabilities = videoTrack.getCapabilities?.() as MediaTrackCapabilities & { 
+            zoom?: { min: number; max: number } 
+          };
+          if (capabilities?.zoom) {
+            setSupportsZoom(true);
+            setMinZoom(capabilities.zoom.min || 1);
+            setMaxZoom(capabilities.zoom.max || 1);
+            setZoomLevel(1);
+          } else {
+            setSupportsZoom(false);
+          }
+        } catch {
+          setSupportsZoom(false);
+        }
+      }
+      
       // Attach stream to video element
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
@@ -145,8 +172,60 @@ export default function CameraView({
   // Flip camera (toggle front/back)
   const flipCamera = useCallback(() => {
     const newFacing = facingMode === 'user' ? 'environment' : 'user';
+    setZoomLevel(1); // Reset zoom when flipping
     startCamera(newFacing);
   }, [facingMode, startCamera]);
+
+  // Apply zoom level to camera
+  const applyZoom = useCallback((level: number) => {
+    if (!streamRef.current || !supportsZoom) return;
+    
+    const clampedLevel = Math.max(minZoom, Math.min(maxZoom, level));
+    const videoTrack = streamRef.current.getVideoTracks()[0];
+    
+    if (videoTrack) {
+      try {
+        videoTrack.applyConstraints({
+          // @ts-expect-error - zoom is not in the standard types yet
+          advanced: [{ zoom: clampedLevel }]
+        });
+        setZoomLevel(clampedLevel);
+      } catch (err) {
+        console.error('Zoom error:', err);
+      }
+    }
+  }, [supportsZoom, minZoom, maxZoom]);
+
+  // Pinch-to-zoom handlers
+  const handleTouchStart = useCallback((e: React.TouchEvent) => {
+    if (e.touches.length === 2) {
+      const distance = Math.hypot(
+        e.touches[0].clientX - e.touches[1].clientX,
+        e.touches[0].clientY - e.touches[1].clientY
+      );
+      lastPinchDistance.current = distance;
+    }
+  }, []);
+
+  const handleTouchMove = useCallback((e: React.TouchEvent) => {
+    if (e.touches.length === 2 && lastPinchDistance.current !== null && supportsZoom) {
+      const distance = Math.hypot(
+        e.touches[0].clientX - e.touches[1].clientX,
+        e.touches[0].clientY - e.touches[1].clientY
+      );
+      
+      const delta = distance - lastPinchDistance.current;
+      const zoomSpeed = 0.01;
+      const newZoom = zoomLevel + (delta * zoomSpeed);
+      
+      applyZoom(newZoom);
+      lastPinchDistance.current = distance;
+    }
+  }, [supportsZoom, zoomLevel, applyZoom]);
+
+  const handleTouchEnd = useCallback(() => {
+    lastPinchDistance.current = null;
+  }, []);
 
   // Auto-start camera when entering photo mode
   useEffect(() => {
@@ -512,7 +591,12 @@ const handleAudioError = (message: string) => {
             />
           </div>
         ) : mode === 'photo' ? (
-          <div className="absolute inset-0 flex items-center justify-center overflow-hidden">
+          <div 
+            className="absolute inset-0 flex items-center justify-center overflow-hidden"
+            onTouchStart={handleTouchStart}
+            onTouchMove={handleTouchMove}
+            onTouchEnd={handleTouchEnd}
+          >
             {/* Live camera preview */}
             <video 
               ref={videoRef}
@@ -589,6 +673,32 @@ const handleAudioError = (message: string) => {
               >
                 <ImageIcon className="w-5 h-5 text-white" />
               </button>
+            )}
+            
+            {/* Zoom controls */}
+            {cameraActive && cameraReady && supportsZoom && maxZoom > 1 && (
+              <div className="absolute bottom-48 left-1/2 -translate-x-1/2 z-20 flex items-center gap-2">
+                {/* Zoom level indicator */}
+                <div className="flex items-center gap-1 px-3 py-1.5 rounded-full bg-black/40 backdrop-blur-md border border-white/10">
+                  <button
+                    onClick={() => applyZoom(zoomLevel - 0.5)}
+                    disabled={zoomLevel <= minZoom}
+                    className="w-6 h-6 flex items-center justify-center text-white/80 hover:text-white disabled:text-white/30 disabled:cursor-not-allowed"
+                  >
+                    −
+                  </button>
+                  <span className="text-xs font-medium text-white min-w-[2.5rem] text-center">
+                    {zoomLevel.toFixed(1)}×
+                  </span>
+                  <button
+                    onClick={() => applyZoom(zoomLevel + 0.5)}
+                    disabled={zoomLevel >= maxZoom}
+                    className="w-6 h-6 flex items-center justify-center text-white/80 hover:text-white disabled:text-white/30 disabled:cursor-not-allowed"
+                  >
+                    +
+                  </button>
+                </div>
+              </div>
             )}
           </div>
         ) : (
