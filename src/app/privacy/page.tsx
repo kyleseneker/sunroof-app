@@ -24,7 +24,7 @@ export default function PrivacyPolicy() {
       {/* Content */}
       <main className="flex-1 overflow-y-auto scrollbar-hide">
         <div className="max-w-2xl mx-auto p-6">
-          <p className="text-sm text-zinc-600 mb-8">Last updated: {new Date().toLocaleDateString()}</p>
+          <p className="text-sm text-zinc-600 mb-8">Last updated: December 29, 2025</p>
 
           <div className="space-y-8 text-zinc-400 leading-relaxed">
             <section>
