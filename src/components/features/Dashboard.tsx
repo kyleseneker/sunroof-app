@@ -1198,13 +1198,13 @@ $$ LANGUAGE sql SECURITY DEFINER;
   // --- HELP MODAL ---
   if (showHelp) {
     return (
-      <div className="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex flex-col safe-top safe-bottom">
+      <div className="fixed inset-0 z-50 bg-[var(--bg-base)]/90 backdrop-blur-md flex flex-col safe-top safe-bottom">
         <div className="flex-1 flex flex-col p-6 animate-enter overflow-y-auto">
           <button 
             onClick={() => setShowHelp(false)} 
-            className="self-end w-10 h-10 flex items-center justify-center rounded-full bg-white/5 mb-6"
+            className="self-end w-10 h-10 flex items-center justify-center rounded-full bg-[var(--bg-hover)] mb-6"
           >
-            <X className="w-5 h-5 text-white/60" />
+            <X className="w-5 h-5 text-[var(--fg-muted)]" />
           </button>
           
           <div className="max-w-sm mx-auto w-full">
@@ -1220,7 +1220,7 @@ $$ LANGUAGE sql SECURITY DEFINER;
                 </div>
              <div>
                   <h3 className="font-medium mb-1">1. Start a Journey</h3>
-                  <p className="text-sm text-zinc-500 leading-relaxed">
+                  <p className="text-sm text-[var(--fg-muted)] leading-relaxed">
                     Create a new journey before you go. Choose when your memories unlock.
                   </p>
                 </div>
@@ -1232,7 +1232,7 @@ $$ LANGUAGE sql SECURITY DEFINER;
                 </div>
                 <div>
                   <h3 className="font-medium mb-1">2. Capture Moments</h3>
-                  <p className="text-sm text-zinc-500 leading-relaxed">
+                  <p className="text-sm text-[var(--fg-muted)] leading-relaxed">
                     Take photos and write notes during your journey. They go straight to the vault, no peeking!
                   </p>
                 </div>
@@ -1244,7 +1244,7 @@ $$ LANGUAGE sql SECURITY DEFINER;
                 </div>
                 <div>
                   <h3 className="font-medium mb-1">3. Wait for Unlock</h3>
-                  <p className="text-sm text-zinc-500 leading-relaxed">
+                  <p className="text-sm text-[var(--fg-muted)] leading-relaxed">
                     Your memories stay hidden until the timer expires. Stay present and enjoy the moment.
                   </p>
                 </div>
@@ -1256,7 +1256,7 @@ $$ LANGUAGE sql SECURITY DEFINER;
                 </div>
                 <div>
                   <h3 className="font-medium mb-1">4. Relive the Magic</h3>
-                  <p className="text-sm text-zinc-500 leading-relaxed">
+                  <p className="text-sm text-[var(--fg-muted)] leading-relaxed">
                     When time&apos;s up, open your vault and rediscover your journey. It&apos;s like developing film!
                   </p>
                 </div>
@@ -1265,7 +1265,7 @@ $$ LANGUAGE sql SECURITY DEFINER;
 
              <button 
               onClick={() => setShowHelp(false)}
-              className="w-full h-14 bg-white text-black rounded-full font-semibold text-sm mt-10"
+              className="w-full h-14 bg-[var(--fg-base)] text-[var(--fg-inverse)] rounded-full font-semibold text-sm mt-10"
              >
               Got it
              </button>
@@ -1427,26 +1427,26 @@ $$ LANGUAGE sql SECURITY DEFINER;
       {showSearch && (
         <div className="px-6 pb-4 animate-enter">
           <div className="relative">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--fg-muted)]" />
             <input
               type="text"
               placeholder="Search journeys..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full h-12 pl-11 pr-10 bg-zinc-900 border border-zinc-800 rounded-xl text-white placeholder:text-zinc-600 focus:outline-none focus:border-zinc-700 transition-colors"
+              className="w-full h-12 pl-11 pr-10 bg-[var(--bg-surface)] border border-[var(--border-base)] rounded-xl text-[var(--fg-base)] placeholder:text-[var(--fg-subtle)] focus:outline-none focus:border-[var(--fg-subtle)] transition-colors"
               autoFocus
             />
             {searchQuery && (
               <button
                 onClick={() => setSearchQuery('')}
-                className="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-white transition-colors"
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-[var(--fg-muted)] hover:text-[var(--fg-base)] transition-colors"
               >
                 <X className="w-4 h-4" />
               </button>
             )}
           </div>
           {searchQuery && (
-            <p className="text-xs text-zinc-500 mt-2">
+            <p className="text-xs text-[var(--fg-muted)] mt-2">
               Found {filteredActiveJourneys.length + filteredPastJourneys.length} {(filteredActiveJourneys.length + filteredPastJourneys.length) === 1 ? 'journey' : 'journeys'}
             </p>
           )}
