@@ -1,0 +1,234 @@
+'use client';
+
+import { useState, useEffect } from 'react';
+import { X, Lock, Pencil, Trash2, UserPlus, Users, ChevronRight, Clock, Camera } from 'lucide-react';
+import { getEmailByUserId, updateJourney } from '@/services';
+import { useToast } from '@/components/ui';
+import { getTimeUntilUnlock, getJourneyGradient, hapticSuccess } from '@/lib';
+import type { Journey } from '@/types';
+
+interface JourneyDetailSheetProps {
+  journey: Journey | null;
+  onClose: () => void;
+  onCapture: (journey: Journey) => void;
+  onEdit: (journey: Journey) => void;
+  onDelete: (journeyId: string) => void;
+  onManageMemories: (journey: Journey) => void;
+  onInvite: (journey: Journey) => void;
+  isOwner: boolean;
+  onJourneyUpdated?: (journey: Journey) => void;
+}
+
+export default function JourneyDetailSheet({
+  journey,
+  onClose,
+  onCapture,
+  onEdit,
+  onDelete,
+  onManageMemories,
+  onInvite,
+  isOwner,
+  onJourneyUpdated,
+}: JourneyDetailSheetProps) {
+  const { showToast } = useToast();
+  
+  // Collaborator emails cache
+  const [collaboratorEmails, setCollaboratorEmails] = useState<Record<string, string>>({});
+
+  // Fetch collaborator emails when journey changes
+  useEffect(() => {
+    if (!journey?.shared_with?.length) return;
+    
+    const fetchEmails = async () => {
+      const unknownIds = journey.shared_with!.filter(id => !collaboratorEmails[id]);
+      if (unknownIds.length === 0) return;
+      
+      for (const id of unknownIds) {
+        const { data } = await getEmailByUserId(id);
+        if (data) {
+          setCollaboratorEmails(prev => ({ ...prev, [id]: data }));
+        }
+      }
+    };
+    
+    fetchEmails();
+  }, [journey?.shared_with, collaboratorEmails]);
+
+  // Remove a collaborator
+  const handleRemoveCollaborator = async (userIdToRemove: string) => {
+    if (!journey) return;
+    
+    const updatedSharedWith = (journey.shared_with || []).filter(id => id !== userIdToRemove);
+    
+    const { error } = await updateJourney({
+      id: journey.id,
+      sharedWith: updatedSharedWith.length > 0 ? updatedSharedWith : [],
+    });
+    
+    if (error) {
+      showToast('Failed to remove collaborator', 'error');
+      return;
+    }
+    
+    hapticSuccess();
+    showToast('Collaborator removed', 'success');
+    
+    onJourneyUpdated?.({
+      ...journey,
+      shared_with: updatedSharedWith.length > 0 ? updatedSharedWith : undefined,
+    });
+  };
+
+  if (!journey) return null;
+
+  const countdown = getTimeUntilUnlock(journey.unlock_date);
+
+  return (
+    <div className="fixed inset-0 z-50 bg-black flex flex-col safe-top safe-bottom">
+      {/* Dynamic gradient background */}
+      <div 
+        className="absolute inset-0"
+        style={{ background: getJourneyGradient(journey.name).gradient }}
+      />
+      <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-black/20" />
+      {/* Subtle pattern overlay */}
+      <div 
+        className="absolute inset-0 opacity-15"
+        style={{
+          backgroundImage: `radial-gradient(circle at 30% 20%, rgba(255,255,255,0.15) 0%, transparent 40%),
+                            radial-gradient(circle at 70% 80%, rgba(255,255,255,0.1) 0%, transparent 40%)`
+        }}
+      />
+      
+      {/* Top Bar */}
+      <div className="relative z-10 flex justify-between items-center p-6">
+        <button 
+          onClick={onClose}
+          className="w-10 h-10 flex items-center justify-center rounded-full bg-black/40 backdrop-blur-md border border-white/10 hover:bg-white/20 hover:border-white/20 active:scale-95 transition-all cursor-pointer"
+        >
+          <X className="w-5 h-5 text-white" />
+        </button>
+        
+        {/* Owner-only actions */}
+        {isOwner && (
+          <div className="flex gap-2">
+            {/* Share button */}
+            <button
+              onClick={() => onInvite(journey)}
+              className="w-10 h-10 rounded-full bg-black/40 backdrop-blur-md border border-white/10 flex items-center justify-center hover:bg-white/20 hover:border-white/20 active:scale-95 transition-all cursor-pointer"
+              title="Share journey"
+            >
+              <UserPlus className="w-4 h-4 text-white" />
+            </button>
+            {/* Edit button */}
+            <button
+              onClick={() => {
+                onClose();
+                onEdit(journey);
+              }}
+              className="w-10 h-10 rounded-full bg-black/40 backdrop-blur-md border border-white/10 flex items-center justify-center hover:bg-white/20 hover:border-white/20 active:scale-95 transition-all cursor-pointer"
+              title="Edit journey"
+            >
+              <Pencil className="w-4 h-4 text-white" />
+            </button>
+            {/* Delete button */}
+            <button
+              onClick={() => {
+                onClose();
+                onDelete(journey.id);
+              }}
+              className="w-10 h-10 rounded-full bg-black/40 backdrop-blur-md border border-white/10 flex items-center justify-center hover:bg-red-500/30 hover:border-red-500/30 active:scale-95 transition-all cursor-pointer"
+              title="Delete journey"
+            >
+              <Trash2 className="w-4 h-4 text-white" />
+            </button>
+          </div>
+        )}
+      </div>
+      
+      {/* Content */}
+      <div className="relative z-10 flex-1 flex flex-col justify-end p-6 pb-12">
+        {/* Locked indicator */}
+        <div className="flex items-center gap-2 mb-4">
+          <div className="w-8 h-8 rounded-full bg-amber-500/20 flex items-center justify-center">
+            <Lock className="w-4 h-4 text-amber-400" />
+          </div>
+          <span className="text-xs font-semibold tracking-wider uppercase text-amber-400">Locked</span>
+        </div>
+        
+        {/* Journey Name */}
+        <h1 className="text-4xl font-bold mb-2 text-white">{journey.name}</h1>
+        
+        {/* Memory count with manage link */}
+        <button 
+          onClick={() => onManageMemories(journey)}
+          className="text-white/70 mb-4 flex items-center gap-2 hover:text-white transition-colors"
+        >
+          <span>{journey.memory_count || 0} {(journey.memory_count || 0) === 1 ? 'memory' : 'memories'} captured</span>
+          {(journey.memory_count || 0) > 0 && (
+            <ChevronRight className="w-4 h-4" />
+          )}
+        </button>
+        
+        {/* Shared with indicator */}
+        {(journey.shared_with?.length || 0) > 0 && (
+          <div className="mb-8">
+            <div className="flex items-center gap-2 text-white/60 mb-3">
+              <Users className="w-4 h-4" />
+              <span className="text-sm">
+                Shared with {journey.shared_with?.length} {journey.shared_with?.length === 1 ? 'person' : 'people'}
+              </span>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {journey.shared_with?.map(userId => (
+                <div 
+                  key={userId}
+                  className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-black/30 backdrop-blur-sm border border-white/10"
+                >
+                  <span className="text-sm text-white/80">
+                    {collaboratorEmails[userId] || 'Loading...'}
+                  </span>
+                  {isOwner && (
+                    <button
+                      onClick={() => handleRemoveCollaborator(userId)}
+                      className="w-4 h-4 flex items-center justify-center rounded-full hover:bg-red-500/20 transition-colors"
+                      title="Remove collaborator"
+                    >
+                      <X className="w-3 h-3 text-white/50 hover:text-red-400" />
+                    </button>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+        
+        {!journey.shared_with?.length && <div className="mb-4" />}
+        
+        {/* Countdown */}
+        <div className="rounded-2xl p-6 mb-6 bg-white/5 backdrop-blur-md border border-white/10">
+          <div className="flex items-center gap-2 mb-2">
+            <Clock className="w-4 h-4 text-white/60" />
+            <p className="text-xs text-white/60 uppercase tracking-wider">Unlocks in</p>
+          </div>
+          <p className="text-4xl font-light tracking-wide text-white">{countdown}</p>
+        </div>
+        
+        {/* Capture Button */}
+        <button
+          onClick={() => {
+            onClose();
+            onCapture(journey);
+          }}
+          className="w-full h-16 rounded-full bg-gradient-to-r from-white to-zinc-100 text-black font-semibold flex items-center justify-center gap-3 active:scale-[0.98] transition-transform shadow-xl shadow-white/10"
+        >
+          <div className="w-8 h-8 rounded-full bg-black/10 flex items-center justify-center">
+            <Camera className="w-4 h-4" />
+          </div>
+          Capture Memory
+        </button>
+      </div>
+    </div>
+  );
+}
+

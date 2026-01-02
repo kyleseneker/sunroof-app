@@ -1,57 +1,59 @@
 'use client';
+
 import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { 
-  createJourney, 
-  updateJourney,
   deleteJourney, 
   fetchPastJourneys as fetchPastJourneysService,
-  fetchMemoriesForJourney,
-  deleteMemory,
-  getUserIdByEmail,
-  getEmailByUserId,
 } from '@/services';
 import { useAuth } from '@/providers';
-import { hapticSuccess, getJourneyGradient, formatDate, getTimeUntilUnlock, isJourneyUnlocked, getGreeting, DESTINATION_SUGGESTIONS, MAX_ACTIVE_JOURNEYS } from '@/lib';
-import { Plus, ArrowRight, MapPin, X, Lock, ChevronRight, Sparkles, Trash2, HelpCircle, Camera, Clock, ImageIcon, Pencil, FileText, Plane, Timer, Archive, UserPlus, Users, Loader2, Search, RefreshCw, Mic } from 'lucide-react';
-import { useToast, Avatar } from '@/components/ui';
-import { GalleryView, KeyboardShortcutsHelp, useKeyboardShortcutsHelp, MemoryBadge, ActionSheet } from '@/components/features';
+import { hapticSuccess, getJourneyGradient, formatDate, getTimeUntilUnlock, isJourneyUnlocked, getGreeting, MAX_ACTIVE_JOURNEYS } from '@/lib';
+import { Plus, ArrowRight, X, Lock, ChevronRight, Sparkles, Trash2, HelpCircle, Camera, ImageIcon, Pencil, Timer, Archive, Search, RefreshCw } from 'lucide-react';
+import { useToast, Avatar, ConfirmDialog } from '@/components/ui';
+import { 
+  GalleryView, 
+  KeyboardShortcutsHelp, 
+  useKeyboardShortcutsHelp, 
+  MemoryBadge, 
+  ActionSheet,
+  CreateJourneyModal,
+  EditJourneyModal,
+  InviteCollaboratorModal,
+  ManageMemoriesSheet,
+  JourneyDetailSheet,
+  HelpModal,
+} from '@/components/features';
 import Image from 'next/image';
 import Link from 'next/link';
 import type { Journey } from '@/types';
 
-export default function Dashboard({ activeJourneys: initialActiveJourneys = [], onCapture }: { activeJourneys?: Journey[], onCapture?: (journey: Journey) => void }) {
+interface DashboardProps {
+  activeJourneys?: Journey[];
+  onCapture?: (journey: Journey) => void;
+}
+
+export default function Dashboard({ activeJourneys: initialActiveJourneys = [], onCapture }: DashboardProps) {
   const { showToast } = useToast();
   const { user } = useAuth();
   const [activeJourneys, setActiveJourneys] = useState<Journey[]>(initialActiveJourneys);
   
-  // Sync with prop updates (e.g., after returning from camera)
+  // Sync with prop updates
   useEffect(() => {
     setActiveJourneys(initialActiveJourneys);
   }, [initialActiveJourneys]);
   
+  // Modal/sheet states
   const [isCreating, setIsCreating] = useState(false);
-  const [tripName, setTripName] = useState('');
-  const [unlockDays, setUnlockDays] = useState<number | null>(3);
-  const [customDate, setCustomDate] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [pastJourneys, setPastJourneys] = useState<Journey[]>([]);
-  const [selectedJourney, setSelectedJourney] = useState<Journey | null>(null);
-  const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
-  const [showHelp, setShowHelp] = useState(false);
   const [editingJourney, setEditingJourney] = useState<Journey | null>(null);
-  const [editName, setEditName] = useState('');
-  const [editDate, setEditDate] = useState('');
+  const [inviteJourney, setInviteJourney] = useState<Journey | null>(null);
+  const [managingJourney, setManagingJourney] = useState<Journey | null>(null);
   const [focusedJourney, setFocusedJourney] = useState<Journey | null>(null);
-  const [managingMemories, setManagingMemories] = useState<Journey | null>(null);
-  const [lockedMemories, setLockedMemories] = useState<any[]>([]);
-  const [memoryToDelete, setMemoryToDelete] = useState<any | null>(null);
-  const [loadingMemories, setLoadingMemories] = useState(false);
+  const [selectedJourney, setSelectedJourney] = useState<Journey | null>(null);
+  const [showHelp, setShowHelp] = useState(false);
+  const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
   
-  // Invite collaborator state
-  const [showInviteModal, setShowInviteModal] = useState(false);
-  const [inviteEmail, setInviteEmail] = useState('');
-  const [inviteLoading, setInviteLoading] = useState(false);
-  const [journeyToShare, setJourneyToShare] = useState<Journey | null>(null);
+  // Data states
+  const [pastJourneys, setPastJourneys] = useState<Journey[]>([]);
+  const [isDeleting, setIsDeleting] = useState(false);
   
   // Search/filter state
   const [searchQuery, setSearchQuery] = useState('');
@@ -66,20 +68,13 @@ export default function Dashboard({ activeJourneys: initialActiveJourneys = [], 
   const mainRef = useRef<HTMLElement>(null);
   const PULL_THRESHOLD = 80;
   
-  // Share during creation state
-  const [shareEmails, setShareEmails] = useState<string[]>([]);
-  const [shareEmailInput, setShareEmailInput] = useState('');
-  
-  // Collaborator emails cache (user_id -> email)
-  const [collaboratorEmails, setCollaboratorEmails] = useState<Record<string, string>>({});
-  
   // Keyboard shortcuts help modal (desktop only)
   const { isOpen: showShortcuts, close: closeShortcuts } = useKeyboardShortcutsHelp();
   
   // Action sheet for journey actions (mobile-friendly)
   const [actionSheetJourney, setActionSheetJourney] = useState<Journey | null>(null);
   
-  // Detect if user is on mobile (no hover, touch device)
+  // Detect if user is on mobile
   const [isMobile, setIsMobile] = useState(false);
   useEffect(() => {
     const checkMobile = () => {
@@ -92,179 +87,26 @@ export default function Dashboard({ activeJourneys: initialActiveJourneys = [], 
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  // Random destination placeholder (changes each time modal opens)
-  const destinationPlaceholder = useMemo(() => {
-    return DESTINATION_SUGGESTIONS[Math.floor(Math.random() * DESTINATION_SUGGESTIONS.length)];
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isCreating]);
-
-  // Fetch locked memories for management (without content)
-  const fetchLockedMemories = async (journeyId: string) => {
-    setLoadingMemories(true);
-    const { data } = await fetchMemoriesForJourney(journeyId);
-    // Only keep id, type, created_at for locked view (hide content)
-    const lockedData = (data || []).map(m => ({ id: m.id, type: m.type, created_at: m.created_at }));
-    setLockedMemories(lockedData);
-    setLoadingMemories(false);
-  };
-
-  // Delete a single memory
-  const [isDeletingMemory, setIsDeletingMemory] = useState(false);
-  
-  const handleDeleteLockedMemory = async (memoryId: string) => {
-    if (isDeletingMemory) return; // Prevent double-click
-    setIsDeletingMemory(true);
-    
-    try {
-      const { error } = await deleteMemory(memoryId);
-      
-      if (error) {
-        showToast('Failed to delete memory', 'error');
-        setIsDeletingMemory(false);
-        return;
-      }
-      
-      setLockedMemories(lockedMemories.filter(m => m.id !== memoryId));
-      setMemoryToDelete(null);
-      
-      // Update the focused journey's memory count
-      if (focusedJourney) {
-        const newCount = Math.max(0, (focusedJourney.memory_count || 1) - 1);
-        setFocusedJourney({
-          ...focusedJourney,
-          memory_count: newCount
-        });
-        
-        // Also update the activeJourneys list
-        setActiveJourneys(activeJourneys.map(j => 
-          j.id === focusedJourney.id 
-            ? { ...j, memory_count: newCount }
-            : j
-        ));
-      }
-      
-      hapticSuccess();
-      showToast('Memory deleted', 'success');
-    } catch (err) {
-      console.error('Delete memory error:', err);
-      showToast('Something went wrong', 'error');
-    } finally {
-      setIsDeletingMemory(false);
-    }
-  };
-
-  // Fetch past/completed journeys with memory counts (optimized - single query for counts)
+  // Fetch past/completed journeys
   const fetchPastJourneys = useCallback(async () => {
     if (!user) return;
-    
     const { data, error } = await fetchPastJourneysService(user.id);
-    
     if (error) {
       console.error('Error fetching past journeys:', error);
       return;
     }
-    
     setPastJourneys(data || []);
   }, [user]);
 
   useEffect(() => {
     fetchPastJourneys();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user]);
+  }, [fetchPastJourneys]);
 
-  const handleCreate = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    // Trim and validate trip name
-    const cleanName = tripName.trim();
-    if (!cleanName) {
-      showToast('Please enter a destination', 'error');
-      return;
-    }
-    if (cleanName.length > 50) {
-      showToast('Destination name is too long (max 50 characters)', 'error');
-      return;
-    }
-    if (!unlockDays && !customDate) {
-      showToast('Please select an unlock date', 'error');
-      return;
-    }
-    
-    setLoading(true);
-
-    let unlockDate: Date;
-    if (customDate) {
-      unlockDate = new Date(customDate);
-      // Ensure it's set to end of day in local timezone
-      unlockDate.setHours(23, 59, 59, 999);
-    } else {
-      // Add exactly N days (N * 24 hours) from now
-      // This ensures "3 days" means approximately 72 hours, not 72h minus hours already elapsed today
-      unlockDate = new Date();
-      unlockDate.setTime(unlockDate.getTime() + (unlockDays || 3) * 24 * 60 * 60 * 1000);
-    }
-
-    // Validate unlock date is in the future
-    if (unlockDate <= new Date()) {
-      showToast('Unlock date must be in the future', 'error');
-      setLoading(false);
-      return;
-    }
-
-    try {
-      // Resolve share emails to user IDs
-      const sharedWithIds: string[] = [];
-      if (shareEmails.length > 0) {
-        for (const email of shareEmails) {
-          const { data } = await getUserIdByEmail(email);
-          if (data) {
-            sharedWithIds.push(data);
-          }
-          // If user not found, skip silently (they may not have signed up yet)
-        }
-      }
-
-      // Note: cover_url is no longer stored - gradients are generated dynamically from journey name
-      const { error } = await createJourney({
-        userId: user?.id || '',
-        name: cleanName,
-        unlockDate: unlockDate.toISOString(),
-        sharedWith: sharedWithIds.length > 0 ? sharedWithIds : undefined,
-      });
-
-      if (error) {
-        console.error('Create journey error:', error);
-        showToast('Couldn\'t create journey. Check your connection and try again.', 'error');
-        setLoading(false);
-      } else {
-        const shareMsg = sharedWithIds.length > 0 
-          ? ` Shared with ${sharedWithIds.length} ${sharedWithIds.length === 1 ? 'person' : 'people'}.`
-          : '';
-        const skippedCount = shareEmails.length - sharedWithIds.length;
-        const skipMsg = skippedCount > 0 
-          ? ` (${skippedCount} email${skippedCount > 1 ? 's' : ''} not found)`
-          : '';
-        hapticSuccess();
-        showToast(`${cleanName} created!${shareMsg}${skipMsg}`, 'success');
-        
-        // Reset share state
-        setShareEmails([]);
-        setShareEmailInput('');
-        
-        window.location.reload();
-      }
-    } catch (err) {
-      console.error('Create journey exception:', err);
-      showToast('Something went wrong. Please try again.', 'error');
-      setLoading(false);
-    }
-  };
-
-  // Use isJourneyUnlocked as isUnlocked for cleaner code
+  // Check if current user owns this journey
+  const isOwner = (journey: Journey) => journey.user_id === user?.id;
   const isUnlocked = isJourneyUnlocked;
-
   const canCreateJourney = activeJourneys.length < MAX_ACTIVE_JOURNEYS;
-  
+
   // Auto-close search when no journeys exist
   useEffect(() => {
     if (activeJourneys.length === 0 && pastJourneys.length === 0) {
@@ -273,44 +115,19 @@ export default function Dashboard({ activeJourneys: initialActiveJourneys = [], 
     }
   }, [activeJourneys.length, pastJourneys.length]);
 
-  // Global escape key handler - close modals/overlays
+  // Global escape key handler
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
-        // Close in priority order (most "on top" first)
-        if (memoryToDelete) {
-          setMemoryToDelete(null);
-        } else if (showInviteModal) {
-          setShowInviteModal(false);
-          setInviteEmail('');
-          setJourneyToShare(null);
-        } else if (deleteConfirm) {
-          setDeleteConfirm(null);
-        } else if (editingJourney) {
-          setEditingJourney(null);
-        } else if (managingMemories) {
-          setManagingMemories(null);
-          setLockedMemories([]);
-        } else if (focusedJourney) {
-          setFocusedJourney(null);
-        } else if (selectedJourney) {
-          setSelectedJourney(null);
-        } else if (isCreating) {
-          setIsCreating(false);
-          setShareEmails([]);
-          setShareEmailInput('');
-        } else if (showHelp) {
-          setShowHelp(false);
-        } else if (showSearch) {
-          setShowSearch(false);
-          setSearchQuery('');
-        }
+        if (deleteConfirm) setDeleteConfirm(null);
+        else if (isCreating) setIsCreating(false);
+        else if (showHelp) setShowHelp(false);
+        else if (showSearch) { setShowSearch(false); setSearchQuery(''); }
       }
     };
-
     document.addEventListener('keydown', handleEscape);
     return () => document.removeEventListener('keydown', handleEscape);
-  }, [memoryToDelete, showInviteModal, deleteConfirm, editingJourney, managingMemories, focusedJourney, selectedJourney, isCreating, showHelp, showSearch]);
+  }, [deleteConfirm, isCreating, showHelp, showSearch]);
 
   // Filtered journeys based on search
   const filteredActiveJourneys = useMemo(() => {
@@ -329,17 +146,15 @@ export default function Dashboard({ activeJourneys: initialActiveJourneys = [], 
   const handleRefresh = useCallback(async () => {
     setIsRefreshing(true);
     await fetchPastJourneys();
-    // Parent component handles active journeys refresh
     setTimeout(() => setIsRefreshing(false), 800);
   }, [fetchPastJourneys]);
 
-  // Set up non-passive touch events for pull-to-refresh
+  // Pull-to-refresh touch handlers
   useEffect(() => {
     const element = mainRef.current;
     if (!element) return;
 
     const handleTouchStart = (e: TouchEvent) => {
-      // Only enable pull-to-refresh when scrolled to top (or near top)
       if (element.scrollTop <= 5) {
         pullStartY.current = e.touches[0].clientY;
         isPullingRef.current = true;
@@ -348,21 +163,16 @@ export default function Dashboard({ activeJourneys: initialActiveJourneys = [], 
 
     const handleTouchMove = (e: TouchEvent) => {
       if (!isPullingRef.current || isRefreshing) return;
-      
       const currentY = e.touches[0].clientY;
       const diff = currentY - pullStartY.current;
       
-      // Only activate if pulling down while at/near top
       if (diff > 0 && element.scrollTop <= 5) {
-        // Prevent native scroll while we're handling pull-to-refresh
         e.preventDefault();
-        // Apply resistance to make it feel natural
         const resistance = 0.4;
         const newDistance = Math.min(diff * resistance, PULL_THRESHOLD * 1.5);
         pullDistanceRef.current = newDistance;
         setPullDistance(newDistance);
       } else if (diff <= 0) {
-        // User is scrolling up, cancel pull-to-refresh
         isPullingRef.current = false;
         pullDistanceRef.current = 0;
         setPullDistance(0);
@@ -371,18 +181,14 @@ export default function Dashboard({ activeJourneys: initialActiveJourneys = [], 
 
     const handleTouchEnd = async () => {
       if (!isPullingRef.current) return;
-      
       isPullingRef.current = false;
-      
       if (pullDistanceRef.current >= PULL_THRESHOLD && !isRefreshing) {
         await handleRefresh();
       }
-      
       pullDistanceRef.current = 0;
       setPullDistance(0);
     };
 
-    // Use non-passive listeners to allow preventDefault
     element.addEventListener('touchstart', handleTouchStart, { passive: true });
     element.addEventListener('touchmove', handleTouchMove, { passive: false });
     element.addEventListener('touchend', handleTouchEnd, { passive: true });
@@ -394,160 +200,21 @@ export default function Dashboard({ activeJourneys: initialActiveJourneys = [], 
     };
   }, [isRefreshing, handleRefresh]);
 
-  // Check if current user owns this journey
-  const isOwner = (journey: Journey) => journey.user_id === user?.id;
-
-  // Fetch collaborator emails when focused journey changes
-  useEffect(() => {
-    const fetchCollaboratorEmails = async () => {
-      if (!focusedJourney?.shared_with?.length) return;
-      
-      const unknownIds = focusedJourney.shared_with.filter(id => !collaboratorEmails[id]);
-      if (unknownIds.length === 0) return;
-      
-      for (const id of unknownIds) {
-        const { data } = await getEmailByUserId(id);
-        if (data) {
-          setCollaboratorEmails(prev => ({ ...prev, [id]: data }));
-        }
-      }
-    };
-    
-    fetchCollaboratorEmails();
-  }, [focusedJourney?.shared_with, collaboratorEmails]);
-
-  // Remove a collaborator from a journey
-  const handleRemoveCollaborator = async (journeyId: string, userIdToRemove: string) => {
-    const journey = activeJourneys.find(j => j.id === journeyId) || pastJourneys.find(j => j.id === journeyId);
-    if (!journey) return;
-    
-    const updatedSharedWith = (journey.shared_with || []).filter(id => id !== userIdToRemove);
-    
-    const { error } = await updateJourney({
-      id: journeyId,
-      sharedWith: updatedSharedWith.length > 0 ? updatedSharedWith : [],
-    });
-    
-    if (error) {
-      showToast('Failed to remove collaborator', 'error');
-      return;
-    }
-    
-    // Update local state
-    const applyJourneyUpdate = (j: Journey) => 
-      j.id === journeyId ? { ...j, shared_with: updatedSharedWith.length > 0 ? updatedSharedWith : undefined } : j;
-    
-    setActiveJourneys(prev => prev.map(applyJourneyUpdate));
-    setPastJourneys(prev => prev.map(applyJourneyUpdate));
-    if (focusedJourney?.id === journeyId) {
-      setFocusedJourney({ ...focusedJourney, shared_with: updatedSharedWith.length > 0 ? updatedSharedWith : undefined });
-    }
-    
-    hapticSuccess();
-    showToast('Collaborator removed', 'success');
-  };
-
-  // Handle inviting a collaborator
-  const handleInviteCollaborator = async () => {
-    if (!journeyToShare || !inviteEmail.trim()) return;
-    
-    setInviteLoading(true);
-    
-    try {
-      // Look up user by email using Supabase Admin API workaround
-      // We'll store the email and resolve it when they sign in
-      // For now, we'll check if they exist in our journeys (meaning they've used the app)
-      
-      // First, check if this email is already shared
-      const currentShared = journeyToShare.shared_with || [];
-      
-      // Get user ID from email
-      const { data: existingUser, error: lookupError } = await getUserIdByEmail(inviteEmail.trim().toLowerCase());
-      
-      if (lookupError) {
-        // If RPC doesn't exist, show a helpful message
-        if (lookupError.includes('function') || lookupError.includes('does not exist')) {
-          showToast('Sharing feature requires database setup. See console for SQL.', 'error');
-          console.log(`
--- Run this SQL in Supabase to enable email lookup:
-CREATE OR REPLACE FUNCTION get_user_id_by_email(email_input TEXT)
-RETURNS UUID AS $$
-  SELECT id FROM auth.users WHERE email = email_input LIMIT 1;
-$$ LANGUAGE sql SECURITY DEFINER;
-          `);
-          setInviteLoading(false);
-          return;
-        }
-        showToast('Failed to find user', 'error');
-        setInviteLoading(false);
-        return;
-      }
-      
-      if (!existingUser) {
-        showToast('No account found. They\'ll need to sign up first.', 'error');
-        setInviteLoading(false);
-        return;
-      }
-      
-      // Check if already shared
-      if (currentShared.includes(existingUser)) {
-        showToast('Already shared with this person', 'error');
-        setInviteLoading(false);
-        return;
-      }
-      
-      // Add to shared_with array
-      const { error: updateError } = await updateJourney({
-        id: journeyToShare.id,
-        sharedWith: [...currentShared, existingUser],
-      });
-      
-      if (updateError) {
-        showToast('Failed to share journey', 'error');
-        setInviteLoading(false);
-        return;
-      }
-      
-      hapticSuccess();
-      showToast(`Shared with ${inviteEmail}!`, 'success');
-      setShowInviteModal(false);
-      setInviteEmail('');
-      setJourneyToShare(null);
-      
-      // Update local state
-      setActiveJourneys(prev => prev.map(j => 
-        j.id === journeyToShare.id 
-          ? { ...j, shared_with: [...currentShared, existingUser] }
-          : j
-      ));
-      if (focusedJourney?.id === journeyToShare.id) {
-        setFocusedJourney({ ...focusedJourney, shared_with: [...currentShared, existingUser] });
-      }
-    } catch (err) {
-      console.error('Invite error:', err);
-      showToast('Failed to invite collaborator', 'error');
-    }
-    
-    setInviteLoading(false);
-  };
-
-  const [isDeleting, setIsDeleting] = useState(false);
-
+  // Delete journey handler
   const handleDeleteJourney = async (journeyId: string) => {
-    if (isDeleting) return; // Prevent double-click
+    if (isDeleting) return;
     setIsDeleting(true);
     
     try {
       const { error } = await deleteJourney(journeyId);
-      
       if (error) {
         showToast('Failed to delete journey', 'error');
         setIsDeleting(false);
         return;
       }
-      
       hapticSuccess();
       showToast('Journey deleted', 'success');
+      setDeleteConfirm(null);
       window.location.reload();
     } catch (err) {
       console.error('Delete journey error:', err);
@@ -556,635 +223,94 @@ $$ LANGUAGE sql SECURITY DEFINER;
     }
   };
 
-  const [isSaving, setIsSaving] = useState(false);
+  // Update journey in local state
+  const handleJourneyUpdated = (updated: Journey) => {
+    setActiveJourneys(prev => prev.map(j => j.id === updated.id ? updated : j));
+    setPastJourneys(prev => prev.map(j => j.id === updated.id ? updated : j));
+    if (focusedJourney?.id === updated.id) setFocusedJourney(updated);
+  };
 
-  const handleEditJourney = async () => {
-    if (!editingJourney || !editName.trim() || isSaving) return;
-    
-    const cleanName = editName.trim();
-    if (cleanName.length > 50) {
-      showToast('Name is too long (max 50 characters)', 'error');
-      return;
-    }
-    
-    setIsSaving(true);
-    
-    let unlockDateStr: string | undefined;
-    if (editDate) {
-      const newDate = new Date(editDate);
-      newDate.setHours(23, 59, 59, 999);
-      
-      // Only validate future date for active journeys
-      if (editingJourney.status === 'active' && newDate <= new Date()) {
-        showToast('Unlock date must be in the future', 'error');
-        setIsSaving(false);
-        return;
-      }
-      
-      unlockDateStr = newDate.toISOString();
-    }
-    
-    try {
-      const { error } = await updateJourney({
-        id: editingJourney.id,
-        name: cleanName,
-        unlockDate: unlockDateStr,
-      });
-      
-      if (error) {
-        console.error('Edit journey error:', error);
-        showToast('Failed to update journey', 'error');
-        setIsSaving(false);
-        return;
-      }
-      
-      hapticSuccess();
-      showToast('Journey updated!', 'success');
-      window.location.reload();
-    } catch (err) {
-      console.error('Edit journey exception:', err);
-      showToast('Something went wrong', 'error');
-      setIsSaving(false);
+  // Handle memory count update from ManageMemoriesSheet
+  const handleMemoryDeleted = (journeyId: string, newCount: number) => {
+    setActiveJourneys(prev => prev.map(j => j.id === journeyId ? { ...j, memory_count: newCount } : j));
+    setPastJourneys(prev => prev.map(j => j.id === journeyId ? { ...j, memory_count: newCount } : j));
+    if (focusedJourney?.id === journeyId) {
+      setFocusedJourney({ ...focusedJourney, memory_count: newCount });
     }
   };
 
-  const openEditModal = (journey: Journey) => {
-    setEditingJourney(journey);
-    setEditName(journey.name);
-    setEditDate(journey.unlock_date.split('T')[0]);
-  };
-
-  // --- CREATE MODAL ---
-  if (isCreating) {
+  // --- MODALS & SHEETS ---
+  
+  // Create Journey Modal
+  if (isCreating && user) {
     return (
-      <div className="fixed inset-0 z-50 bg-[var(--bg-base)] flex flex-col safe-top safe-bottom">
-        <div className="flex-1 flex flex-col p-6 animate-enter">
-          <button 
-            onClick={() => {
-              setIsCreating(false);
-              setShareEmails([]);
-              setShareEmailInput('');
-            }} 
-            className="self-end w-10 h-10 flex items-center justify-center rounded-full bg-[var(--bg-hover)] mb-8"
-          >
-            <X className="w-5 h-5 text-[var(--fg-muted)]" />
-        </button>
-        
-          <div className="flex-1 flex flex-col justify-center max-w-sm mx-auto w-full">
-            <div className="flex items-center gap-3 mb-2">
-              <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-orange-500/20 to-pink-500/20 flex items-center justify-center">
-                <Plane className="w-6 h-6 text-orange-400" />
-              </div>
-              <h2 className="text-3xl font-light tracking-tight text-[var(--fg-base)]">New Journey</h2>
-            </div>
-            <p className="text-[var(--fg-muted)] text-sm mb-10 ml-[60px]">Where are you headed?</p>
-            
-            <form onSubmit={handleCreate} className="space-y-8">
-          <div>
-                <label className="flex items-center gap-2 text-[11px] uppercase tracking-[0.2em] text-[var(--fg-muted)] font-medium mb-3">
-                  <MapPin className="w-3 h-3" />
-                  Destination
-                </label>
-                <input 
-                  type="text" 
-                  autoFocus
-                  placeholder={destinationPlaceholder}
-                  value={tripName}
-                  onChange={(e) => setTripName(e.target.value)}
-                  maxLength={50}
-                  className="w-full bg-[var(--bg-surface)]/50 border border-[var(--border-base)] focus:border-orange-400 rounded-2xl px-5 py-4 text-2xl font-light text-[var(--fg-base)] placeholder:text-[var(--fg-subtle)] focus:outline-none focus:bg-[var(--bg-base)]/50 transition-all input-premium"
-                />
-          </div>
-
-              <div>
-                <label className="flex items-center gap-2 text-[11px] uppercase tracking-[0.2em] text-[var(--fg-muted)] font-medium mb-3">
-                  <Timer className="w-3 h-3" />
-                  Unlock After
-                </label>
-                <div className="flex gap-2 mb-3">
-                  {[3, 5, 7, 14].map((days) => {
-                    const isSelected = unlockDays === days && !customDate;
-                    return (
-                      <button
-                        key={days}
-                        type="button"
-                        onClick={() => {
-                          setUnlockDays(days);
-                          setCustomDate('');
-                        }}
-                        className={`flex-1 py-3 rounded-xl text-sm font-medium transition-all ${
-                          isSelected
-                            ? 'bg-[var(--fg-base)] text-[var(--fg-inverse)]' 
-                            : 'bg-[var(--bg-surface)] text-[var(--fg-muted)] hover:bg-[var(--bg-muted)]'
-                        }`}
-                      >
-                        {days}d
-                      </button>
-                    );
-                  })}
-                </div>
-                <div className="flex items-center gap-3">
-                  <span className="text-sm text-[var(--fg-subtle)]">or</span>
-                  <input
-                    type="date"
-                    value={customDate}
-                    onFocus={() => setUnlockDays(null)}
-                    onInput={() => setUnlockDays(null)}
-                    onChange={(e) => {
-                      const selectedDate = new Date(e.target.value);
-                      const today = new Date();
-                      today.setHours(0, 0, 0, 0);
-                      
-                      if (selectedDate >= today) {
-                        setCustomDate(e.target.value);
-                        setUnlockDays(null);
-                      } else {
-                        // Reset to empty if past date
-                        setCustomDate('');
-                      }
-                    }}
-                    min={new Date().toISOString().split('T')[0]}
-                    className={`flex-1 py-3 px-4 rounded-xl text-sm font-medium transition-all bg-[var(--bg-surface)] border-2 ${
-                      customDate 
-                        ? 'border-[var(--fg-base)] text-[var(--fg-base)]' 
-                        : 'border-transparent text-[var(--fg-muted)]'
-                    }`}
-                  />
-                </div>
-              </div>
-
-              {/* Share With (Optional) */}
-              <div>
-                <label className="flex items-center gap-2 text-[11px] uppercase tracking-[0.2em] text-[var(--fg-muted)] font-medium mb-3">
-                  <UserPlus className="w-3 h-3" />
-                  Share With <span className="text-[var(--fg-subtle)] normal-case tracking-normal">(optional)</span>
-                </label>
-                
-                {/* Added emails */}
-                {shareEmails.length > 0 && (
-                  <div className="flex flex-wrap gap-2 mb-3">
-                    {shareEmails.map((email, i) => (
-                      <div 
-                        key={i} 
-                        className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-blue-500/20 text-blue-400 text-xs"
-                      >
-                        <span>{email}</span>
-                        <button
-                          type="button"
-                          onClick={() => setShareEmails(shareEmails.filter((_, idx) => idx !== i))}
-                          className="hover:text-blue-300 transition-colors"
-                        >
-                          <X className="w-3 h-3" />
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                )}
-                
-                <div className="flex gap-2">
-                  <input 
-                    type="email"
-                    placeholder="friend@email.com"
-                    value={shareEmailInput}
-                    onChange={(e) => setShareEmailInput(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter') {
-                        e.preventDefault();
-                        const email = shareEmailInput.trim().toLowerCase();
-                        if (email && email.includes('@') && !shareEmails.includes(email)) {
-                          setShareEmails([...shareEmails, email]);
-                          setShareEmailInput('');
-                        }
-                      }
-                    }}
-                    className="flex-1 bg-[var(--bg-surface)] border border-[var(--border-base)] rounded-xl py-3 px-4 text-sm text-[var(--fg-base)] placeholder:text-[var(--fg-subtle)] focus:outline-none focus:border-[var(--fg-subtle)] transition-colors"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => {
-                      const email = shareEmailInput.trim().toLowerCase();
-                      if (email && email.includes('@') && !shareEmails.includes(email)) {
-                        setShareEmails([...shareEmails, email]);
-                        setShareEmailInput('');
-                      }
-                    }}
-                    disabled={!shareEmailInput.trim() || !shareEmailInput.includes('@')}
-                    className="px-4 py-3 rounded-xl bg-blue-500/20 text-blue-400 text-sm font-medium hover:bg-blue-500/30 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-                  >
-                    Add
-                  </button>
-                </div>
-                <p className="text-xs text-[var(--fg-subtle)] mt-2">
-                  They'll be invited when the journey is created
-                </p>
-              </div>
-              
-              <button 
-                type="submit"
-                disabled={loading || !tripName}
-                className="w-full h-14 bg-[var(--fg-base)] text-[var(--fg-inverse)] rounded-full font-semibold text-sm tracking-wide disabled:opacity-40 disabled:cursor-not-allowed hover:opacity-90 active:scale-[0.98] transition-all mt-4"
-              >
-                {loading ? 'Creating...' : 'Start Journey'}
-          </button>
-        </form>
-          </div>
-        </div>
-      </div>
+      <CreateJourneyModal
+        isOpen={isCreating}
+        onClose={() => setIsCreating(false)}
+        userId={user.id}
+        onSuccess={() => window.location.reload()}
+      />
     );
   }
 
-  // --- MANAGE LOCKED MEMORIES VIEW ---
-  if (managingMemories) {
-  return (
-      <div className="fixed inset-0 z-50 bg-[var(--bg-base)] flex flex-col safe-top safe-bottom">
-        {/* Header */}
-        <header className="flex items-center gap-4 p-6 border-b border-[var(--border-base)]">
-          <button 
-            onClick={() => {
-              setManagingMemories(null);
-              setLockedMemories([]);
-            }}
-            className="w-10 h-10 rounded-full bg-[var(--bg-hover)] flex items-center justify-center"
-          >
-            <X className="w-5 h-5 text-[var(--fg-muted)]" />
-          </button>
-          <div className="flex-1">
-            <h1 className="text-xl font-medium text-[var(--fg-base)]">Manage Memories</h1>
-            <p className="text-xs text-[var(--fg-muted)]">{managingMemories.name} • {lockedMemories.length} memories</p>
-          </div>
-      </header>
-
-        {/* Memory List */}
-        <div className="flex-1 overflow-y-auto p-4">
-          {loadingMemories ? (
-            /* Skeleton loader for memories */
-            <div className="space-y-3">
-              {[...Array(4)].map((_, i) => (
-                <div 
-                  key={i} 
-                  className="flex items-center gap-3 p-3 rounded-xl bg-[var(--bg-surface)]"
-                  style={{ animationDelay: `${i * 100}ms` }}
-                >
-                  <div className="w-12 h-12 rounded-lg skeleton" />
-                  <div className="flex-1 space-y-2">
-                    <div className="h-4 w-24 rounded skeleton" />
-                    <div className="h-3 w-16 rounded skeleton" />
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : lockedMemories.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-full text-center">
-              <div className="w-16 h-16 rounded-full bg-[var(--bg-surface)] flex items-center justify-center mb-4">
-                <Lock className="w-6 h-6 text-[var(--fg-subtle)]" />
-              </div>
-              <p className="text-[var(--fg-muted)]">No memories captured yet</p>
-            </div>
-          ) : (
-            <div className="space-y-2">
-              {lockedMemories.map((memory, i) => {
-                const memoryDate = new Date(memory.created_at);
-                const formattedDate = memoryDate.toLocaleDateString('en-US', {
-                  month: 'short',
-                  day: 'numeric',
-                  hour: 'numeric',
-                  minute: '2-digit'
-                });
-                return (
-                  <div 
-                    key={memory.id}
-                    className="flex items-center justify-between p-4 bg-[var(--bg-surface)] rounded-xl animate-enter"
-                    style={{ animationDelay: `${i * 30}ms`, opacity: 0 }}
-                  >
-                    <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 rounded-lg bg-[var(--bg-muted)] flex items-center justify-center">
-                        {memory.type === 'photo' ? (
-                          <ImageIcon className="w-5 h-5 text-pink-400" />
-                        ) : memory.type === 'audio' ? (
-                          <Mic className="w-5 h-5 text-orange-400" />
-                        ) : (
-                          <FileText className="w-5 h-5 text-blue-400" />
-                        )}
-                      </div>
-                      <div>
-                        <p className="font-medium text-sm text-[var(--fg-base)]">
-                          {memory.type === 'photo' ? 'Photo' : memory.type === 'audio' ? 'Voice Note' : 'Note'}
-                        </p>
-                        <p className="text-xs text-[var(--fg-muted)]">{formattedDate}</p>
-                      </div>
-                    </div>
-                    <button
-                      onClick={() => setMemoryToDelete(memory)}
-                      className="w-10 h-10 rounded-full bg-[var(--bg-muted)] flex items-center justify-center hover:bg-[var(--color-error-subtle)] transition-colors"
-                    >
-                      <Trash2 className="w-4 h-4 text-[var(--fg-muted)]" />
-                    </button>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-        </div>
-
-        {/* Delete Memory Confirmation */}
-        {memoryToDelete && (
-          <div 
-            className="absolute inset-0 z-50 bg-[var(--bg-base)]/80 backdrop-blur-sm flex items-center justify-center p-6"
-            onClick={() => setMemoryToDelete(null)}
-          >
-            <div 
-              className="w-full max-w-sm bg-[var(--bg-surface)] rounded-3xl p-6 animate-enter"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <div className="w-14 h-14 mx-auto mb-4 rounded-full bg-[var(--color-error-subtle)] flex items-center justify-center">
-                <Trash2 className="w-6 h-6 text-[var(--color-error)]" />
-              </div>
-              <h3 className="text-xl font-semibold text-center mb-2 text-[var(--fg-base)]">Delete this memory?</h3>
-              <p className="text-[var(--fg-muted)] text-sm text-center mb-6">
-                This {memoryToDelete.type === 'photo' ? 'photo' : memoryToDelete.type === 'audio' ? 'voice note' : 'note'} will be permanently deleted. You won't be able to recover it.
-              </p>
-              <div className="flex gap-3">
-                <button
-                  onClick={() => setMemoryToDelete(null)}
-                  className="flex-1 h-12 rounded-full bg-[var(--bg-muted)] text-[var(--fg-base)] font-medium hover:bg-[var(--bg-hover)] transition-colors"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={() => handleDeleteLockedMemory(memoryToDelete.id)}
-                  disabled={isDeletingMemory}
-                  className="flex-1 h-12 rounded-full bg-[var(--color-error)] text-white font-medium hover:opacity-90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {isDeletingMemory ? 'Deleting...' : 'Delete'}
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-      </div>
-    );
-  }
-
-  // --- INVITE COLLABORATOR MODAL (must be before focusedJourney check) ---
-  if (showInviteModal && journeyToShare) {
+  // Edit Journey Modal
+  if (editingJourney) {
     return (
-      <div 
-        className="fixed inset-0 z-[60] bg-[var(--bg-base)]/90 backdrop-blur-md flex items-center justify-center p-6 safe-top safe-bottom"
-        onClick={() => {
-          setShowInviteModal(false);
-          setInviteEmail('');
-          setJourneyToShare(null);
-        }}
-      >
-        <div 
-          className="bg-[var(--bg-surface)] rounded-2xl p-6 max-w-sm w-full animate-enter border border-[var(--border-base)]"
-          onClick={(e) => e.stopPropagation()}
-        >
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-[var(--color-info-subtle)] flex items-center justify-center">
-                <UserPlus className="w-5 h-5 text-[var(--color-info)]" />
-              </div>
-              <h2 className="text-lg font-medium text-[var(--fg-base)]">Share Journey</h2>
-            </div>
-            <button 
-              onClick={() => {
-                setShowInviteModal(false);
-                setInviteEmail('');
-              }}
-              className="w-8 h-8 rounded-full bg-[var(--bg-hover)] flex items-center justify-center"
-            >
-              <X className="w-4 h-4 text-[var(--fg-muted)]" />
-            </button>
-          </div>
-          
-          <p className="text-sm text-[var(--fg-muted)] mb-4">
-            Invite someone to contribute to <span className="text-[var(--fg-base)]">{journeyToShare.name}</span>. 
-            They&apos;ll be able to add memories and see the journey unlock.
-          </p>
-          
-          {/* Current collaborators */}
-          {(journeyToShare.shared_with?.length || 0) > 0 && (
-            <div className="mb-4 p-3 rounded-xl bg-[var(--bg-hover)]">
-              <p className="text-xs text-[var(--fg-muted)] mb-2">Already shared with:</p>
-              <div className="flex flex-wrap gap-2">
-                {journeyToShare.shared_with?.map((userId, i) => (
-                  <div key={i} className="px-3 py-1 rounded-full bg-[var(--color-info-subtle)] text-[var(--color-info)] text-xs">
-                    Collaborator {i + 1}
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-          
-          <form onSubmit={(e) => { e.preventDefault(); handleInviteCollaborator(); }}>
-            <input
-              type="email"
-              placeholder="Enter their email address"
-              value={inviteEmail}
-              onChange={(e) => setInviteEmail(e.target.value)}
-              className="w-full h-12 px-4 bg-[var(--bg-muted)] border border-[var(--border-base)] rounded-xl text-[var(--fg-base)] placeholder:text-[var(--fg-subtle)] focus:outline-none focus:border-[var(--color-info)] mb-4"
-              autoFocus
-            />
-            
-            <div className="flex gap-3">
-              <button
-                type="button"
-                onClick={() => {
-                  setShowInviteModal(false);
-                  setInviteEmail('');
-                }}
-                className="flex-1 h-12 bg-[var(--bg-hover)] text-[var(--fg-base)] rounded-xl font-medium hover:bg-[var(--bg-active)] transition-colors"
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                disabled={!inviteEmail.trim() || inviteLoading}
-                className="flex-1 h-12 bg-[var(--color-info)] text-white rounded-xl font-medium disabled:opacity-40 disabled:cursor-not-allowed hover:opacity-90 transition-colors flex items-center justify-center gap-2"
-              >
-                {inviteLoading ? (
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                ) : (
-                  <>
-                    <UserPlus className="w-4 h-4" />
-                    Invite
-                  </>
-                )}
-              </button>
-            </div>
-          </form>
-        </div>
-      </div>
+      <EditJourneyModal
+        journey={editingJourney}
+        onClose={() => setEditingJourney(null)}
+        onSuccess={() => window.location.reload()}
+      />
     );
   }
 
-  // --- FOCUSED JOURNEY VIEW (for active journeys) ---
+  // Invite Collaborator Modal
+  if (inviteJourney) {
+    return (
+      <InviteCollaboratorModal
+        journey={inviteJourney}
+        onClose={() => setInviteJourney(null)}
+        onSuccess={handleJourneyUpdated}
+      />
+    );
+  }
+
+  // Manage Memories Sheet
+  if (managingJourney) {
+    return (
+      <ManageMemoriesSheet
+        journey={managingJourney}
+        onClose={() => setManagingJourney(null)}
+        onMemoryDeleted={handleMemoryDeleted}
+      />
+    );
+  }
+
+  // Journey Detail Sheet (focused journey)
   if (focusedJourney) {
-    const countdown = getTimeUntilUnlock(focusedJourney.unlock_date);
     return (
-      <div className="fixed inset-0 z-50 bg-black flex flex-col safe-top safe-bottom">
-        {/* Dynamic gradient background */}
-        <div 
-          className="absolute inset-0"
-          style={{ background: getJourneyGradient(focusedJourney.name).gradient }}
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-black/20" />
-        {/* Subtle pattern overlay */}
-        <div 
-          className="absolute inset-0 opacity-15"
-          style={{
-            backgroundImage: `radial-gradient(circle at 30% 20%, rgba(255,255,255,0.15) 0%, transparent 40%),
-                              radial-gradient(circle at 70% 80%, rgba(255,255,255,0.1) 0%, transparent 40%)`
-          }}
-        />
-        
-        {/* Top Bar */}
-        <div className="relative z-10 flex justify-between items-center p-6">
-          <button 
-            onClick={() => setFocusedJourney(null)} 
-            className="w-10 h-10 flex items-center justify-center rounded-full bg-black/40 backdrop-blur-md border border-white/10 hover:bg-white/20 hover:border-white/20 active:scale-95 transition-all cursor-pointer"
-          >
-            <X className="w-5 h-5 text-white" />
-          </button>
-          {/* Owner-only actions */}
-          {isOwner(focusedJourney) && (
-            <div className="flex gap-2">
-              {/* Share button */}
-              <button
-                onClick={() => {
-                  setJourneyToShare(focusedJourney);
-                  setShowInviteModal(true);
-                }}
-                className="w-10 h-10 rounded-full bg-black/40 backdrop-blur-md border border-white/10 flex items-center justify-center hover:bg-white/20 hover:border-white/20 active:scale-95 transition-all cursor-pointer"
-                title="Share journey"
-              >
-                <UserPlus className="w-4 h-4 text-white" />
-              </button>
-              {/* Edit button */}
-              <button
-                onClick={() => {
-                  setFocusedJourney(null);
-                  openEditModal(focusedJourney);
-                }}
-                className="w-10 h-10 rounded-full bg-black/40 backdrop-blur-md border border-white/10 flex items-center justify-center hover:bg-white/20 hover:border-white/20 active:scale-95 transition-all cursor-pointer"
-                title="Edit journey"
-              >
-                <Pencil className="w-4 h-4 text-white" />
-              </button>
-              {/* Delete button */}
-              <button
-                onClick={() => {
-                  setFocusedJourney(null);
-                  setDeleteConfirm(focusedJourney.id);
-                }}
-                className="w-10 h-10 rounded-full bg-black/40 backdrop-blur-md border border-white/10 flex items-center justify-center hover:bg-red-500/30 hover:border-red-500/30 active:scale-95 transition-all cursor-pointer"
-                title="Delete journey"
-              >
-                <Trash2 className="w-4 h-4 text-white" />
-              </button>
-            </div>
-          )}
-        </div>
-        
-        {/* Content */}
-        <div className="relative z-10 flex-1 flex flex-col justify-end p-6 pb-12">
-          {/* Locked indicator */}
-          <div className="flex items-center gap-2 mb-4">
-            <div className="w-8 h-8 rounded-full bg-amber-500/20 flex items-center justify-center">
-              <Lock className="w-4 h-4 text-amber-400" />
-            </div>
-            <span className="text-xs font-semibold tracking-wider uppercase text-amber-400">Locked</span>
-          </div>
-          
-          {/* Journey Name */}
-          <h1 className="text-4xl font-bold mb-2 text-white">{focusedJourney.name}</h1>
-          
-          {/* Memory count with manage link */}
-          <button 
-            onClick={() => {
-              setManagingMemories(focusedJourney);
-              fetchLockedMemories(focusedJourney.id);
-            }}
-            className="text-white/70 mb-4 flex items-center gap-2 hover:text-white transition-colors"
-          >
-            <span>{focusedJourney.memory_count || 0} {(focusedJourney.memory_count || 0) === 1 ? 'memory' : 'memories'} captured</span>
-            {(focusedJourney.memory_count || 0) > 0 && (
-              <ChevronRight className="w-4 h-4" />
-            )}
-          </button>
-          
-          {/* Shared with indicator */}
-          {(focusedJourney.shared_with?.length || 0) > 0 && (
-            <div className="mb-8">
-              <div className="flex items-center gap-2 text-white/60 mb-3">
-                <Users className="w-4 h-4" />
-                <span className="text-sm">
-                  Shared with {focusedJourney.shared_with?.length} {focusedJourney.shared_with?.length === 1 ? 'person' : 'people'}
-                </span>
-              </div>
-              <div className="flex flex-wrap gap-2">
-                {focusedJourney.shared_with?.map(userId => (
-                  <div 
-                    key={userId}
-                    className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-black/30 backdrop-blur-sm border border-white/10"
-                  >
-                    <span className="text-sm text-white/80">
-                      {collaboratorEmails[userId] || 'Loading...'}
-                    </span>
-                    {isOwner(focusedJourney) && (
-                      <button
-                        onClick={() => handleRemoveCollaborator(focusedJourney.id, userId)}
-                        className="w-4 h-4 flex items-center justify-center rounded-full hover:bg-red-500/20 transition-colors"
-                        title="Remove collaborator"
-                      >
-                        <X className="w-3 h-3 text-white/50 hover:text-red-400" />
-                      </button>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-          
-          {!focusedJourney.shared_with?.length && <div className="mb-4" />}
-          
-          {/* Countdown */}
-          <div className="rounded-2xl p-6 mb-6 bg-white/5 backdrop-blur-md border border-white/10">
-            <div className="flex items-center gap-2 mb-2">
-              <Clock className="w-4 h-4 text-white/60" />
-              <p className="text-xs text-white/60 uppercase tracking-wider">Unlocks in</p>
-            </div>
-            <p className="text-4xl font-light tracking-wide text-white">{countdown}</p>
-          </div>
-          
-          {/* Capture Button */}
-          <button
-            onClick={() => {
-              setFocusedJourney(null);
-              onCapture?.(focusedJourney);
-            }}
-            className="w-full h-16 rounded-full bg-gradient-to-r from-white to-zinc-100 text-black font-semibold flex items-center justify-center gap-3 active:scale-[0.98] transition-transform shadow-xl shadow-white/10"
-          >
-            <div className="w-8 h-8 rounded-full bg-black/10 flex items-center justify-center">
-              <Camera className="w-4 h-4" />
-            </div>
-            Capture Memory
-          </button>
-        </div>
-      </div>
+      <JourneyDetailSheet
+        journey={focusedJourney}
+        onClose={() => setFocusedJourney(null)}
+        onCapture={(j) => { setFocusedJourney(null); onCapture?.(j); }}
+        onEdit={(j) => { setFocusedJourney(null); setEditingJourney(j); }}
+        onDelete={(id) => { setFocusedJourney(null); setDeleteConfirm(id); }}
+        onManageMemories={(j) => setManagingJourney(j)}
+        onInvite={(j) => setInviteJourney(j)}
+        isOwner={isOwner(focusedJourney)}
+        onJourneyUpdated={handleJourneyUpdated}
+      />
     );
   }
 
-  // --- GALLERY VIEW (for unlocked journeys) ---
+  // Gallery View (for unlocked journeys)
   if (selectedJourney) {
     return (
       <GalleryView 
         journey={selectedJourney} 
         onClose={() => setSelectedJourney(null)}
         onMemoryDeleted={() => {
-          // Update the memory count in pastJourneys
-          setPastJourneys(pastJourneys.map(j => 
+          setPastJourneys(prev => prev.map(j => 
             j.id === selectedJourney.id 
               ? { ...j, memory_count: Math.max(0, (j.memory_count || 1) - 1) }
               : j
@@ -1194,183 +320,26 @@ $$ LANGUAGE sql SECURITY DEFINER;
     );
   }
 
-  // --- HELP MODAL ---
+  // Help Modal
   if (showHelp) {
-    return (
-      <div className="fixed inset-0 z-50 bg-[var(--bg-base)]/90 backdrop-blur-md flex flex-col safe-top safe-bottom">
-        <div className="flex-1 flex flex-col p-6 animate-enter overflow-y-auto">
-          <button 
-            onClick={() => setShowHelp(false)} 
-            className="self-end w-10 h-10 flex items-center justify-center rounded-full bg-[var(--bg-hover)] mb-6"
-          >
-            <X className="w-5 h-5 text-[var(--fg-muted)]" />
-          </button>
-          
-          <div className="max-w-sm mx-auto w-full">
-            <div className="flex items-center gap-3 mb-8">
-              <Image src="/icon.svg" alt="Sunroof" width={32} height={32} />
-              <h2 className="text-2xl font-light">How Sunroof Works</h2>
-            </div>
-            
-            <div className="space-y-6">
-              <div className="flex gap-4">
-                <div className="w-12 h-12 rounded-full bg-emerald-500/10 flex items-center justify-center flex-shrink-0">
-                  <Sparkles className="w-5 h-5 text-emerald-400" />
-                </div>
-             <div>
-                  <h3 className="font-medium mb-1">1. Start a Journey</h3>
-                  <p className="text-sm text-[var(--fg-muted)] leading-relaxed">
-                    Create a new journey before you go. Choose when your memories unlock.
-                  </p>
-                </div>
-              </div>
-              
-              <div className="flex gap-4">
-                <div className="w-12 h-12 rounded-full bg-blue-500/10 flex items-center justify-center flex-shrink-0">
-                  <Camera className="w-5 h-5 text-blue-400" />
-                </div>
-                <div>
-                  <h3 className="font-medium mb-1">2. Capture Moments</h3>
-                  <p className="text-sm text-[var(--fg-muted)] leading-relaxed">
-                    Take photos and write notes during your journey. They go straight to the vault, no peeking!
-                  </p>
-                </div>
-              </div>
-              
-              <div className="flex gap-4">
-                <div className="w-12 h-12 rounded-full bg-amber-500/10 flex items-center justify-center flex-shrink-0">
-                  <Lock className="w-5 h-5 text-amber-400" />
-                </div>
-                <div>
-                  <h3 className="font-medium mb-1">3. Wait for Unlock</h3>
-                  <p className="text-sm text-[var(--fg-muted)] leading-relaxed">
-                    Your memories stay hidden until the timer expires. Stay present and enjoy the moment.
-                  </p>
-                </div>
-              </div>
-              
-              <div className="flex gap-4">
-                <div className="w-12 h-12 rounded-full bg-pink-500/10 flex items-center justify-center flex-shrink-0">
-                  <ImageIcon className="w-5 h-5 text-pink-400" />
-                </div>
-                <div>
-                  <h3 className="font-medium mb-1">4. Relive the Magic</h3>
-                  <p className="text-sm text-[var(--fg-muted)] leading-relaxed">
-                    When time&apos;s up, open your vault and rediscover your journey. It&apos;s like developing film!
-                  </p>
-                </div>
-              </div>
-             </div>
-
-             <button 
-              onClick={() => setShowHelp(false)}
-              className="w-full h-14 bg-[var(--fg-base)] text-[var(--fg-inverse)] rounded-full font-semibold text-sm mt-10"
-             >
-              Got it
-             </button>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // --- EDIT JOURNEY MODAL ---
-  if (editingJourney) {
-    return (
-      <div className="fixed inset-0 z-50 bg-[var(--bg-base)]/90 backdrop-blur-md flex flex-col safe-top safe-bottom">
-        <div className="flex-1 flex flex-col p-6 animate-enter">
-          <button 
-            onClick={() => setEditingJourney(null)} 
-            className="self-end w-10 h-10 flex items-center justify-center rounded-full bg-[var(--bg-hover)] mb-6"
-          >
-            <X className="w-5 h-5 text-[var(--fg-muted)]" />
-          </button>
-          
-          <div className="flex-1 flex flex-col justify-center max-w-sm mx-auto w-full">
-            <h2 className="text-3xl font-light tracking-tight text-[var(--fg-base)] mb-8">Edit Journey</h2>
-            
-            <div className="space-y-6">
-              <div>
-                <label className="text-[11px] uppercase tracking-[0.2em] text-[var(--fg-muted)] font-medium mb-3 block">
-                  Name
-                </label>
-                <input 
-                  type="text" 
-                  value={editName}
-                  onChange={(e) => setEditName(e.target.value)}
-                  maxLength={50}
-                  className="w-full bg-[var(--bg-surface)] rounded-xl py-3 px-4 text-lg text-[var(--fg-base)] focus:outline-none focus:ring-2 focus:ring-[var(--fg-base)]/20"
-                />
-              </div>
-              
-              <div>
-                <label className="text-[11px] uppercase tracking-[0.2em] text-[var(--fg-muted)] font-medium mb-3 block">
-                  Unlock Date
-                </label>
-                <input 
-                  type="date"
-                  value={editDate}
-                  onChange={(e) => setEditDate(e.target.value)}
-                  min={new Date().toISOString().split('T')[0]}
-                  className="w-full bg-[var(--bg-surface)] rounded-xl py-3 px-4 text-lg text-[var(--fg-base)] focus:outline-none focus:ring-2 focus:ring-[var(--fg-base)]/20"
-                />
-              </div>
-              
-              <button 
-                onClick={handleEditJourney}
-                disabled={!editName.trim() || isSaving}
-                className="w-full h-14 bg-[var(--fg-base)] text-[var(--fg-inverse)] rounded-full font-semibold text-sm disabled:opacity-40 mt-4"
-              >
-                {isSaving ? 'Saving...' : 'Save Changes'}
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // --- DELETE CONFIRMATION MODAL ---
-  if (deleteConfirm) {
-    return (
-      <div 
-        className="fixed inset-0 z-50 bg-[var(--bg-base)]/80 backdrop-blur-sm flex items-center justify-center p-6"
-        onClick={() => setDeleteConfirm(null)}
-      >
-        <div 
-          className="w-full max-w-sm bg-[var(--bg-surface)] rounded-3xl p-6 animate-enter"
-          onClick={(e) => e.stopPropagation()}
-        >
-          <div className="w-14 h-14 mx-auto mb-4 rounded-full bg-[var(--color-error-subtle)] flex items-center justify-center">
-            <Trash2 className="w-6 h-6 text-[var(--color-error)]" />
-          </div>
-          <h3 className="text-xl font-semibold text-center mb-2 text-[var(--fg-base)]">Delete Journey?</h3>
-          <p className="text-[var(--fg-muted)] text-sm text-center mb-6">
-            This will permanently delete this journey and all its memories. This cannot be undone.
-          </p>
-          <div className="flex gap-3">
-            <button
-              onClick={() => setDeleteConfirm(null)}
-              className="flex-1 h-12 rounded-full bg-[var(--bg-muted)] text-[var(--fg-base)] font-medium hover:bg-[var(--bg-hover)] transition-colors"
-            >
-              Cancel
-            </button>
-            <button
-              onClick={() => handleDeleteJourney(deleteConfirm)}
-              disabled={isDeleting}
-              className="flex-1 h-12 rounded-full bg-[var(--color-error)] text-white font-medium hover:opacity-90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {isDeleting ? 'Deleting...' : 'Delete'}
-            </button>
-          </div>
-        </div>
-      </div>
-    );
+    return <HelpModal isOpen={showHelp} onClose={() => setShowHelp(false)} />;
   }
 
   // --- MAIN DASHBOARD ---
   return (
     <div className="min-h-[100dvh] flex flex-col safe-top safe-bottom">
+      {/* Delete Confirmation Dialog */}
+      <ConfirmDialog
+        isOpen={!!deleteConfirm}
+        onClose={() => setDeleteConfirm(null)}
+        onConfirm={() => deleteConfirm && handleDeleteJourney(deleteConfirm)}
+        title="Delete Journey?"
+        description="This will permanently delete this journey and all its memories. This cannot be undone."
+        confirmLabel={isDeleting ? 'Deleting...' : 'Delete'}
+        variant="danger"
+        loading={isDeleting}
+      />
+
       {/* Header */}
       <header className="flex justify-between items-center p-6 pb-4">
         <div className="flex items-center gap-2">
@@ -1378,7 +347,7 @@ $$ LANGUAGE sql SECURITY DEFINER;
           <span className="text-[11px] font-semibold tracking-[0.25em] uppercase text-[var(--fg-muted)]">Sunroof</span>
         </div>
         <div className="flex items-center gap-2">
-          {/* Search Button - only show if there are journeys to search */}
+          {/* Search Button */}
           {(activeJourneys.length > 0 || pastJourneys.length > 0) && (
             <button 
               onClick={() => setShowSearch(!showSearch)}
@@ -1418,7 +387,7 @@ $$ LANGUAGE sql SECURITY DEFINER;
               size="md"
             />
           </Link>
-            </div>
+        </div>
       </header>
 
       {/* Search Bar */}
@@ -1451,7 +420,6 @@ $$ LANGUAGE sql SECURITY DEFINER;
         </div>
       )}
 
-      {/* Main Content */}
       {/* Pull to Refresh Indicator */}
       <div 
         className="flex items-center justify-center overflow-hidden transition-all duration-200"
@@ -1462,12 +430,8 @@ $$ LANGUAGE sql SECURITY DEFINER;
       >
         <div className={`flex items-center gap-2 ${isRefreshing ? 'animate-pulse' : ''}`}>
           <RefreshCw 
-            className={`w-5 h-5 text-zinc-500 transition-transform ${
-              isRefreshing ? 'animate-spin' : ''
-            }`} 
-            style={{ 
-              transform: isRefreshing ? undefined : `rotate(${(pullDistance / PULL_THRESHOLD) * 360}deg)` 
-            }}
+            className={`w-5 h-5 text-zinc-500 transition-transform ${isRefreshing ? 'animate-spin' : ''}`} 
+            style={{ transform: isRefreshing ? undefined : `rotate(${(pullDistance / PULL_THRESHOLD) * 360}deg)` }}
           />
           <span className="text-sm text-zinc-500">
             {isRefreshing ? 'Refreshing...' : pullDistance >= PULL_THRESHOLD ? 'Release to refresh' : 'Pull to refresh'}
@@ -1475,20 +439,14 @@ $$ LANGUAGE sql SECURITY DEFINER;
         </div>
       </div>
 
-      <main 
-        ref={mainRef}
-        className="flex-1 px-6 pb-6 overflow-y-auto scrollbar-hide overscroll-contain"
-      >
+      <main ref={mainRef} className="flex-1 px-6 pb-6 overflow-y-auto scrollbar-hide overscroll-contain">
         
         {/* Welcome Section */}
         {(activeJourneys.length > 0 || pastJourneys.length > 0) && (
           <div className="mb-8 animate-enter">
-            {/* Greeting */}
             <h1 className="text-2xl font-light mb-1 text-[var(--fg-muted)]">
               {getGreeting()}, <span className="text-[var(--fg-base)]">{user?.user_metadata?.display_name?.split(' ')[0] || 'traveler'}</span>
             </h1>
-            
-            {/* Contextual subtitle */}
             <p className="text-[var(--fg-muted)] text-sm mb-4">
               {activeJourneys.length > 0 
                 ? `You have ${activeJourneys.length} ${activeJourneys.length === 1 ? 'journey' : 'journeys'} in progress`
@@ -1499,32 +457,28 @@ $$ LANGUAGE sql SECURITY DEFINER;
             </p>
             
             {/* Quick Stats Row */}
-            {(activeJourneys.length > 0 || pastJourneys.length > 0) && (
-              <div className="flex gap-3">
-                {/* Total Memories */}
+            <div className="flex gap-3">
+              <div className="flex items-center gap-2 px-3 py-2 rounded-full bg-[var(--bg-hover)] border border-[var(--border-base)]">
+                <ImageIcon className="w-3.5 h-3.5 text-pink-400" />
+                <span className="text-xs text-[var(--fg-muted)]">
+                  {activeJourneys.reduce((sum, j) => sum + (j.memory_count || 0), 0) + 
+                   pastJourneys.reduce((sum, j) => sum + (j.memory_count || 0), 0)} memories
+                </span>
+              </div>
+              
+              {activeJourneys.length > 0 && (
                 <div className="flex items-center gap-2 px-3 py-2 rounded-full bg-[var(--bg-hover)] border border-[var(--border-base)]">
-                  <ImageIcon className="w-3.5 h-3.5 text-pink-400" />
+                  <Timer className="w-3.5 h-3.5 text-amber-400" />
                   <span className="text-xs text-[var(--fg-muted)]">
-                    {activeJourneys.reduce((sum, j) => sum + (j.memory_count || 0), 0) + 
-                     pastJourneys.reduce((sum, j) => sum + (j.memory_count || 0), 0)} memories
+                    Next unlock: {getTimeUntilUnlock(
+                      [...activeJourneys].sort((a, b) => 
+                        new Date(a.unlock_date).getTime() - new Date(b.unlock_date).getTime()
+                      )[0].unlock_date
+                    )}
                   </span>
                 </div>
-                
-                {/* Next Unlock */}
-                {activeJourneys.length > 0 && (
-                  <div className="flex items-center gap-2 px-3 py-2 rounded-full bg-[var(--bg-hover)] border border-[var(--border-base)]">
-                    <Timer className="w-3.5 h-3.5 text-amber-400" />
-                    <span className="text-xs text-[var(--fg-muted)]">
-                      Next unlock: {getTimeUntilUnlock(
-                        [...activeJourneys].sort((a, b) => 
-                          new Date(a.unlock_date).getTime() - new Date(b.unlock_date).getTime()
-                        )[0].unlock_date
-                      )}
-                    </span>
-                  </div>
-                )}
-              </div>
-            )}
+              )}
+            </div>
           </div>
         )}
         
@@ -1554,21 +508,13 @@ $$ LANGUAGE sql SECURITY DEFINER;
                     className="relative w-full glass rounded-[28px] p-6 overflow-hidden border border-white/10 cursor-pointer card-glow active:scale-[0.98] transition-all duration-300"
                     style={{ animationDelay: `${index * 100}ms` }}
                   >
-                    {/* Dynamic gradient background based on journey name */}
-                    <div 
-                      className="absolute inset-0"
-                      style={{ background: getJourneyGradient(journey.name).gradient }}
-                    />
+                    {/* Dynamic gradient background */}
+                    <div className="absolute inset-0" style={{ background: getJourneyGradient(journey.name).gradient }} />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
-                    
-                    {/* Subtle pattern overlay for texture */}
-                    <div 
-                      className="absolute inset-0 opacity-20"
-                      style={{
-                        backgroundImage: `radial-gradient(circle at 25% 25%, rgba(255,255,255,0.1) 0%, transparent 50%),
-                                          radial-gradient(circle at 75% 75%, rgba(255,255,255,0.08) 0%, transparent 50%)`
-                      }}
-                    />
+                    <div className="absolute inset-0 opacity-20" style={{
+                      backgroundImage: `radial-gradient(circle at 25% 25%, rgba(255,255,255,0.1) 0%, transparent 50%),
+                                        radial-gradient(circle at 75% 75%, rgba(255,255,255,0.08) 0%, transparent 50%)`
+                    }} />
                     
                     <div className="relative z-10 flex justify-between items-start mb-4">
                       <div>
@@ -1576,24 +522,17 @@ $$ LANGUAGE sql SECURITY DEFINER;
                           <p className="text-zinc-500 text-xs font-medium uppercase tracking-wider">
                             Unlocks in {getTimeUntilUnlock(journey.unlock_date)}
                           </p>
-                          {/* Shared indicator for collaborators */}
                           {!isOwner(journey) && (
-                            <span className="px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-400 text-[10px] font-medium">
-                              Shared
-                            </span>
+                            <span className="px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-400 text-[10px] font-medium">Shared</span>
                           )}
                         </div>
                         {(journey.memory_count ?? 0) > 0 && (
                           <div className="mt-1">
-                            <MemoryBadge 
-                              count={journey.memory_count ?? 0} 
-                              isLocked={true}
-                              variant="compact"
-                            />
+                            <MemoryBadge count={journey.memory_count ?? 0} isLocked={true} variant="compact" />
                           </div>
                         )}
                       </div>
-                      {/* Owner-only action buttons - show inline on desktop, menu button on mobile */}
+                      {/* Owner-only action buttons */}
                       {isOwner(journey) && (
                         isMobile ? (
                           <button
@@ -1608,7 +547,7 @@ $$ LANGUAGE sql SECURITY DEFINER;
                         ) : (
                           <div className="flex gap-1">
                             <button
-                              onClick={(e) => { e.stopPropagation(); openEditModal(journey); }}
+                              onClick={(e) => { e.stopPropagation(); setEditingJourney(journey); }}
                               className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center hover:bg-white/10 transition-colors"
                             >
                               <Pencil className="w-3.5 h-3.5 text-zinc-500" />
@@ -1640,30 +579,22 @@ $$ LANGUAGE sql SECURITY DEFINER;
               </div>
             </div>
           ) : (
+            /* Empty state */
             <div className="text-center py-12 animate-enter">
-              {/* Premium empty state illustration */}
               <div className="relative w-40 h-40 mx-auto mb-8 empty-illustration">
-                {/* Outer glow ring */}
                 <div className="absolute inset-0 rounded-full bg-gradient-to-br from-orange-500/20 via-pink-500/10 to-purple-500/20 animate-breathe" />
-                
-                {/* Main circle */}
                 <div className="absolute inset-4 rounded-full bg-gradient-to-br from-zinc-900 to-zinc-950 border border-zinc-800 flex items-center justify-center shadow-2xl">
                   <div className="relative">
                     <Camera className="w-10 h-10 text-zinc-500" />
-                    {/* Sparkle accents */}
                     <Sparkles className="absolute -top-2 -right-2 w-4 h-4 text-orange-400 animate-pulse" />
                   </div>
                 </div>
-                
-                {/* Floating decorative elements */}
                 <div className="absolute top-2 right-6 w-3 h-3 rounded-full bg-gradient-to-br from-orange-400 to-orange-500 animate-float" style={{ animationDelay: '0s' }} />
                 <div className="absolute bottom-4 left-4 w-2 h-2 rounded-full bg-gradient-to-br from-pink-400 to-pink-500 animate-float" style={{ animationDelay: '0.5s' }} />
                 <div className="absolute top-1/2 -right-2 w-2 h-2 rounded-full bg-gradient-to-br from-purple-400 to-purple-500 animate-float" style={{ animationDelay: '1s' }} />
               </div>
               
-              <h2 className="text-3xl font-light text-white mb-3">
-                Ready for an adventure?
-              </h2>
+              <h2 className="text-3xl font-light text-white mb-3">Ready for an adventure?</h2>
               <p className="text-base text-zinc-500 mb-10 max-w-[280px] mx-auto leading-relaxed">
                 Start a journey to capture photos and notes that unlock later. Like developing film.
               </p>
@@ -1675,13 +606,11 @@ $$ LANGUAGE sql SECURITY DEFINER;
                 <Plus className="w-5 h-5" />
                 <span>Start Your First Journey</span>
                 <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-            </button>
+              </button>
               
-              <p className="mt-6 text-xs text-zinc-600">
-                Takes 30 seconds • No credit card needed
-              </p>
-          </div>
-        )}
+              <p className="mt-6 text-xs text-zinc-600">Takes 30 seconds • No credit card needed</p>
+            </div>
+          )}
         </section>
 
         {/* Past Journeys / Archive */}
@@ -1705,15 +634,8 @@ $$ LANGUAGE sql SECURITY DEFINER;
                       : 'bg-zinc-900/30 opacity-50 cursor-not-allowed'
                   }`}
                 >
-                  {/* Subtle gradient accent on left edge */}
-                  <div 
-                    className="absolute left-0 top-0 bottom-0 w-1 rounded-l-2xl"
-                    style={{ background: getJourneyGradient(journey.name).gradient }}
-                  />
-                  <div 
-                    className="w-12 h-12 rounded-xl flex items-center justify-center relative overflow-hidden"
-                    style={{ background: getJourneyGradient(journey.name).gradient }}
-                  >
+                  <div className="absolute left-0 top-0 bottom-0 w-1 rounded-l-2xl" style={{ background: getJourneyGradient(journey.name).gradient }} />
+                  <div className="w-12 h-12 rounded-xl flex items-center justify-center relative overflow-hidden" style={{ background: getJourneyGradient(journey.name).gradient }}>
                     <div className="absolute inset-0 bg-black/30" />
                     {isUnlocked(journey) ? (
                       <Sparkles className="w-5 h-5 text-white relative z-10" />
@@ -1726,9 +648,7 @@ $$ LANGUAGE sql SECURITY DEFINER;
                     <div className="flex items-center gap-2">
                       <h3 className="font-medium text-white truncate">{journey.name}</h3>
                       {!isOwner(journey) && (
-                        <span className="px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-400 text-[10px] font-medium shrink-0">
-                          Shared
-                        </span>
+                        <span className="px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-400 text-[10px] font-medium shrink-0">Shared</span>
                       )}
                     </div>
                     <p className="text-xs text-zinc-500">
@@ -1739,36 +659,26 @@ $$ LANGUAGE sql SECURITY DEFINER;
                     </p>
                   </div>
                   
-                  {isUnlocked(journey) && (
-                    <ChevronRight className="w-5 h-5 text-zinc-600" />
-                  )}
+                  {isUnlocked(journey) && <ChevronRight className="w-5 h-5 text-zinc-600" />}
                 </button>
               ))}
             </div>
           </section>
         )}
 
-        {/* Footer with Legal Links */}
+        {/* Footer */}
         <footer className="mt-8 pb-6 text-center space-y-3">
           <nav className="text-xs text-zinc-600">
-            <Link href="/privacy" className="hover:text-zinc-400 transition-colors">
-              Privacy
-            </Link>
+            <Link href="/privacy" className="hover:text-zinc-400 transition-colors">Privacy</Link>
             <span className="mx-3 text-zinc-700">•</span>
-            <Link href="/terms" className="hover:text-zinc-400 transition-colors">
-              Terms
-            </Link>
+            <Link href="/terms" className="hover:text-zinc-400 transition-colors">Terms</Link>
           </nav>
-          <p className="text-[10px] text-zinc-700">
-            © {new Date().getFullYear()} Sunroof. All rights reserved.
-          </p>
+          <p className="text-[10px] text-zinc-700">© {new Date().getFullYear()} Sunroof. All rights reserved.</p>
         </footer>
       </main>
       
       {/* Keyboard Shortcuts Help Modal (desktop only) */}
-      {!isMobile && (
-        <KeyboardShortcutsHelp isOpen={showShortcuts} onClose={closeShortcuts} />
-      )}
+      {!isMobile && <KeyboardShortcutsHelp isOpen={showShortcuts} onClose={closeShortcuts} />}
       
       {/* Action Sheet for journey actions (mobile-friendly) */}
       <ActionSheet
@@ -1779,44 +689,28 @@ $$ LANGUAGE sql SECURITY DEFINER;
           {
             label: 'Capture Memory',
             icon: <Camera className="w-5 h-5" />,
-            onClick: () => {
-              if (actionSheetJourney) onCapture?.(actionSheetJourney);
-            },
+            onClick: () => { if (actionSheetJourney) onCapture?.(actionSheetJourney); },
           },
           {
             label: 'Edit Journey',
             icon: <Pencil className="w-5 h-5" />,
-            onClick: () => {
-              if (actionSheetJourney) openEditModal(actionSheetJourney);
-            },
+            onClick: () => { if (actionSheetJourney) setEditingJourney(actionSheetJourney); },
           },
           {
             label: 'Manage Memories',
             icon: <ImageIcon className="w-5 h-5" />,
-            onClick: () => {
-              if (actionSheetJourney) {
-                setManagingMemories(actionSheetJourney);
-                fetchLockedMemories(actionSheetJourney.id);
-              }
-            },
+            onClick: () => { if (actionSheetJourney) setManagingJourney(actionSheetJourney); },
           },
           {
             label: 'Invite Collaborator',
-            icon: <UserPlus className="w-5 h-5" />,
-            onClick: () => {
-              if (actionSheetJourney) {
-                setJourneyToShare(actionSheetJourney);
-                setShowInviteModal(true);
-              }
-            },
+            icon: <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" /></svg>,
+            onClick: () => { if (actionSheetJourney) setInviteJourney(actionSheetJourney); },
           },
           {
             label: 'Delete Journey',
             icon: <Trash2 className="w-5 h-5" />,
             variant: 'danger',
-            onClick: () => {
-              if (actionSheetJourney) setDeleteConfirm(actionSheetJourney.id);
-            },
+            onClick: () => { if (actionSheetJourney) setDeleteConfirm(actionSheetJourney.id); },
           },
         ]}
       />
