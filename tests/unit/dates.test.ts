@@ -10,7 +10,7 @@ import {
   getGreeting,
   getTimeUntilUnlock,
   isJourneyUnlocked,
-} from '@/lib/utils/dates';
+} from '@/lib';
 
 describe('Date Utilities', () => {
   beforeEach(() => {

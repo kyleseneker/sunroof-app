@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { getCompressionStats, compressImage, compressDataUrl } from '@/lib/imageCompression';
+import { getCompressionStats, compressImage, compressDataUrl } from '@/lib';
 
 describe('Image Compression', () => {
   beforeEach(() => {

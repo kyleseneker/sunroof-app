@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, act, waitFor } from '@testing-library/react';
-import { AuthProvider, useAuth } from '@/lib/auth';
+import { AuthProvider, useAuth } from '@/providers';
 
 // Mock supabase
 const mockGetSession = vi.fn();

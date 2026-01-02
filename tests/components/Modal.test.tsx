@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import Modal from '@/app/components/Modal';
+import { Modal } from '@/components/ui';
 
 describe('Modal Component', () => {
   beforeEach(() => {

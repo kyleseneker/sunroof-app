@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
-import MemoryBadge from '@/app/components/MemoryBadge';
+import { MemoryBadge } from '@/components/features';
 
 describe('MemoryBadge', () => {
   describe('rendering', () => {

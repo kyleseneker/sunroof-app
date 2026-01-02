@@ -10,7 +10,7 @@
 export async function register() {
   // Only run on server
   if (process.env.NEXT_RUNTIME === 'nodejs') {
-    const { validateEnv, logEnvStatus } = await import('./lib/env');
+    const { validateEnv, logEnvStatus } = await import('./src/lib/env');
     
     // Validate environment variables
     const { valid, errors } = validateEnv();

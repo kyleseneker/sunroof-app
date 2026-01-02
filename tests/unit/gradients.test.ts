@@ -3,7 +3,7 @@ import {
   hashString,
   getJourneyGradient,
   getJourneyPrimaryColor,
-} from '@/lib/utils/gradients';
+} from '@/lib';
 
 describe('Gradient Utilities', () => {
   describe('hashString', () => {

@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
-import ActionSheet, { useLongPress } from '@/app/components/ActionSheet';
+import { ActionSheet, useLongPress } from '@/components/features';
 
 // Mock haptics
 vi.mock('@/lib/haptics', () => ({

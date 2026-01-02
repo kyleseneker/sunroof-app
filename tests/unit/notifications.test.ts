@@ -5,7 +5,7 @@ import {
   registerServiceWorker,
   subscribeToPushNotifications,
   unsubscribeFromPushNotifications
-} from '@/lib/notifications';
+} from '@/lib';
 
 // Mock supabase
 vi.mock('@/lib/supabase', () => ({

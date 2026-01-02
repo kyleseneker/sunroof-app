@@ -16,7 +16,7 @@ import {
   ok,
   err,
   tryCatch,
-} from '@/lib/errors';
+} from '@/lib';
 
 describe('Error Classes', () => {
   describe('AppError', () => {

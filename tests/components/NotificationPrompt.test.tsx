@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, fireEvent, act } from '@testing-library/react';
-import NotificationPrompt, { NotificationSettings } from '@/app/components/NotificationPrompt';
+import { NotificationPrompt, NotificationSettings } from '@/components/features';
 
 // Mock the notifications library
 vi.mock('@/lib/notifications', () => ({
@@ -9,7 +9,7 @@ vi.mock('@/lib/notifications', () => ({
   requestNotificationPermission: vi.fn().mockResolvedValue('granted'),
 }));
 
-import { checkNotificationPermission, requestNotificationPermission } from '@/lib/notifications';
+import { checkNotificationPermission, requestNotificationPermission } from '@/lib';
 
 describe('NotificationPrompt Component', () => {
   beforeEach(() => {

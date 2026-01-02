@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
-import Progress, { CircularProgress } from '@/app/components/Progress';
+import { Progress, CircularProgress } from '@/components/ui';
 
 describe('Progress Component', () => {
   it('renders with correct percentage', () => {

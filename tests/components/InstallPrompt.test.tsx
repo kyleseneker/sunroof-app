@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, fireEvent, act } from '@testing-library/react';
-import InstallPrompt from '@/app/components/InstallPrompt';
+import { InstallPrompt } from '@/components/features';
 
 describe('InstallPrompt Component', () => {
   beforeEach(() => {

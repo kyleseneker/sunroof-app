@@ -7,7 +7,7 @@ import {
   validateFile,
   sanitizeString,
   isSafeString,
-} from '@/lib/utils/validation';
+} from '@/lib';
 
 describe('Validation Utilities', () => {
   describe('validateEmail', () => {

@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { renderHook } from '@testing-library/react';
-import { useAnalytics, AnalyticsEvents } from '@/lib/hooks/useAnalytics';
+import { useAnalytics, AnalyticsEvents } from '@/hooks';
 
 describe('useAnalytics', () => {
   const originalNodeEnv = process.env.NODE_ENV;

@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { haptic, hapticClick, hapticSuccess, hapticError, hapticSelection } from '@/lib/haptics';
+import { haptic, hapticClick, hapticSuccess, hapticError, hapticSelection } from '@/lib';
 
 describe('Haptics Library', () => {
   beforeEach(() => {

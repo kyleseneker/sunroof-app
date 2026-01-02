@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
-import Button from '@/app/components/Button';
+import { Button } from '@/components/ui';
 import { Mail } from 'lucide-react';
 
 describe('Button Component', () => {

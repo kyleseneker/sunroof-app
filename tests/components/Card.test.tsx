@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
-import Card, { CardHeader, CardContent, CardFooter } from '@/app/components/Card';
+import { Card, CardHeader, CardContent, CardFooter } from '@/components/ui';
 
 describe('Card Component', () => {
   it('renders children correctly', () => {

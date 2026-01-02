@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { render, screen, act } from '@testing-library/react';
-import OfflineIndicator from '@/app/components/OfflineIndicator';
+import { OfflineIndicator } from '@/components/features';
 
 describe('OfflineIndicator Component', () => {
   let originalOnLine: boolean;

@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
-import SkipLink from '@/app/components/SkipLink';
+import { SkipLink } from '@/components/ui';
 
 describe('SkipLink Component', () => {
   it('renders with correct href', () => {

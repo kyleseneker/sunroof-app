@@ -1,12 +1,13 @@
 import { describe, it, expect } from 'vitest';
 import { render } from '@testing-library/react';
-import Skeleton, {
+import {
+  Skeleton,
   SkeletonCard,
   SkeletonJourneyCard,
   SkeletonMemoryGrid,
   SkeletonListItem,
   SkeletonProfile,
-} from '@/app/components/Skeleton';
+} from '@/components/ui';
 
 describe('Skeleton', () => {
   describe('base component', () => {
