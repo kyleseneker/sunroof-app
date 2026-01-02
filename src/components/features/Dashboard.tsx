@@ -1377,23 +1377,23 @@ $$ LANGUAGE sql SECURITY DEFINER;
       <header className="flex justify-between items-center p-6 pb-4">
         <div className="flex items-center gap-2">
           <Image src="/icon.svg" alt="Sunroof" width={22} height={22} />
-          <span className="text-[11px] font-semibold tracking-[0.25em] uppercase text-zinc-500">Sunroof</span>
+          <span className="text-[11px] font-semibold tracking-[0.25em] uppercase text-[var(--fg-muted)]">Sunroof</span>
         </div>
         <div className="flex items-center gap-2">
           {/* Search Button - only show if there are journeys to search */}
           {(activeJourneys.length > 0 || pastJourneys.length > 0) && (
             <button 
               onClick={() => setShowSearch(!showSearch)}
-              className={`w-10 h-10 rounded-full border border-white/10 flex items-center justify-center hover:bg-white/10 active:scale-95 transition-all cursor-pointer ${showSearch ? 'bg-white/10' : 'bg-white/5'}`}
+              className={`w-10 h-10 rounded-full border border-[var(--border-base)] flex items-center justify-center hover:bg-[var(--bg-active)] active:scale-95 transition-all cursor-pointer ${showSearch ? 'bg-[var(--bg-active)]' : 'bg-[var(--bg-hover)]'}`}
             >
-              <Search className="w-4 h-4 text-zinc-500" />
+              <Search className="w-4 h-4 text-[var(--fg-muted)]" />
             </button>
           )}
           <button 
             onClick={() => setShowHelp(true)}
-            className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center hover:bg-white/10 active:scale-95 transition-all cursor-pointer"
+            className="w-10 h-10 rounded-full bg-[var(--bg-hover)] border border-[var(--border-base)] flex items-center justify-center hover:bg-[var(--bg-active)] active:scale-95 transition-all cursor-pointer"
           >
-            <HelpCircle className="w-4 h-4 text-zinc-500" />
+            <HelpCircle className="w-4 h-4 text-[var(--fg-muted)]" />
           </button>
           <button 
             onClick={() => {
@@ -1403,9 +1403,9 @@ $$ LANGUAGE sql SECURITY DEFINER;
                 showToast(`Maximum ${MAX_ACTIVE_JOURNEYS} active journeys allowed`, 'error');
               }
             }}
-            className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center hover:bg-white/10 active:scale-95 transition-all cursor-pointer"
+            className="w-10 h-10 rounded-full bg-[var(--bg-hover)] border border-[var(--border-base)] flex items-center justify-center hover:bg-[var(--bg-active)] active:scale-95 transition-all cursor-pointer"
           >
-            <Plus className="w-4 h-4 text-white" />
+            <Plus className="w-4 h-4 text-[var(--fg-base)]" />
           </button>
           {/* Profile Avatar */}
           <Link 
