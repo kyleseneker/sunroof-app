@@ -78,7 +78,7 @@ const IconButton = forwardRef<HTMLButtonElement, IconButtonProps & { dark?: bool
         {loading ? (
           <Loader2 className={cn(sizeStyles[size].icon, 'animate-spin')} aria-hidden="true" />
         ) : (
-          <span className={sizeStyles[size].icon} aria-hidden="true">
+          <span className="flex items-center justify-center" aria-hidden="true">
             {icon}
           </span>
         )}
