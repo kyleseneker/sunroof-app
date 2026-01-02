@@ -402,7 +402,7 @@ export default function ProfilePage() {
           <div className="space-y-3">
             <button
               onClick={handleSignOut}
-              className="group w-full flex items-center justify-center gap-2 h-14 bg-white/5 hover:bg-white/10 rounded-2xl text-sm font-medium transition-all active:scale-[0.98]"
+              className="group w-full flex items-center justify-center gap-2 h-14 bg-[var(--bg-surface)] hover:bg-[var(--bg-muted)] border border-[var(--border-base)] rounded-2xl text-sm font-medium text-[var(--fg-base)] transition-all active:scale-[0.98]"
             >
               <LogOut className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" />
               Sign Out
