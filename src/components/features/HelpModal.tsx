@@ -1,19 +1,21 @@
 'use client';
 
+import { ReactNode } from 'react';
 import { X, Sparkles, Camera, Lock, ImageIcon } from 'lucide-react';
 import Image from 'next/image';
 
 interface HelpModalProps {
   isOpen: boolean;
   onClose: () => void;
+  children?: ReactNode;
 }
 
-export default function HelpModal({ isOpen, onClose }: HelpModalProps) {
+export default function HelpModal({ isOpen, onClose, children }: HelpModalProps) {
   if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 z-50 bg-[var(--bg-base)]/90 backdrop-blur-md flex flex-col safe-top safe-bottom">
-      <div className="flex-1 flex flex-col p-6 animate-enter overflow-y-auto">
+      <div className="flex-1 flex flex-col p-6 animate-enter overflow-y-auto scrollbar-hide">
         <button 
           onClick={onClose}
           className="self-end w-10 h-10 flex items-center justify-center rounded-full bg-[var(--bg-hover)] mb-6"
@@ -76,6 +78,8 @@ export default function HelpModal({ isOpen, onClose }: HelpModalProps) {
               </div>
             </div>
           </div>
+
+          {children}
 
           <button 
             onClick={onClose}

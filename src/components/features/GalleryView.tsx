@@ -3,8 +3,8 @@
 import { useState, useEffect } from 'react';
 import { api, getJourneyGradient } from '@/lib';
 import { deleteJourney, deleteMemory, fetchMemoriesForJourney } from '@/services';
-import { X, Trash2, Camera, ArrowUpDown, Sparkles, Loader2, Mic } from 'lucide-react';
-import { useToast, ConfirmDialog } from '@/components/ui';
+import { X, Trash2, Camera, ArrowUpDown, Sparkles, Mic } from 'lucide-react';
+import { useToast, ConfirmDialog, IconButton } from '@/components/ui';
 import { AudioPlayer, MemoryViewer, AIRecapSheet } from '@/components/features';
 import type { Journey, Memory } from '@/types';
 
@@ -226,9 +226,12 @@ export default function GalleryView({ journey, onClose, onMemoryDeleted }: Galle
 
       {/* Header */}
       <header className="relative z-10 flex items-center gap-4 p-6 border-b border-zinc-900/50">
-        <button onClick={onClose} className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center">
-          <X className="w-5 h-5" />
-        </button>
+        <IconButton 
+          icon={<X className="w-5 h-5" />} 
+          label="Close" 
+          onClick={onClose}
+          dark 
+        />
         <div className="flex-1">
           <h1 className="text-xl font-medium">{journey.name}</h1>
           <p className="text-xs text-zinc-500">
@@ -243,36 +246,32 @@ export default function GalleryView({ journey, onClose, onMemoryDeleted }: Galle
         
         {/* AI Recap button */}
         {memories.length > 0 && (
-          <button
+          <IconButton
+            icon={<Sparkles className="w-4 h-4" />}
+            label="AI Journey Recap"
             onClick={fetchRecap}
-            disabled={recapLoading}
-            className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors ${
-              recap
-                ? 'bg-purple-500/20 text-purple-400'
-                : 'bg-white/5 text-zinc-500 hover:bg-purple-500/10 hover:text-purple-400'
-            }`}
-            title="AI Journey Recap"
-          >
-            {recapLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
-          </button>
+            loading={recapLoading}
+            active={!!recap}
+            dark
+            className={recap ? 'bg-purple-500/20 text-purple-400' : ''}
+          />
         )}
         
-        <button
+        <IconButton
+          icon={<ArrowUpDown className="w-4 h-4" />}
+          label={sortNewestFirst ? 'Showing newest first' : 'Showing oldest first'}
           onClick={() => setSortNewestFirst(!sortNewestFirst)}
-          className={`w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-white/10 transition-colors ${
-            sortNewestFirst ? 'text-orange-400' : 'text-zinc-500'
-          }`}
-          title={sortNewestFirst ? 'Showing newest first' : 'Showing oldest first'}
-        >
-          <ArrowUpDown className="w-4 h-4" />
-        </button>
+          active={sortNewestFirst}
+          dark
+        />
         
-        <button
+        <IconButton
+          icon={<Trash2 className="w-4 h-4" />}
+          label="Delete journey"
           onClick={() => setShowDeleteJourneyConfirm(true)}
-          className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-red-500/10 transition-colors"
-        >
-          <Trash2 className="w-4 h-4 text-zinc-500" />
-        </button>
+          variant="danger"
+          dark
+        />
       </header>
 
       {/* AI Recap Sheet */}

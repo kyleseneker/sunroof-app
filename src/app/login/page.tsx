@@ -2,7 +2,8 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { supabase } from '@/lib';
-import { Mail, ArrowRight, Loader2, Sparkles, HelpCircle, X, Camera, Lock, Unlock } from 'lucide-react';
+import { Mail, ArrowRight, Loader2, HelpCircle } from 'lucide-react';
+import { HelpModal } from '@/components/features';
 import Image from 'next/image';
 
 export default function LoginPage() {
@@ -296,95 +297,19 @@ export default function LoginPage() {
     );
   }
 
-  // Help Modal - matches Dashboard help for consistency
-  if (showHelp) {
-    return (
-      <div className="fixed inset-0 z-50 bg-black/95 backdrop-blur-md flex flex-col safe-top safe-bottom">
-        <div className="flex-1 flex flex-col p-6 overflow-y-auto">
-          <button 
-            onClick={() => setShowHelp(false)} 
-            className="self-end w-10 h-10 flex items-center justify-center rounded-full bg-white/5 mb-6"
-          >
-            <X className="w-5 h-5 text-white/60" />
-          </button>
-          
-          <div className="max-w-sm mx-auto w-full">
-            <div className="flex items-center gap-3 mb-8">
-              <Image src="/icon.svg" alt="Sunroof" width={32} height={32} />
-              <h2 className="text-2xl font-light">How Sunroof Works</h2>
-            </div>
-            
-            <div className="space-y-6">
-              <div className="flex gap-4">
-                <div className="w-12 h-12 rounded-full bg-emerald-500/10 flex items-center justify-center flex-shrink-0">
-                  <Sparkles className="w-5 h-5 text-emerald-400" />
-                </div>
-                <div>
-                  <h3 className="font-medium mb-1">1. Start a Journey</h3>
-                  <p className="text-sm text-zinc-500 leading-relaxed">
-                    Create a new journey before you go. Choose when your memories unlock.
-                  </p>
-                </div>
-              </div>
-              
-              <div className="flex gap-4">
-                <div className="w-12 h-12 rounded-full bg-blue-500/10 flex items-center justify-center flex-shrink-0">
-                  <Camera className="w-5 h-5 text-blue-400" />
-                </div>
-                <div>
-                  <h3 className="font-medium mb-1">2. Capture Moments</h3>
-                  <p className="text-sm text-zinc-500 leading-relaxed">
-                    Take photos and write notes during your journey. They go straight to the vault, no peeking!
-                  </p>
-                </div>
-              </div>
-              
-              <div className="flex gap-4">
-                <div className="w-12 h-12 rounded-full bg-amber-500/10 flex items-center justify-center flex-shrink-0">
-                  <Lock className="w-5 h-5 text-amber-400" />
-                </div>
-                <div>
-                  <h3 className="font-medium mb-1">3. Wait for Unlock</h3>
-                  <p className="text-sm text-zinc-500 leading-relaxed">
-                    Your memories stay hidden until the timer expires. Stay present and enjoy the moment.
-                  </p>
-                </div>
-              </div>
-              
-              <div className="flex gap-4">
-                <div className="w-12 h-12 rounded-full bg-pink-500/10 flex items-center justify-center flex-shrink-0">
-                  <Unlock className="w-5 h-5 text-pink-400" />
-                </div>
-                <div>
-                  <h3 className="font-medium mb-1">4. Relive the Magic</h3>
-                  <p className="text-sm text-zinc-500 leading-relaxed">
-                    When time&apos;s up, open your vault and rediscover your journey. Like developing film!
-                  </p>
-                </div>
-              </div>
-            </div>
-            
-            <div className="glass rounded-2xl p-5 mt-8">
-              <h3 className="font-medium mb-2">Why lock your photos?</h3>
-              <p className="text-sm text-zinc-400 leading-relaxed">
-                When you can&apos;t review and edit during a journey, you stay more present. 
-                And when you finally unlock them, you rediscover the experience all over again.
-              </p>
-            </div>
-            
-            <button 
-              onClick={() => setShowHelp(false)}
-              className="w-full h-14 bg-white text-black rounded-full font-semibold text-sm mt-8 hover:bg-zinc-100 active:scale-[0.98] transition-all"
-            >
-              Got it
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   return (
+    <>
+    <HelpModal isOpen={showHelp} onClose={() => setShowHelp(false)}>
+      <div className="glass rounded-2xl p-5 mt-8">
+        <h3 className="font-medium mb-2">Why lock your photos?</h3>
+        <p className="text-sm text-[var(--fg-muted)] leading-relaxed">
+          When you can&apos;t review and edit during a journey, you stay more present. 
+          And when you finally unlock them, you rediscover the experience all over again.
+        </p>
+      </div>
+    </HelpModal>
+    
+    {showHelp ? null : (
     <div className="fixed inset-0 bg-black flex flex-col safe-top safe-bottom">
       {/* Ambient Background */}
       <div className="absolute inset-0 pointer-events-none">
@@ -521,5 +446,7 @@ export default function LoginPage() {
         </div>
       </div>
     </div>
+    )}
+    </>
   );
 }

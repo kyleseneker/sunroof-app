@@ -1,25 +1,11 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
-import { ArrowLeft } from 'lucide-react';
+import { PageHeader } from '@/components/ui';
 
 export default function TermsOfService() {
-  const router = useRouter();
-
   return (
     <div className="fixed inset-0 bg-[var(--bg-base)] text-[var(--fg-base)] flex flex-col safe-top safe-bottom overflow-hidden">
-      {/* Header - matches app styling */}
-      <header className="sticky top-0 z-10 bg-[var(--bg-base)]/80 backdrop-blur-xl border-b border-[var(--border-base)]">
-        <div className="flex items-center gap-4 p-6">
-          <button 
-            onClick={() => router.back()}
-            className="w-10 h-10 rounded-full bg-[var(--bg-hover)] border border-[var(--border-base)] flex items-center justify-center hover:bg-[var(--bg-active)] active:scale-95 transition-all"
-          >
-            <ArrowLeft className="w-4 h-4" />
-          </button>
-          <h1 className="text-lg font-medium">Terms of Service</h1>
-        </div>
-      </header>
+      <PageHeader title="Terms of Service" sticky />
 
       {/* Content */}
       <main className="flex-1 overflow-y-auto scrollbar-hide">
