@@ -1150,7 +1150,7 @@ $$ LANGUAGE sql SECURITY DEFINER;
           {!focusedJourney.shared_with?.length && <div className="mb-4" />}
           
           {/* Countdown */}
-          <div className="glass rounded-2xl p-6 mb-6">
+          <div className="rounded-2xl p-6 mb-6 bg-white/5 backdrop-blur-md border border-white/10">
             <div className="flex items-center gap-2 mb-2">
               <Clock className="w-4 h-4 text-white/60" />
               <p className="text-xs text-white/60 uppercase tracking-wider">Unlocks in</p>
