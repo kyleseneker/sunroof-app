@@ -20,10 +20,12 @@ export {
   SkeletonProfile 
 } from './Skeleton';
 export { default as SkipLink } from './SkipLink';
-export { default as ThemeToggle } from './ThemeToggle';
+export { default as Toggle } from './Toggle';
 export { default as PageHeader } from './PageHeader';
 export { default as EmptyState } from './EmptyState';
 export { default as Section, SectionRow } from './Section';
+export { default as FeatureStep } from './FeatureStep';
+export { default as StatCard } from './StatCard';
 
 // Toast/Notifications
 export { ToastProvider, useToast } from './Toast';

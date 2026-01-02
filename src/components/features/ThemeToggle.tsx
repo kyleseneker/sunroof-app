@@ -3,7 +3,7 @@
 import { Moon, Sun } from 'lucide-react';
 import { useTheme } from '@/providers';
 import { cn } from '@/lib';
-import Toggle from './Toggle';
+import { Toggle } from '@/components/ui';
 
 interface ThemeToggleProps {
   showSystemOption?: boolean;

@@ -2,6 +2,7 @@
 
 import { ReactNode } from 'react';
 import { X, Sparkles, Camera, Lock, ImageIcon } from 'lucide-react';
+import { FeatureStep, IconButton } from '@/components/ui';
 import Image from 'next/image';
 
 interface HelpModalProps {
@@ -16,12 +17,9 @@ export default function HelpModal({ isOpen, onClose, children }: HelpModalProps)
   return (
     <div className="fixed inset-0 z-50 bg-[var(--bg-base)]/90 backdrop-blur-md flex flex-col safe-top safe-bottom">
       <div className="flex-1 flex flex-col p-6 animate-enter overflow-y-auto scrollbar-hide">
-        <button 
-          onClick={onClose}
-          className="self-end w-10 h-10 flex items-center justify-center rounded-full bg-[var(--bg-hover)] mb-6"
-        >
-          <X className="w-5 h-5 text-[var(--fg-muted)]" />
-        </button>
+        <div className="self-end mb-6">
+          <IconButton icon={<X className="w-5 h-5" />} label="Close" onClick={onClose} />
+        </div>
         
         <div className="max-w-sm mx-auto w-full">
           <div className="flex items-center gap-3 mb-8">
@@ -30,53 +28,37 @@ export default function HelpModal({ isOpen, onClose, children }: HelpModalProps)
           </div>
           
           <div className="space-y-6">
-            <div className="flex gap-4">
-              <div className="w-12 h-12 rounded-full bg-emerald-500/10 flex items-center justify-center flex-shrink-0">
-                <Sparkles className="w-5 h-5 text-emerald-400" />
-              </div>
-              <div>
-                <h3 className="font-medium mb-1">1. Start a Journey</h3>
-                <p className="text-sm text-[var(--fg-muted)] leading-relaxed">
-                  Create a new journey before you go. Choose when your memories unlock.
-                </p>
-              </div>
-            </div>
+            <FeatureStep
+              icon={<Sparkles className="w-5 h-5" />}
+              iconBgColor="bg-emerald-500/10"
+              iconColor="text-emerald-400"
+              title="1. Start a Journey"
+              description="Create a new journey before you go. Choose when your memories unlock."
+            />
             
-            <div className="flex gap-4">
-              <div className="w-12 h-12 rounded-full bg-blue-500/10 flex items-center justify-center flex-shrink-0">
-                <Camera className="w-5 h-5 text-blue-400" />
-              </div>
-              <div>
-                <h3 className="font-medium mb-1">2. Capture Moments</h3>
-                <p className="text-sm text-[var(--fg-muted)] leading-relaxed">
-                  Take photos and write notes during your journey. They go straight to the vault, no peeking!
-                </p>
-              </div>
-            </div>
+            <FeatureStep
+              icon={<Camera className="w-5 h-5" />}
+              iconBgColor="bg-blue-500/10"
+              iconColor="text-blue-400"
+              title="2. Capture Moments"
+              description="Take photos and write notes during your journey. They go straight to the vault, no peeking!"
+            />
             
-            <div className="flex gap-4">
-              <div className="w-12 h-12 rounded-full bg-amber-500/10 flex items-center justify-center flex-shrink-0">
-                <Lock className="w-5 h-5 text-amber-400" />
-              </div>
-              <div>
-                <h3 className="font-medium mb-1">3. Wait for Unlock</h3>
-                <p className="text-sm text-[var(--fg-muted)] leading-relaxed">
-                  Your memories stay hidden until the timer expires. Stay present and enjoy the moment.
-                </p>
-              </div>
-            </div>
+            <FeatureStep
+              icon={<Lock className="w-5 h-5" />}
+              iconBgColor="bg-amber-500/10"
+              iconColor="text-amber-400"
+              title="3. Wait for Unlock"
+              description="Your memories stay hidden until the timer expires. Stay present and enjoy the moment."
+            />
             
-            <div className="flex gap-4">
-              <div className="w-12 h-12 rounded-full bg-pink-500/10 flex items-center justify-center flex-shrink-0">
-                <ImageIcon className="w-5 h-5 text-pink-400" />
-              </div>
-              <div>
-                <h3 className="font-medium mb-1">4. Relive the Magic</h3>
-                <p className="text-sm text-[var(--fg-muted)] leading-relaxed">
-                  When time&apos;s up, open your vault and rediscover your journey. It&apos;s like developing film!
-                </p>
-              </div>
-            </div>
+            <FeatureStep
+              icon={<ImageIcon className="w-5 h-5" />}
+              iconBgColor="bg-pink-500/10"
+              iconColor="text-pink-400"
+              title="4. Relive the Magic"
+              description="When time's up, open your vault and rediscover your journey. It's like developing film!"
+            />
           </div>
 
           {children}

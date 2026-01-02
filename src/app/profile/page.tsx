@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { useToast, Avatar, PageHeader, Section, SectionRow } from '@/components/ui';
+import { useToast, Avatar, PageHeader, Section, SectionRow, Toggle, StatCard } from '@/components/ui';
 import { NotificationSettings } from '@/components/features';
 import { useTheme } from '@/providers';
 import { formatDate } from '@/lib';
@@ -331,18 +331,9 @@ export default function ProfilePage() {
           {/* Stats */}
           <Section title="Your Stats">
             <div className="grid grid-cols-3 gap-3 stagger-children">
-              <div className="text-center p-4 bg-gradient-to-br from-orange-500/10 to-orange-500/5 rounded-2xl border border-orange-500/10">
-                <div className="text-3xl font-bold text-orange-400 counter">{stats.totalJourneys}</div>
-                <div className="text-xs text-[var(--fg-muted)] mt-1">Journeys</div>
-              </div>
-              <div className="text-center p-4 bg-gradient-to-br from-blue-500/10 to-blue-500/5 rounded-2xl border border-blue-500/10">
-                <div className="text-3xl font-bold text-blue-400 counter">{stats.activeJourneys}</div>
-                <div className="text-xs text-[var(--fg-muted)] mt-1">Active</div>
-              </div>
-              <div className="text-center p-4 bg-gradient-to-br from-pink-500/10 to-pink-500/5 rounded-2xl border border-pink-500/10">
-                <div className="text-3xl font-bold text-pink-400 counter">{stats.totalMemories}</div>
-                <div className="text-xs text-[var(--fg-muted)] mt-1">Memories</div>
-              </div>
+              <StatCard value={stats.totalJourneys} label="Journeys" color="orange" />
+              <StatCard value={stats.activeJourneys} label="Active" color="blue" />
+              <StatCard value={stats.totalMemories} label="Memories" color="pink" />
             </div>
           </Section>
 
@@ -360,13 +351,11 @@ export default function ProfilePage() {
               description={resolvedTheme === 'dark' ? 'Currently using dark theme' : 'Currently using light theme'}
               onClick={toggleTheme}
               rightContent={
-                <div className={`w-12 h-7 rounded-full relative transition-colors ${
-                  resolvedTheme === 'dark' ? 'bg-orange-500' : 'bg-[var(--bg-muted)]'
-                }`}>
-                  <div className={`absolute top-1 w-5 h-5 rounded-full bg-[var(--fg-base)] transition-transform ${
-                    resolvedTheme === 'dark' ? 'translate-x-6' : 'translate-x-1'
-                  }`} />
-                </div>
+                <Toggle 
+                  checked={resolvedTheme === 'dark'} 
+                  onChange={toggleTheme}
+                  label="Toggle dark mode"
+                />
               }
             />
           </Section>

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Bell, BellOff, X } from 'lucide-react';
+import { Toggle } from '@/components/ui';
 import { 
   registerServiceWorker, 
   checkNotificationPermission, 
@@ -165,13 +166,12 @@ export function NotificationSettings() {
         </div>
       </div>
       
-      <div className={`w-12 h-7 rounded-full relative transition-colors ${
-        permission === 'granted' ? 'bg-purple-500' : 'bg-[var(--bg-muted)]'
-      }`}>
-        <div className={`absolute top-1 w-5 h-5 rounded-full bg-[var(--fg-base)] transition-transform ${
-          permission === 'granted' ? 'translate-x-6' : 'translate-x-1'
-        }`} />
-      </div>
+      <Toggle 
+        checked={permission === 'granted'} 
+        onChange={() => {}} 
+        activeColor="bg-purple-500"
+        label="Toggle notifications"
+      />
     </button>
   );
 }
