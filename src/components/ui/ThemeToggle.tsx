@@ -29,7 +29,7 @@ export default function ThemeToggle({
     return (
       <div
         className={cn(
-          'flex items-center gap-1 p-1 rounded-full bg-[var(--bg-surface)] border border-[var(--border-base)]',
+          'flex items-center gap-0.5 p-0.5 rounded-full bg-[var(--bg-muted)] border border-[var(--border-base)]',
           className
         )}
         role="radiogroup"
@@ -38,46 +38,46 @@ export default function ThemeToggle({
         <button
           onClick={() => setTheme('dark')}
           className={cn(
-            'w-8 h-8 flex items-center justify-center rounded-full transition-all',
+            'w-6 h-6 flex items-center justify-center rounded-full transition-all',
             theme === 'dark'
-              ? 'bg-[var(--bg-muted)] text-[var(--fg-base)]'
+              ? 'bg-[var(--fg-base)] text-[var(--fg-inverse)]'
               : 'text-[var(--fg-subtle)] hover:text-[var(--fg-muted)]'
           )}
           role="radio"
           aria-checked={theme === 'dark'}
           aria-label="Dark theme"
         >
-          <Moon className="w-4 h-4" />
+          <Moon className="w-3 h-3" />
         </button>
         
         <button
           onClick={() => setTheme('light')}
           className={cn(
-            'w-8 h-8 flex items-center justify-center rounded-full transition-all',
+            'w-6 h-6 flex items-center justify-center rounded-full transition-all',
             theme === 'light'
-              ? 'bg-[var(--bg-muted)] text-[var(--fg-base)]'
+              ? 'bg-[var(--fg-base)] text-[var(--fg-inverse)]'
               : 'text-[var(--fg-subtle)] hover:text-[var(--fg-muted)]'
           )}
           role="radio"
           aria-checked={theme === 'light'}
           aria-label="Light theme"
         >
-          <Sun className="w-4 h-4" />
+          <Sun className="w-3 h-3" />
         </button>
         
         <button
           onClick={() => setTheme('system')}
           className={cn(
-            'w-8 h-8 flex items-center justify-center rounded-full transition-all',
+            'w-6 h-6 flex items-center justify-center rounded-full transition-all',
             theme === 'system'
-              ? 'bg-[var(--bg-muted)] text-[var(--fg-base)]'
+              ? 'bg-[var(--fg-base)] text-[var(--fg-inverse)]'
               : 'text-[var(--fg-subtle)] hover:text-[var(--fg-muted)]'
           )}
           role="radio"
           aria-checked={theme === 'system'}
           aria-label="System theme"
         >
-          <Monitor className="w-4 h-4" />
+          <Monitor className="w-3 h-3" />
         </button>
       </div>
     );

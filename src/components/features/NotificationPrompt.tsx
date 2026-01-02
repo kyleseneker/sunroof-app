@@ -146,15 +146,15 @@ export function NotificationSettings() {
       disabled={loading || permission === 'denied'}
       className="w-full flex items-center justify-between gap-3 p-4 rounded-xl bg-[var(--bg-surface)]/50 hover:bg-[var(--bg-muted)]/50 transition-colors disabled:opacity-50"
     >
-      <div className="flex items-center gap-3 min-w-0">
+      <div className="flex items-center gap-3">
         {permission === 'granted' ? (
           <Bell className="w-5 h-5 text-purple-400 shrink-0" />
         ) : (
           <BellOff className="w-5 h-5 text-[var(--fg-muted)] shrink-0" />
         )}
-        <div className="text-left min-w-0">
+        <div className="text-left">
           <span className="block text-[var(--fg-base)]">Push Notifications</span>
-          <span className="text-xs text-[var(--fg-muted)] truncate block">
+          <span className="text-xs text-[var(--fg-muted)]">
             {permission === 'granted' 
               ? 'Notified when journeys unlock'
               : permission === 'denied'
