@@ -1504,9 +1504,9 @@ $$ LANGUAGE sql SECURITY DEFINER;
             {(activeJourneys.length > 0 || pastJourneys.length > 0) && (
               <div className="flex gap-3">
                 {/* Total Memories */}
-                <div className="flex items-center gap-2 px-3 py-2 rounded-full bg-white/5 border border-white/10">
+                <div className="flex items-center gap-2 px-3 py-2 rounded-full bg-[var(--bg-hover)] border border-[var(--border-base)]">
                   <ImageIcon className="w-3.5 h-3.5 text-pink-400" />
-                  <span className="text-xs text-zinc-400">
+                  <span className="text-xs text-[var(--fg-muted)]">
                     {activeJourneys.reduce((sum, j) => sum + (j.memory_count || 0), 0) + 
                      pastJourneys.reduce((sum, j) => sum + (j.memory_count || 0), 0)} memories
                   </span>
@@ -1514,9 +1514,9 @@ $$ LANGUAGE sql SECURITY DEFINER;
                 
                 {/* Next Unlock */}
                 {activeJourneys.length > 0 && (
-                  <div className="flex items-center gap-2 px-3 py-2 rounded-full bg-white/5 border border-white/10">
+                  <div className="flex items-center gap-2 px-3 py-2 rounded-full bg-[var(--bg-hover)] border border-[var(--border-base)]">
                     <Timer className="w-3.5 h-3.5 text-amber-400" />
-                    <span className="text-xs text-zinc-400">
+                    <span className="text-xs text-[var(--fg-muted)]">
                       Next unlock: {getTimeUntilUnlock(
                         [...activeJourneys].sort((a, b) => 
                           new Date(a.unlock_date).getTime() - new Date(b.unlock_date).getTime()
