@@ -18,8 +18,6 @@ import {
 } from '@/services';
 import { 
   ArrowLeft, 
-  Mail, 
-  Calendar, 
   LogOut, 
   Trash2, 
   Loader2,
@@ -332,6 +330,9 @@ export default function ProfilePage() {
             )}
             
             <p className="text-zinc-500 text-sm mt-1">{user?.email}</p>
+            <p className="text-zinc-600 text-xs mt-0.5">
+              Member since {formatMonthYear(user?.created_at || new Date().toISOString())}
+            </p>
           </div>
 
           {/* Stats */}
@@ -349,23 +350,6 @@ export default function ProfilePage() {
               <div className="text-center p-4 bg-gradient-to-br from-pink-500/10 to-pink-500/5 rounded-2xl border border-pink-500/10">
                 <div className="text-3xl font-bold text-pink-400 counter">{stats.totalMemories}</div>
                 <div className="text-xs text-zinc-500 mt-1">Memories</div>
-              </div>
-            </div>
-          </div>
-
-          {/* Account Info */}
-          <div className="glass rounded-2xl p-4">
-            <h3 className="text-sm font-medium text-zinc-400 mb-3">Account</h3>
-            <div className="space-y-3">
-              <div className="flex items-center gap-3 text-sm">
-                <Mail className="w-4 h-4 text-zinc-500" />
-                <span className="text-zinc-300">{user?.email}</span>
-              </div>
-              <div className="flex items-center gap-3 text-sm">
-                <Calendar className="w-4 h-4 text-zinc-500" />
-                <span className="text-zinc-300">
-                  Joined {formatMonthYear(user?.created_at || new Date().toISOString())}
-                </span>
               </div>
             </div>
           </div>
