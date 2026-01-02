@@ -79,15 +79,20 @@ export default function CameraView({
     return () => document.removeEventListener('keydown', handleEscape);
   }, [loading, onClose]);
 
-  // Check for multiple cameras on mount
-  useEffect(() => {
-    navigator.mediaDevices?.enumerateDevices().then(devices => {
-      const videoDevices = devices.filter(d => d.kind === 'videoinput');
+  // Check for multiple cameras (initial check on mount)
+  const checkForMultipleCameras = useCallback(async () => {
+    try {
+      const devices = await navigator.mediaDevices?.enumerateDevices();
+      const videoDevices = devices?.filter(d => d.kind === 'videoinput') || [];
       setHasMultipleCameras(videoDevices.length > 1);
-    }).catch(() => {
+    } catch {
       // Ignore errors
-    });
+    }
   }, []);
+
+  useEffect(() => {
+    checkForMultipleCameras();
+  }, [checkForMultipleCameras]);
 
   // Start camera (works on both mobile and desktop)
   const startCamera = useCallback(async (facing: 'user' | 'environment' = facingMode) => {
@@ -146,6 +151,9 @@ export default function CameraView({
       
       setCameraActive(true);
       setFacingMode(facing);
+      
+      // Re-check for multiple cameras after permission is granted
+      checkForMultipleCameras();
     } catch (err) {
       console.error('Camera error:', err);
       if (err instanceof Error && err.name === 'NotAllowedError') {
@@ -157,7 +165,7 @@ export default function CameraView({
       }
       setCameraActive(false);
     }
-  }, [facingMode]);
+  }, [facingMode, checkForMultipleCameras]);
 
   // Stop camera
   const stopCamera = useCallback(() => {
