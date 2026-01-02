@@ -74,8 +74,8 @@ export default function NotificationPrompt({ onDismiss, compact = false }: Notif
         </div>
         
         <div className="flex-1 min-w-0">
-          <h3 className="font-medium text-white mb-1">Get notified when memories unlock</h3>
-          <p className="text-sm text-zinc-500 mb-3">
+          <h3 className="font-medium text-[var(--fg-base)] mb-1">Get notified when memories unlock</h3>
+          <p className="text-sm text-[var(--fg-muted)] mb-3">
             We&apos;ll send you a notification when your journey is ready to view.
           </p>
           
@@ -89,7 +89,7 @@ export default function NotificationPrompt({ onDismiss, compact = false }: Notif
             </button>
             <button
               onClick={handleDismiss}
-              className="px-4 py-2 rounded-full bg-white/5 text-zinc-400 text-sm hover:bg-white/10 transition-colors"
+              className="px-4 py-2 rounded-full bg-[var(--bg-hover)] text-[var(--fg-muted)] text-sm hover:bg-[var(--bg-active)] transition-colors"
             >
               Not now
             </button>
@@ -98,7 +98,7 @@ export default function NotificationPrompt({ onDismiss, compact = false }: Notif
         
         <button
           onClick={handleDismiss}
-          className="w-8 h-8 rounded-full flex items-center justify-center text-zinc-600 hover:text-zinc-400 hover:bg-white/5 transition-colors"
+          className="w-8 h-8 rounded-full flex items-center justify-center text-[var(--fg-subtle)] hover:text-[var(--fg-muted)] hover:bg-[var(--bg-hover)] transition-colors"
         >
           <X className="w-4 h-4" />
         </button>
@@ -131,10 +131,10 @@ export function NotificationSettings() {
 
   if (typeof window === 'undefined' || !('Notification' in window)) {
     return (
-      <div className="flex items-center justify-between p-4 rounded-xl bg-zinc-900/50">
+      <div className="flex items-center justify-between p-4 rounded-xl bg-[var(--bg-surface)]/50">
         <div className="flex items-center gap-3">
-          <BellOff className="w-5 h-5 text-zinc-600" />
-          <span className="text-zinc-500">Notifications not supported</span>
+          <BellOff className="w-5 h-5 text-[var(--fg-subtle)]" />
+          <span className="text-[var(--fg-muted)]">Notifications not supported</span>
         </div>
       </div>
     );
@@ -144,17 +144,17 @@ export function NotificationSettings() {
     <button
       onClick={handleToggle}
       disabled={loading || permission === 'denied'}
-      className="w-full flex items-center justify-between p-4 rounded-xl bg-zinc-900/50 hover:bg-zinc-800/50 transition-colors disabled:opacity-50"
+      className="w-full flex items-center justify-between p-4 rounded-xl bg-[var(--bg-surface)]/50 hover:bg-[var(--bg-muted)]/50 transition-colors disabled:opacity-50"
     >
       <div className="flex items-center gap-3">
         {permission === 'granted' ? (
           <Bell className="w-5 h-5 text-purple-400" />
         ) : (
-          <BellOff className="w-5 h-5 text-zinc-500" />
+          <BellOff className="w-5 h-5 text-[var(--fg-muted)]" />
         )}
         <div className="text-left">
-          <span className="block text-white">Push Notifications</span>
-          <span className="text-xs text-zinc-500">
+          <span className="block text-[var(--fg-base)]">Push Notifications</span>
+          <span className="text-xs text-[var(--fg-muted)]">
             {permission === 'granted' 
               ? 'You\'ll be notified when journeys unlock'
               : permission === 'denied'
@@ -166,9 +166,9 @@ export function NotificationSettings() {
       </div>
       
       <div className={`w-12 h-7 rounded-full relative transition-colors ${
-        permission === 'granted' ? 'bg-purple-500' : 'bg-zinc-700'
+        permission === 'granted' ? 'bg-purple-500' : 'bg-[var(--bg-muted)]'
       }`}>
-        <div className={`absolute top-1 w-5 h-5 rounded-full bg-white transition-transform ${
+        <div className={`absolute top-1 w-5 h-5 rounded-full bg-[var(--fg-base)] transition-transform ${
           permission === 'granted' ? 'translate-x-6' : 'translate-x-1'
         }`} />
       </div>
