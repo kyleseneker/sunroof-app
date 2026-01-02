@@ -27,20 +27,19 @@ export default function ThemeToggle({
   if (showSystemOption) {
     const isDark = resolvedTheme === 'dark';
     return (
-      <button
+      <div
         onClick={toggleTheme}
-        className={cn(
-          'w-12 h-7 rounded-full relative transition-colors',
-          isDark ? 'bg-orange-500' : 'bg-[var(--bg-muted)]',
-          className
-        )}
+        className={`w-12 h-7 rounded-full relative transition-colors cursor-pointer ${
+          isDark ? 'bg-orange-500' : 'bg-[var(--bg-muted)]'
+        } ${className || ''}`}
+        role="switch"
+        aria-checked={isDark}
         aria-label={`Switch to ${isDark ? 'light' : 'dark'} mode`}
       >
-        <div className={cn(
-          'absolute top-1 w-5 h-5 rounded-full bg-[var(--fg-base)] transition-transform',
+        <div className={`absolute top-1 w-5 h-5 rounded-full bg-[var(--fg-base)] transition-transform ${
           isDark ? 'translate-x-6' : 'translate-x-1'
-        )} />
-      </button>
+        }`} />
+      </div>
     );
   }
 
