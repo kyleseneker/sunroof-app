@@ -25,59 +25,28 @@ export default function ThemeToggle({
   const { theme, resolvedTheme, setTheme, toggleTheme } = useTheme();
 
   if (showSystemOption) {
-    // Three-way toggle: Dark / Light / System - compact version
+    const isDark = resolvedTheme === 'dark';
     return (
-      <div
+      <button
+        onClick={toggleTheme}
         className={cn(
-          'inline-flex items-center h-6 rounded-full bg-[var(--bg-muted)] border border-[var(--border-base)] p-px',
+          'w-12 h-7 rounded-full relative transition-colors',
+          isDark ? 'bg-orange-500' : 'bg-[var(--bg-muted)]',
           className
         )}
-        role="radiogroup"
-        aria-label="Theme selection"
+        aria-label={`Switch to ${isDark ? 'light' : 'dark'} mode`}
       >
-        <button
-          onClick={() => setTheme('dark')}
-          className={cn(
-            'w-5 h-5 flex items-center justify-center rounded-full transition-all',
-            theme === 'dark'
-              ? 'bg-[var(--fg-base)] text-[var(--fg-inverse)]'
-              : 'text-[var(--fg-subtle)] hover:text-[var(--fg-muted)]'
+        <div className={cn(
+          'absolute top-1 w-5 h-5 rounded-full bg-[var(--fg-base)] transition-transform flex items-center justify-center',
+          isDark ? 'translate-x-6' : 'translate-x-1'
+        )}>
+          {isDark ? (
+            <Moon className="w-3 h-3 text-[var(--fg-inverse)]" />
+          ) : (
+            <Sun className="w-3 h-3 text-[var(--fg-inverse)]" />
           )}
-          role="radio"
-          aria-checked={theme === 'dark'}
-          aria-label="Dark theme"
-        >
-          <Moon className="w-2.5 h-2.5" />
-        </button>
-        <button
-          onClick={() => setTheme('light')}
-          className={cn(
-            'w-5 h-5 flex items-center justify-center rounded-full transition-all',
-            theme === 'light'
-              ? 'bg-[var(--fg-base)] text-[var(--fg-inverse)]'
-              : 'text-[var(--fg-subtle)] hover:text-[var(--fg-muted)]'
-          )}
-          role="radio"
-          aria-checked={theme === 'light'}
-          aria-label="Light theme"
-        >
-          <Sun className="w-2.5 h-2.5" />
-        </button>
-        <button
-          onClick={() => setTheme('system')}
-          className={cn(
-            'w-5 h-5 flex items-center justify-center rounded-full transition-all',
-            theme === 'system'
-              ? 'bg-[var(--fg-base)] text-[var(--fg-inverse)]'
-              : 'text-[var(--fg-subtle)] hover:text-[var(--fg-muted)]'
-          )}
-          role="radio"
-          aria-checked={theme === 'system'}
-          aria-label="System theme"
-        >
-          <Monitor className="w-2.5 h-2.5" />
-        </button>
-      </div>
+        </div>
+      </button>
     );
   }
 
