@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { useToast, Avatar } from '@/components/ui';
+import { useToast, Avatar, ThemeToggle } from '@/components/ui';
 import { NotificationSettings } from '@/components/features';
 import { formatDate } from '@/lib';
 import { 
@@ -358,6 +358,15 @@ export default function ProfilePage() {
           <div className="glass rounded-2xl p-4">
             <h3 className="text-sm font-medium text-zinc-400 mb-3">Notifications</h3>
             <NotificationSettings />
+          </div>
+
+          {/* Appearance */}
+          <div className="glass rounded-2xl p-4">
+            <h3 className="text-sm font-medium text-zinc-400 mb-3">Appearance</h3>
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-[var(--fg-base)]">Theme</span>
+              <ThemeToggle showSystemOption />
+            </div>
           </div>
 
           {/* Your Data */}

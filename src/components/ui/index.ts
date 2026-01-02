@@ -19,6 +19,7 @@ export {
   SkeletonProfile 
 } from './Skeleton';
 export { default as SkipLink } from './SkipLink';
+export { default as ThemeToggle } from './ThemeToggle';
 
 // Toast/Notifications
 export { ToastProvider, useToast } from './Toast';

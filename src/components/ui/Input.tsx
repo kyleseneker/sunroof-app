@@ -2,6 +2,7 @@
 
 import { forwardRef, InputHTMLAttributes, ReactNode, useState, useId } from 'react';
 import { AlertCircle, Eye, EyeOff } from 'lucide-react';
+import { cn } from '@/lib';
 
 interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
   label?: string;
@@ -25,7 +26,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
       rightIcon,
       showPasswordToggle,
       type = 'text',
-      className = '',
+      className,
       id,
       ...props
     },
@@ -44,16 +45,16 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
         {label && (
           <label
             htmlFor={inputId}
-            className="block text-sm font-medium text-zinc-300 mb-2"
+            className="block text-sm font-medium text-[var(--fg-muted)] mb-2"
           >
             {label}
-            {props.required && <span className="text-red-400 ml-1">*</span>}
+            {props.required && <span className="text-[var(--color-error)] ml-1">*</span>}
           </label>
         )}
 
         <div className="relative">
           {leftIcon && (
-            <div className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500">
+            <div className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--fg-subtle)]">
               {leftIcon}
             </div>
           )}
@@ -68,18 +69,20 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
                 .filter(Boolean)
                 .join(' ') || undefined
             }
-            className={`
-              w-full px-4 py-3 
-              bg-zinc-900/50 border rounded-xl
-              text-white placeholder-zinc-600
-              focus:outline-none focus:ring-2 focus:ring-orange-500/50
-              transition-all duration-200
-              disabled:opacity-50 disabled:cursor-not-allowed
-              ${leftIcon ? 'pl-10' : ''}
-              ${rightIcon || showPasswordToggle ? 'pr-10' : ''}
-              ${error ? 'border-red-500/50 focus:ring-red-500/50' : 'border-zinc-800 hover:border-zinc-700'}
-              ${className}
-            `}
+            className={cn(
+              'w-full px-4 py-3',
+              'bg-[var(--bg-surface)]/50 border rounded-xl',
+              'text-[var(--fg-base)] placeholder-[var(--fg-subtle)]',
+              'focus:outline-none input-premium',
+              'transition-all duration-200',
+              'disabled:opacity-50 disabled:cursor-not-allowed',
+              leftIcon && 'pl-10',
+              (rightIcon || showPasswordToggle) && 'pr-10',
+              error 
+                ? 'border-[var(--color-error)]/50 focus:ring-[var(--color-error)]/50' 
+                : 'border-[var(--border-base)] hover:border-[var(--border-base)]',
+              className
+            )}
             {...props}
           />
 
@@ -89,7 +92,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="text-zinc-500 hover:text-zinc-400 transition-colors p-1"
+                  className="text-[var(--fg-subtle)] hover:text-[var(--fg-muted)] transition-colors p-1"
                   aria-label={showPassword ? 'Hide password' : 'Show password'}
                 >
                   {showPassword ? (
@@ -109,7 +112,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
           <div
             id={errorId}
             role="alert"
-            className="flex items-center gap-1.5 mt-2 text-sm text-red-400"
+            className="flex items-center gap-1.5 mt-2 text-sm text-[var(--color-error)]"
           >
             <AlertCircle className="w-4 h-4 flex-shrink-0" />
             <span>{error}</span>
@@ -117,7 +120,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
         )}
 
         {hint && !error && (
-          <p id={hintId} className="mt-2 text-sm text-zinc-500">
+          <p id={hintId} className="mt-2 text-sm text-[var(--fg-subtle)]">
             {hint}
           </p>
         )}

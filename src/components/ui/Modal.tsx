@@ -7,6 +7,7 @@
 import { ReactNode, useEffect, useRef } from 'react';
 import { X } from 'lucide-react';
 import { useFocusTrap } from '@/hooks';
+import { cn } from '@/lib';
 
 interface ModalProps {
   isOpen: boolean;
@@ -81,7 +82,7 @@ export default function Modal({
     <div
       ref={overlayRef}
       onClick={handleOverlayClick}
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fade-in"
+      className="fixed inset-0 z-[var(--z-modal)] flex items-center justify-center p-4 bg-[var(--bg-base)]/80 backdrop-blur-sm animate-fade-in"
       role="dialog"
       aria-modal="true"
       aria-labelledby={titleId}
@@ -89,23 +90,23 @@ export default function Modal({
     >
       <div
         ref={modalRef}
-        className={`
-          ${sizeStyles[size]}
-          w-full
-          bg-zinc-900 border border-zinc-800 rounded-2xl
-          shadow-2xl
-          animate-scale-in
-        `}
+        className={cn(
+          sizeStyles[size],
+          'w-full',
+          'bg-[var(--bg-surface)] border border-[var(--border-base)] rounded-2xl',
+          'shadow-[var(--shadow-xl)]',
+          'animate-scale-in'
+        )}
       >
         {(title || showCloseButton) && (
-          <div className="flex items-center justify-between p-6 border-b border-zinc-800">
+          <div className="flex items-center justify-between p-6 border-b border-[var(--border-base)]">
             {title && (
               <div>
-                <h2 id={titleId} className="text-lg font-medium text-white">
+                <h2 id={titleId} className="text-lg font-medium text-[var(--fg-base)]">
                   {title}
                 </h2>
                 {description && (
-                  <p id={descriptionId} className="text-sm text-zinc-500 mt-1">
+                  <p id={descriptionId} className="text-sm text-[var(--fg-subtle)] mt-1">
                     {description}
                   </p>
                 )}
@@ -114,10 +115,10 @@ export default function Modal({
             {showCloseButton && (
               <button
                 onClick={onClose}
-                className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center hover:bg-white/10 transition-colors ml-auto"
+                className="w-8 h-8 rounded-full bg-[var(--bg-hover)] flex items-center justify-center hover:bg-[var(--bg-active)] transition-colors ml-auto focus-ring"
                 aria-label="Close modal"
               >
-                <X className="w-4 h-4 text-zinc-400" />
+                <X className="w-4 h-4 text-[var(--fg-muted)]" />
               </button>
             )}
           </div>

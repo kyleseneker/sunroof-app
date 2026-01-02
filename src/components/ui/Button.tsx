@@ -6,6 +6,7 @@
 
 import { forwardRef, ButtonHTMLAttributes, ReactNode } from 'react';
 import { Loader2 } from 'lucide-react';
+import { cn } from '@/lib';
 
 type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger';
 type ButtonSize = 'sm' | 'md' | 'lg';
@@ -20,10 +21,10 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 const variantStyles: Record<ButtonVariant, string> = {
-  primary: 'bg-white text-black hover:bg-zinc-100 active:bg-zinc-200',
-  secondary: 'bg-zinc-900 text-white border border-zinc-800 hover:bg-zinc-800 active:bg-zinc-700',
-  ghost: 'bg-transparent text-zinc-400 hover:text-white hover:bg-white/5 active:bg-white/10',
-  danger: 'bg-red-500/10 text-red-400 border border-red-500/20 hover:bg-red-500/20 active:bg-red-500/30',
+  primary: 'bg-[var(--fg-base)] text-[var(--fg-inverse)] hover:opacity-90 active:opacity-80',
+  secondary: 'bg-[var(--bg-surface)] text-[var(--fg-base)] border border-[var(--border-base)] hover:bg-[var(--bg-muted)] active:bg-[var(--bg-active)]',
+  ghost: 'bg-transparent text-[var(--fg-muted)] hover:text-[var(--fg-base)] hover:bg-[var(--bg-hover)] active:bg-[var(--bg-active)]',
+  danger: 'bg-[var(--color-error-subtle)] text-[var(--color-error)] border border-[var(--color-error)]/20 hover:bg-[var(--color-error)]/20 active:bg-[var(--color-error)]/30',
 };
 
 const sizeStyles: Record<ButtonSize, string> = {
@@ -43,7 +44,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       rightIcon,
       fullWidth = false,
       disabled,
-      className = '',
+      className,
       ...props
     },
     ref
@@ -54,18 +55,18 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       <button
         ref={ref}
         disabled={isDisabled}
-        className={`
-          inline-flex items-center justify-center
-          font-medium rounded-full
-          transition-all duration-200
-          focus:outline-none focus:ring-2 focus:ring-orange-500/50 focus:ring-offset-2 focus:ring-offset-black
-          disabled:opacity-50 disabled:cursor-not-allowed
-          active:scale-[0.98]
-          ${variantStyles[variant]}
-          ${sizeStyles[size]}
-          ${fullWidth ? 'w-full' : ''}
-          ${className}
-        `}
+        className={cn(
+          'inline-flex items-center justify-center',
+          'font-medium rounded-full',
+          'transition-all duration-200',
+          'focus:outline-none focus-ring',
+          'disabled:opacity-50 disabled:cursor-not-allowed',
+          'active:scale-[0.98]',
+          variantStyles[variant],
+          sizeStyles[size],
+          fullWidth && 'w-full',
+          className
+        )}
         {...props}
       >
         {loading ? (

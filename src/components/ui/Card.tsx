@@ -5,6 +5,7 @@
  */
 
 import { ReactNode, forwardRef, HTMLAttributes } from 'react';
+import { cn } from '@/lib';
 
 interface CardProps extends HTMLAttributes<HTMLDivElement> {
   children: ReactNode;
@@ -14,9 +15,9 @@ interface CardProps extends HTMLAttributes<HTMLDivElement> {
 }
 
 const variantStyles = {
-  default: 'bg-zinc-900/50 border-zinc-800',
-  interactive: 'bg-zinc-900/50 border-zinc-800 hover:bg-zinc-800/50 hover:border-zinc-700 cursor-pointer transition-all',
-  elevated: 'bg-zinc-900 border-zinc-800 shadow-xl shadow-black/20',
+  default: 'bg-[var(--bg-surface)]/50 border-[var(--border-base)]',
+  interactive: 'bg-[var(--bg-surface)]/50 border-[var(--border-base)] hover:bg-[var(--bg-muted)]/50 hover:border-[var(--border-base)] cursor-pointer transition-all',
+  elevated: 'bg-[var(--bg-surface)] border-[var(--border-base)] shadow-[var(--shadow-xl)]',
 };
 
 const paddingStyles = {
@@ -33,7 +34,7 @@ const Card = forwardRef<HTMLDivElement, CardProps>(
       variant = 'default',
       padding = 'md',
       gradient = false,
-      className = '',
+      className,
       ...props
     },
     ref
@@ -41,18 +42,18 @@ const Card = forwardRef<HTMLDivElement, CardProps>(
     return (
       <div
         ref={ref}
-        className={`
-          rounded-2xl border
-          ${variantStyles[variant]}
-          ${paddingStyles[padding]}
-          ${gradient ? 'relative overflow-hidden' : ''}
-          ${className}
-        `}
+        className={cn(
+          'rounded-2xl border',
+          variantStyles[variant],
+          paddingStyles[padding],
+          gradient && 'relative overflow-hidden',
+          className
+        )}
         {...props}
       >
         {gradient && (
           <div
-            className="absolute inset-0 bg-gradient-to-br from-orange-500/5 via-transparent to-pink-500/5 pointer-events-none"
+            className="absolute inset-0 bg-gradient-to-br from-[var(--color-accent)]/5 via-transparent to-[var(--color-gradient-mid)]/5 pointer-events-none"
             aria-hidden="true"
           />
         )}
@@ -68,13 +69,13 @@ export default Card;
 
 export function CardHeader({
   children,
-  className = '',
+  className,
 }: {
   children: ReactNode;
   className?: string;
 }) {
   return (
-    <div className={`border-b border-zinc-800 p-4 ${className}`}>
+    <div className={cn('border-b border-[var(--border-base)] p-4', className)}>
       {children}
     </div>
   );
@@ -82,23 +83,23 @@ export function CardHeader({
 
 export function CardContent({
   children,
-  className = '',
+  className,
 }: {
   children: ReactNode;
   className?: string;
 }) {
-  return <div className={`p-4 ${className}`}>{children}</div>;
+  return <div className={cn('p-4', className)}>{children}</div>;
 }
 
 export function CardFooter({
   children,
-  className = '',
+  className,
 }: {
   children: ReactNode;
   className?: string;
 }) {
   return (
-    <div className={`border-t border-zinc-800 p-4 ${className}`}>
+    <div className={cn('border-t border-[var(--border-base)] p-4', className)}>
       {children}
     </div>
   );

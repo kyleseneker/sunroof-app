@@ -3,7 +3,7 @@ import { Space_Grotesk } from 'next/font/google';
 import './globals.css';
 import { ToastProvider, SkipLink } from '@/components/ui';
 import { OfflineIndicator, InstallPrompt, ErrorBoundary } from '@/components/features';
-import { AuthProvider } from '@/providers';
+import { AuthProvider, ThemeProvider } from '@/providers';
 
 const spaceGrotesk = Space_Grotesk({ 
   subsets: ['latin'],
@@ -85,31 +85,33 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
       </head>
-      <body className="font-sans antialiased bg-black text-white overflow-hidden selection:bg-orange-500/30 selection:text-white">
+      <body className="font-sans antialiased bg-[var(--bg-base)] text-[var(--fg-base)] overflow-hidden selection:bg-[var(--color-accent)]/30 selection:text-[var(--fg-base)]">
         {/* Skip Link for Accessibility */}
         <SkipLink />
         
         <ErrorBoundary>
-          <AuthProvider>
-            <ToastProvider>
-              {/* Offline Indicator */}
-              <OfflineIndicator />
-              
-              {/* Install Prompt for PWA */}
-              <InstallPrompt />
-              
-              {/* Ambient Aurora Glow */}
-              <div className="aurora-bg" aria-hidden="true" />
-              
-              {/* Film Grain Texture */}
-              <div className="grain-overlay" aria-hidden="true" />
-              
-              {/* Content */}
-              <main id="main-content" className="relative z-10" role="main">
-                {children}
-              </main>
-            </ToastProvider>
-          </AuthProvider>
+          <ThemeProvider defaultTheme="dark">
+            <AuthProvider>
+              <ToastProvider>
+                {/* Offline Indicator */}
+                <OfflineIndicator />
+                
+                {/* Install Prompt for PWA */}
+                <InstallPrompt />
+                
+                {/* Ambient Aurora Glow */}
+                <div className="aurora-bg" aria-hidden="true" />
+                
+                {/* Film Grain Texture */}
+                <div className="grain-overlay" aria-hidden="true" />
+                
+                {/* Content */}
+                <main id="main-content" className="relative z-[var(--z-elevated)]" role="main">
+                  {children}
+                </main>
+              </ToastProvider>
+            </AuthProvider>
+          </ThemeProvider>
         </ErrorBoundary>
       </body>
     </html>

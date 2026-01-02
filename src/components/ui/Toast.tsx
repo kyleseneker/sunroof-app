@@ -6,6 +6,7 @@
 
 import { useState, useEffect, createContext, useContext, useCallback } from 'react';
 import { Check, AlertCircle, Info } from 'lucide-react';
+import { cn } from '@/lib';
 
 type ToastType = 'success' | 'error' | 'info';
 
@@ -63,22 +64,22 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
   const getIcon = (type: ToastType) => {
     switch (type) {
       case 'success':
-        return <Check className="w-4 h-4 text-green-400" />;
+        return <Check className="w-4 h-4 text-[var(--color-success)]" />;
       case 'error':
-        return <AlertCircle className="w-4 h-4 text-red-400" />;
+        return <AlertCircle className="w-4 h-4 text-[var(--color-error)]" />;
       case 'info':
-        return <Info className="w-4 h-4 text-blue-400" />;
+        return <Info className="w-4 h-4 text-[var(--color-info)]" />;
     }
   };
 
   const getBgColor = (type: ToastType) => {
     switch (type) {
       case 'success':
-        return 'bg-green-500/10 border-green-500/20';
+        return 'bg-[var(--color-success-subtle)] border-[var(--color-success)]/20';
       case 'error':
-        return 'bg-red-500/10 border-red-500/20';
+        return 'bg-[var(--color-error-subtle)] border-[var(--color-error)]/20';
       case 'info':
-        return 'bg-blue-500/10 border-blue-500/20';
+        return 'bg-[var(--color-info-subtle)] border-[var(--color-info)]/20';
     }
   };
 
@@ -86,22 +87,22 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
     <ToastContext.Provider value={{ showToast }}>
       {children}
       
-      <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[200] flex flex-col gap-2 pointer-events-none safe-bottom">
+      <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[var(--z-toast)] flex flex-col gap-2 pointer-events-none safe-bottom">
         {toasts.map(toast => (
           <div
             key={toast.id}
-            className={`
-              pointer-events-auto px-4 py-3 rounded-2xl backdrop-blur-xl border
-              flex items-center gap-3 min-w-[200px] max-w-[90vw]
-              ${getBgColor(toast.type)}
-              ${removing.has(toast.id) ? 'animate-toast-out' : 'animate-toast-in'}
-            `}
+            className={cn(
+              'pointer-events-auto px-4 py-3 rounded-2xl backdrop-blur-xl border',
+              'flex items-center gap-3 min-w-[200px] max-w-[90vw]',
+              getBgColor(toast.type),
+              removing.has(toast.id) ? 'animate-toast-out' : 'animate-toast-in'
+            )}
             onClick={() => removeToast(toast.id)}
           >
             <div className="flex-shrink-0">
               {getIcon(toast.type)}
             </div>
-            <p className="text-sm font-medium text-white">{toast.message}</p>
+            <p className="text-sm font-medium text-[var(--fg-base)]">{toast.message}</p>
           </div>
         ))}
       </div>
