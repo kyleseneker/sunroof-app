@@ -2,7 +2,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { compressImage, getCompressionStats, getTimeOfDay, NOTE_PROMPTS, MAX_FILE_SIZE_BYTES, MAX_NOTE_LENGTH, ALLOWED_IMAGE_TYPES, IMAGE_COMPRESSION } from '@/lib';
 import { getCurrentUser, uploadMemoryPhoto, uploadMemoryAudio, createMemory } from '@/services';
-import { X, Camera, FileText, Send, Check, Loader2, Upload, Video, VideoOff, Sparkles, Mic } from 'lucide-react';
+import { X, Camera, FileText, Send, Check, Loader2, Upload, Sparkles, Mic, SwitchCamera, ImageIcon } from 'lucide-react';
 import { AudioRecorder } from '@/components/features';
 import type { TimeOfDay } from '@/types';
 
@@ -32,13 +32,17 @@ export default function CameraView({
     return timePrompts.slice(0, 3);
   });
   
-  // Desktop webcam support
-  const [isDesktop, setIsDesktop] = useState(false);
-  const [webcamActive, setWebcamActive] = useState(false);
-  const [webcamError, setWebcamError] = useState<string | null>(null);
+  // Camera state (unified for mobile and desktop)
+  const [cameraActive, setCameraActive] = useState(false);
+  const [cameraError, setCameraError] = useState<string | null>(null);
+  const [cameraReady, setCameraReady] = useState(false);
+  const [facingMode, setFacingMode] = useState<'user' | 'environment'>('environment');
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
+  
+  // Track if device has multiple cameras
+  const [hasMultipleCameras, setHasMultipleCameras] = useState(false);
   
 
   const showSuccess = () => {
@@ -68,57 +72,102 @@ export default function CameraView({
     return () => document.removeEventListener('keydown', handleEscape);
   }, [loading, onClose]);
 
-  // Detect if user is on desktop (no touch support or large screen)
+  // Check for multiple cameras on mount
   useEffect(() => {
-    const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
-    const isLargeScreen = window.innerWidth >= 1024;
-    setIsDesktop(!isTouchDevice || isLargeScreen);
+    navigator.mediaDevices?.enumerateDevices().then(devices => {
+      const videoDevices = devices.filter(d => d.kind === 'videoinput');
+      setHasMultipleCameras(videoDevices.length > 1);
+    }).catch(() => {
+      // Ignore errors
+    });
   }, []);
 
-  // Start webcam for desktop
-  const startWebcam = useCallback(async () => {
+  // Start camera (works on both mobile and desktop)
+  const startCamera = useCallback(async (facing: 'user' | 'environment' = facingMode) => {
     try {
-      setWebcamError(null);
+      setCameraError(null);
+      setCameraReady(false);
+      
+      // Stop any existing stream first
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach(track => track.stop());
+      }
+      
       const stream = await navigator.mediaDevices.getUserMedia({ 
-        video: { facingMode: 'user', width: { ideal: 1280 }, height: { ideal: 720 } },
+        video: { 
+          facingMode: facing,
+          width: { ideal: 1920 },
+          height: { ideal: 1080 },
+        },
         audio: false 
       });
       streamRef.current = stream;
       
-      // Attach stream to video element (it's always in DOM now)
+      // Attach stream to video element
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
-        videoRef.current.play().catch(err => {
-          console.error('Video play error:', err);
-        });
+        
+        // Wait for video to be ready
+        videoRef.current.onloadedmetadata = () => {
+          videoRef.current?.play().then(() => {
+            setCameraReady(true);
+          }).catch(err => {
+            console.error('Video play error:', err);
+          });
+        };
       }
       
-      setWebcamActive(true);
+      setCameraActive(true);
+      setFacingMode(facing);
     } catch (err) {
-      console.error('Webcam error:', err);
-      setWebcamError('Camera access denied or unavailable');
-      setWebcamActive(false);
+      console.error('Camera error:', err);
+      if (err instanceof Error && err.name === 'NotAllowedError') {
+        setCameraError('Camera access denied. Please enable in settings.');
+      } else if (err instanceof Error && err.name === 'NotFoundError') {
+        setCameraError('No camera found on this device.');
+      } else {
+        setCameraError('Could not access camera.');
+      }
+      setCameraActive(false);
     }
-  }, []);
+  }, [facingMode]);
 
-  // Stop webcam
-  const stopWebcam = useCallback(() => {
+  // Stop camera
+  const stopCamera = useCallback(() => {
     if (streamRef.current) {
       streamRef.current.getTracks().forEach(track => track.stop());
       streamRef.current = null;
     }
-    setWebcamActive(false);
+    setCameraActive(false);
+    setCameraReady(false);
   }, []);
 
-  // Cleanup webcam on unmount
+  // Flip camera (toggle front/back)
+  const flipCamera = useCallback(() => {
+    const newFacing = facingMode === 'user' ? 'environment' : 'user';
+    startCamera(newFacing);
+  }, [facingMode, startCamera]);
+
+  // Auto-start camera when entering photo mode
+  useEffect(() => {
+    if (mode === 'photo' && !cameraActive && !cameraError) {
+      startCamera();
+    }
+    // Stop camera when leaving photo mode
+    if (mode !== 'photo' && cameraActive) {
+      stopCamera();
+    }
+  }, [mode, cameraActive, cameraError, startCamera, stopCamera]);
+
+  // Cleanup camera on unmount
   useEffect(() => {
     return () => {
-      stopWebcam();
+      stopCamera();
     };
-  }, [stopWebcam]);
+  }, [stopCamera]);
 
-  // Capture photo from webcam
-  const captureFromWebcam = useCallback(async () => {
+  // Capture photo from camera
+  const capturePhoto = useCallback(async () => {
     if (!videoRef.current || !canvasRef.current) {
       setError('Camera not ready');
       setTimeout(() => setError(null), 3000);
@@ -147,9 +196,11 @@ export default function CameraView({
       return;
     }
     
-    // Flip horizontally for selfie camera
-    ctx.translate(canvas.width, 0);
-    ctx.scale(-1, 1);
+    // Only flip horizontally for front-facing (selfie) camera
+    if (facingMode === 'user') {
+      ctx.translate(canvas.width, 0);
+      ctx.scale(-1, 1);
+    }
     ctx.drawImage(video, 0, 0);
     
     // Haptic feedback
@@ -223,7 +274,7 @@ export default function CameraView({
       setLoading(false);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [journeyId]);
+  }, [journeyId, facingMode, userId]);
 
   const handleCapture = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files?.length) return;
@@ -461,75 +512,83 @@ const handleAudioError = (message: string) => {
             />
           </div>
         ) : mode === 'photo' ? (
-          <div className="absolute inset-0 flex items-center justify-center">
-            {/* Desktop webcam view - always rendered but hidden when not active */}
+          <div className="absolute inset-0 flex items-center justify-center overflow-hidden">
+            {/* Live camera preview */}
             <video 
               ref={videoRef}
               autoPlay
               playsInline
               muted
               className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-300 ${
-                isDesktop && webcamActive ? 'opacity-100' : 'opacity-0 pointer-events-none'
+                cameraActive && cameraReady ? 'opacity-100' : 'opacity-0'
               }`}
-              style={{ transform: 'scaleX(-1)' }} // Mirror for selfie view
+              style={{ transform: facingMode === 'user' ? 'scaleX(-1)' : 'none' }}
             />
             
             {/* Canvas for capturing (hidden) */}
             <canvas ref={canvasRef} className="hidden" />
             
-            {/* Subtle frame guide */}
-            <div className="w-72 h-72 border border-white/10 rounded-3xl z-10" />
-            
-            {/* Corner accents */}
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-80 h-80 pointer-events-none z-10">
-              <div className="absolute top-0 left-0 w-8 h-8 border-l-2 border-t-2 border-white/30 rounded-tl-xl" />
-              <div className="absolute top-0 right-0 w-8 h-8 border-r-2 border-t-2 border-white/30 rounded-tr-xl" />
-              <div className="absolute bottom-0 left-0 w-8 h-8 border-l-2 border-b-2 border-white/30 rounded-bl-xl" />
-              <div className="absolute bottom-0 right-0 w-8 h-8 border-r-2 border-b-2 border-white/30 rounded-br-xl" />
-            </div>
-            
-            {/* Desktop: Show webcam instructions or error */}
-            {isDesktop && !webcamActive && (
-              <div className="absolute inset-0 flex flex-col items-center justify-center z-20 bg-zinc-950/80">
-                {webcamError ? (
-                  <>
-                    <div className="w-16 h-16 rounded-full bg-red-500/10 flex items-center justify-center mb-4">
-                      <VideoOff className="w-8 h-8 text-red-400" />
-                    </div>
-                    <p className="text-zinc-400 text-sm mb-6 text-center px-8">{webcamError}</p>
-                    <button
-                      onClick={() => fileInputRef.current?.click()}
-                      className="px-6 py-3 bg-white text-black rounded-full font-medium text-sm flex items-center gap-2"
-                    >
-                      <Upload className="w-4 h-4" />
-                      Upload Photo Instead
-                    </button>
-                  </>
-                ) : (
-                  <>
-                    <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center mb-4">
-                      <Video className="w-8 h-8 text-zinc-400" />
-                    </div>
-                    <p className="text-zinc-400 text-sm mb-6 text-center px-8">Use your webcam or upload a photo</p>
-                    <div className="flex gap-3">
-                      <button
-                        onClick={startWebcam}
-                        className="px-6 py-3 bg-white text-black rounded-full font-medium text-sm flex items-center gap-2"
-                      >
-                        <Camera className="w-4 h-4" />
-                        Start Webcam
-                      </button>
-                      <button
-                        onClick={() => fileInputRef.current?.click()}
-                        className="px-6 py-3 bg-zinc-800 text-white rounded-full font-medium text-sm flex items-center gap-2"
-                      >
-                        <Upload className="w-4 h-4" />
-                        Upload
-                      </button>
-                    </div>
-                  </>
-                )}
+            {/* Loading state while camera initializes */}
+            {cameraActive && !cameraReady && !cameraError && (
+              <div className="absolute inset-0 flex items-center justify-center z-20">
+                <Loader2 className="w-8 h-8 animate-spin text-zinc-500" />
               </div>
+            )}
+            
+            {/* Corner frame guides - only show when camera is ready */}
+            {cameraReady && (
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-72 h-72 pointer-events-none z-10">
+                <div className="absolute top-0 left-0 w-10 h-10 border-l-2 border-t-2 border-white/40 rounded-tl-2xl" />
+                <div className="absolute top-0 right-0 w-10 h-10 border-r-2 border-t-2 border-white/40 rounded-tr-2xl" />
+                <div className="absolute bottom-0 left-0 w-10 h-10 border-l-2 border-b-2 border-white/40 rounded-bl-2xl" />
+                <div className="absolute bottom-0 right-0 w-10 h-10 border-r-2 border-b-2 border-white/40 rounded-br-2xl" />
+              </div>
+            )}
+            
+            {/* Camera error state */}
+            {cameraError && (
+              <div className="absolute inset-0 flex flex-col items-center justify-center z-20 bg-zinc-950 px-8">
+                <div className="w-16 h-16 rounded-full bg-red-500/10 flex items-center justify-center mb-4">
+                  <Camera className="w-8 h-8 text-red-400" />
+                </div>
+                <p className="text-zinc-400 text-sm mb-6 text-center">{cameraError}</p>
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => startCamera()}
+                    className="px-6 py-3 bg-white text-black rounded-full font-medium text-sm flex items-center gap-2"
+                  >
+                    <Camera className="w-4 h-4" />
+                    Try Again
+                  </button>
+                  <button
+                    onClick={() => fileInputRef.current?.click()}
+                    className="px-6 py-3 bg-zinc-800 text-white rounded-full font-medium text-sm flex items-center gap-2"
+                  >
+                    <Upload className="w-4 h-4" />
+                    Upload
+                  </button>
+                </div>
+              </div>
+            )}
+            
+            {/* Flip camera button - only show if multiple cameras and camera is active */}
+            {hasMultipleCameras && cameraActive && cameraReady && (
+              <button
+                onClick={flipCamera}
+                className="absolute top-24 right-6 z-20 w-12 h-12 rounded-full bg-black/40 backdrop-blur-md border border-white/10 flex items-center justify-center active:scale-95 transition-transform"
+              >
+                <SwitchCamera className="w-5 h-5 text-white" />
+              </button>
+            )}
+            
+            {/* Gallery/upload button */}
+            {cameraActive && cameraReady && (
+              <button
+                onClick={() => fileInputRef.current?.click()}
+                className="absolute top-24 left-6 z-20 w-12 h-12 rounded-full bg-black/40 backdrop-blur-md border border-white/10 flex items-center justify-center active:scale-95 transition-transform"
+              >
+                <ImageIcon className="w-5 h-5 text-white" />
+              </button>
             )}
           </div>
         ) : (
@@ -641,51 +700,31 @@ const handleAudioError = (message: string) => {
               <div className="h-20" />
             ) : mode === 'photo' ? (
               <>
-                {/* File input for mobile camera capture or desktop file upload */}
+                {/* Hidden file input for gallery uploads */}
                 <input 
                   type="file" 
                   accept="image/*" 
-                  capture={isDesktop ? undefined : "environment"}
                   className="hidden" 
                   ref={fileInputRef} 
                   onChange={handleCapture} 
                 />
                 
-                {/* Desktop with active webcam: show capture button */}
-                {isDesktop && webcamActive ? (
-                  <div className="flex items-center gap-4">
-                    <button
-                      onClick={stopWebcam}
-                      className="w-12 h-12 rounded-full bg-zinc-800 flex items-center justify-center hover:bg-zinc-700 transition-colors"
-                      title="Stop webcam"
-                    >
-                      <VideoOff className="w-5 h-5 text-zinc-400" />
-                    </button>
-                    <button 
-                      onClick={captureFromWebcam}
-                      className="w-20 h-20 rounded-full border-[3px] border-white flex items-center justify-center active:scale-95 transition-transform group"
-                    >
-                      <div className="w-16 h-16 bg-white rounded-full group-active:bg-zinc-200 transition-colors" />
-                    </button>
-                    <button
-                      onClick={() => fileInputRef.current?.click()}
-                      className="w-12 h-12 rounded-full bg-zinc-800 flex items-center justify-center hover:bg-zinc-700 transition-colors"
-                      title="Upload instead"
-                    >
-                      <Upload className="w-5 h-5 text-zinc-400" />
-                    </button>
-                  </div>
-                ) : isDesktop && !webcamActive ? (
-                  // Desktop without webcam: just show invisible trigger (buttons are in viewfinder)
-                  <div className="w-20 h-20" />
-                ) : (
-                  // Mobile: standard camera capture button
+                {/* Show capture button when camera is ready, or error fallback */}
+                {cameraActive && cameraReady ? (
                   <button 
-                    onClick={() => fileInputRef.current?.click()}
+                    onClick={capturePhoto}
                     className="w-20 h-20 rounded-full border-[3px] border-white flex items-center justify-center active:scale-95 transition-transform group"
                   >
                     <div className="w-16 h-16 bg-white rounded-full group-active:bg-zinc-200 transition-colors" />
                   </button>
+                ) : cameraError ? (
+                  // Error state - buttons are in viewfinder, just placeholder here
+                  <div className="h-20" />
+                ) : (
+                  // Loading state
+                  <div className="w-20 h-20 rounded-full border-[3px] border-zinc-700 flex items-center justify-center">
+                    <div className="w-16 h-16 bg-zinc-800 rounded-full" />
+                  </div>
                 )}
               </>
             ) : (
