@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { X } from 'lucide-react';
+import { X, Pencil, MapPin, Timer } from 'lucide-react';
 import { useToast, Button } from '@/components/ui';
 import { EmojiPicker } from '@/components/features';
 import { updateJourney } from '@/services';
@@ -96,21 +96,29 @@ export default function EditJourneyModal({
   if (!journey) return null;
 
   return (
-    <div className="fixed inset-0 z-50 bg-[var(--bg-base)]/90 backdrop-blur-md flex flex-col safe-top safe-bottom overflow-y-auto">
-      <div className="flex-1 flex flex-col p-6 pb-12 animate-enter min-h-0">
+    <div className="fixed inset-0 z-50 bg-[var(--bg-base)] flex flex-col safe-top safe-bottom overflow-y-auto">
+      <div className="flex-1 flex flex-col p-6 animate-enter">
         <button 
           onClick={handleClose}
-          className="self-end w-10 h-10 flex items-center justify-center rounded-full bg-[var(--bg-hover)] mb-6 flex-shrink-0"
+          className="self-end w-10 h-10 flex items-center justify-center rounded-full bg-[var(--bg-hover)] mb-8 flex-shrink-0"
         >
           <X className="w-5 h-5 text-[var(--fg-muted)]" />
         </button>
         
-        <div className="flex-1 flex flex-col justify-center max-w-sm mx-auto w-full py-8">
-          <h2 className="text-3xl font-light tracking-tight text-[var(--fg-base)] mb-8">Edit Journey</h2>
+        <div className="flex-1 flex flex-col justify-center max-w-sm mx-auto w-full">
+          <div className="flex items-center gap-3 mb-2">
+            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-500/20 to-purple-500/20 flex items-center justify-center">
+              <Pencil className="w-6 h-6 text-blue-400" />
+            </div>
+            <h2 className="text-3xl font-light tracking-tight text-[var(--fg-base)]">Edit Journey</h2>
+          </div>
+          <p className="text-[var(--fg-muted)] text-sm mb-10 ml-[60px]">Update your journey details</p>
           
-          <div className="space-y-6">
+          <div className="space-y-8">
+            {/* Name */}
             <div>
-              <label className="text-[11px] uppercase tracking-[0.2em] text-[var(--fg-muted)] font-medium mb-3 block">
+              <label className="flex items-center gap-2 text-[11px] uppercase tracking-[0.2em] text-[var(--fg-muted)] font-medium mb-3">
+                <MapPin className="w-3 h-3" />
                 Name
               </label>
               <input 
@@ -118,12 +126,17 @@ export default function EditJourneyModal({
                 value={editName}
                 onChange={(e) => setEditName(e.target.value)}
                 maxLength={50}
-                className="w-full bg-[var(--bg-surface)] rounded-xl py-3 px-4 text-lg text-[var(--fg-base)] focus:outline-none focus:ring-2 focus:ring-[var(--fg-base)]/20"
+                className="w-full bg-[var(--bg-surface)]/50 border border-[var(--border-base)] focus:border-blue-400 rounded-2xl px-5 py-4 text-2xl font-light text-[var(--fg-base)] placeholder:text-[var(--fg-subtle)] focus:outline-none focus:bg-[var(--bg-base)]/50 transition-all input-premium"
               />
             </div>
             
+            {/* Emoji Picker */}
+            <EmojiPicker value={editEmoji} onChange={setEditEmoji} />
+            
+            {/* Unlock Date */}
             <div>
-              <label className="text-[11px] uppercase tracking-[0.2em] text-[var(--fg-muted)] font-medium mb-3 block">
+              <label className="flex items-center gap-2 text-[11px] uppercase tracking-[0.2em] text-[var(--fg-muted)] font-medium mb-3">
+                <Timer className="w-3 h-3" />
                 Unlock Date
               </label>
               <input 
@@ -131,13 +144,10 @@ export default function EditJourneyModal({
                 value={editDate}
                 onChange={(e) => setEditDate(e.target.value)}
                 min={new Date().toISOString().split('T')[0]}
-                className="w-full bg-[var(--bg-surface)] rounded-xl py-3 px-4 text-lg text-[var(--fg-base)] focus:outline-none focus:ring-2 focus:ring-[var(--fg-base)]/20 appearance-none"
+                className="w-full bg-[var(--bg-surface)]/50 border border-[var(--border-base)] focus:border-blue-400 rounded-2xl px-5 py-4 text-lg text-[var(--fg-base)] focus:outline-none focus:bg-[var(--bg-base)]/50 transition-all appearance-none"
                 style={{ minWidth: 0 }}
               />
             </div>
-
-            {/* Emoji Picker */}
-            <EmojiPicker value={editEmoji} onChange={setEditEmoji} />
             
             <Button 
               onClick={handleSave}
