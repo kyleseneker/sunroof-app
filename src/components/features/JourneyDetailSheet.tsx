@@ -199,16 +199,24 @@ export default function JourneyDetailSheet({
         )}
       </div>
       
-      {/* Blurred Memory Preview Card */}
-      {memories.length > 0 && (
+      {/* Blurred Memory Preview Card or Loading Skeleton */}
+      {memoriesLoading ? (
+        <div className="relative z-10 flex-1 flex items-center justify-center p-6 pt-2">
+          <div className="relative w-full max-w-sm aspect-[4/3] rounded-3xl overflow-hidden border border-white/10 bg-white/5 animate-pulse">
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="w-16 h-16 rounded-full bg-white/10" />
+            </div>
+          </div>
+        </div>
+      ) : memories.length > 0 ? (
         <MemoryPreviewCard 
           memories={memories} 
           onTap={() => onManageMemories(journey)} 
         />
-      )}
+      ) : null}
 
       {/* Content */}
-      <div className={`relative z-10 p-6 pb-16 safe-bottom ${!memoriesLoading && memories.length === 0 ? 'flex-1 flex flex-col justify-end' : ''}`}>
+      <div className={`relative z-10 p-6 pb-16 safe-bottom ${!memoriesLoading && memories.length === 0 ? 'flex-1 flex flex-col justify-end' : 'mt-auto'}`}>
         {/* Locked indicator - only show when no memories */}
         {!memoriesLoading && memories.length === 0 && (
           <div className="flex items-center gap-3 mb-4">
