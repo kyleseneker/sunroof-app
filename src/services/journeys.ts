@@ -12,6 +12,7 @@ export interface CreateJourneyInput {
   destination?: string;
   unlockDate: string;
   sharedWith?: string[];
+  emoji?: string;
 }
 
 export interface UpdateJourneyInput {
@@ -21,6 +22,7 @@ export interface UpdateJourneyInput {
   unlockDate?: string;
   status?: 'active' | 'completed';
   sharedWith?: string[];
+  emoji?: string | null;
 }
 
 /**
@@ -37,6 +39,7 @@ export async function createJourney(input: CreateJourneyInput): Promise<ServiceR
         unlock_date: input.unlockDate,
         status: 'active',
         shared_with: input.sharedWith?.length ? input.sharedWith : null,
+        emoji: input.emoji || null,
       }])
       .select()
       .single();
@@ -64,6 +67,7 @@ export async function updateJourney(input: UpdateJourneyInput): Promise<ServiceR
     if (input.unlockDate !== undefined) updates.unlock_date = input.unlockDate;
     if (input.status !== undefined) updates.status = input.status;
     if (input.sharedWith !== undefined) updates.shared_with = input.sharedWith.length > 0 ? input.sharedWith : null;
+    if (input.emoji !== undefined) updates.emoji = input.emoji || null;
 
     const { data, error } = await supabase
       .from('journeys')

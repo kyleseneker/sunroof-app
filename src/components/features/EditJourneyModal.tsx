@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
 import { useToast, Button } from '@/components/ui';
+import { EmojiPicker } from '@/components/features';
 import { updateJourney } from '@/services';
 import { hapticSuccess } from '@/lib';
 import type { Journey } from '@/types';
@@ -22,6 +23,7 @@ export default function EditJourneyModal({
   
   const [editName, setEditName] = useState('');
   const [editDate, setEditDate] = useState('');
+  const [editEmoji, setEditEmoji] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
 
   // Sync state when journey changes
@@ -29,6 +31,7 @@ export default function EditJourneyModal({
     if (journey) {
       setEditName(journey.name);
       setEditDate(journey.unlock_date.split('T')[0]);
+      setEditEmoji(journey.emoji || null);
     }
   }, [journey]);
 
@@ -69,6 +72,7 @@ export default function EditJourneyModal({
         id: journey.id,
         name: cleanName,
         unlockDate: unlockDateStr,
+        emoji: editEmoji,
       });
       
       if (error) {
@@ -130,6 +134,9 @@ export default function EditJourneyModal({
                 className="w-full bg-[var(--bg-surface)] rounded-xl py-3 px-4 text-lg text-[var(--fg-base)] focus:outline-none focus:ring-2 focus:ring-[var(--fg-base)]/20"
               />
             </div>
+
+            {/* Emoji Picker */}
+            <EmojiPicker value={editEmoji} onChange={setEditEmoji} />
             
             <Button 
               onClick={handleSave}

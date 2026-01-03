@@ -27,6 +27,7 @@ export interface Journey {
   unlock_date: string;
   status: JourneyStatus;
   shared_with?: string[] | null;
+  emoji?: string | null;
   deleted_at?: string | null;
   created_at: string;
   memory_count?: number;

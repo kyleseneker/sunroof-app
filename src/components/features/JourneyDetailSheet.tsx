@@ -224,7 +224,10 @@ export default function JourneyDetailSheet({
         )}
         
         {/* Journey Name */}
-        <h1 className="text-4xl font-bold mb-3 text-white">{journey.name}</h1>
+        <h1 className="text-4xl font-bold mb-3 text-white">
+          {journey.emoji && <span className="mr-3">{journey.emoji}</span>}
+          {journey.name}
+        </h1>
         
         {/* Memory Stats Row - only show if no memories (preview card shows otherwise) */}
         {!memoriesLoading && memories.length === 0 && (

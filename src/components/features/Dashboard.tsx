@@ -578,7 +578,10 @@ export default function Dashboard({ activeJourneys: initialActiveJourneys = [], 
                     </div>
 
                     <div className="relative z-10">
-                      <h2 className="text-3xl font-light tracking-tight mb-4 break-words">{journey.name}</h2>
+                      <h2 className="text-3xl font-light tracking-tight mb-4 break-words">
+                        {journey.emoji && <span className="mr-2">{journey.emoji}</span>}
+                        {journey.name}
+                      </h2>
                       <button 
                         onClick={(e) => { e.stopPropagation(); onCapture?.(journey); }}
                         className="group w-full h-12 bg-white text-black rounded-full font-semibold text-sm tracking-wide flex items-center justify-center gap-2 hover:bg-zinc-100 active:scale-[0.98] transition-all btn-shine shadow-lg shadow-white/10"
@@ -669,7 +672,9 @@ export default function Dashboard({ activeJourneys: initialActiveJourneys = [], 
                   <div className="absolute left-0 top-0 bottom-0 w-1 rounded-l-2xl" style={{ background: getJourneyGradient(journey.name).gradient }} />
                   <div className="w-12 h-12 rounded-xl flex items-center justify-center relative overflow-hidden" style={{ background: getJourneyGradient(journey.name).gradient }}>
                     <div className="absolute inset-0 bg-black/30" />
-                    {isUnlocked(journey) ? (
+                    {journey.emoji ? (
+                      <span className="text-xl relative z-10">{journey.emoji}</span>
+                    ) : isUnlocked(journey) ? (
                       <Sparkles className="w-5 h-5 text-white relative z-10" />
                     ) : (
                       <Lock className="w-4 h-4 text-white/60 relative z-10" />

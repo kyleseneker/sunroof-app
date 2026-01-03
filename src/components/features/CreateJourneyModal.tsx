@@ -3,6 +3,7 @@
 import { useState, useMemo } from 'react';
 import { X, MapPin, Timer, UserPlus, Plane } from 'lucide-react';
 import { useToast, Button } from '@/components/ui';
+import { EmojiPicker } from '@/components/features';
 import { createJourney, getUserIdByEmail } from '@/services';
 import { hapticSuccess, DESTINATION_SUGGESTIONS } from '@/lib';
 
@@ -24,6 +25,7 @@ export default function CreateJourneyModal({
   const [tripName, setTripName] = useState('');
   const [unlockDays, setUnlockDays] = useState<number | null>(3);
   const [customDate, setCustomDate] = useState('');
+  const [emoji, setEmoji] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   
   // Share during creation state
@@ -39,6 +41,7 @@ export default function CreateJourneyModal({
     setTripName('');
     setUnlockDays(3);
     setCustomDate('');
+    setEmoji(null);
     setShareEmails([]);
     setShareEmailInput('');
     onClose();
@@ -95,6 +98,7 @@ export default function CreateJourneyModal({
         name: cleanName,
         unlockDate: unlockDate.toISOString(),
         sharedWith: sharedWithIds.length > 0 ? sharedWithIds : undefined,
+        emoji: emoji || undefined,
       });
 
       if (error) {
@@ -168,6 +172,9 @@ export default function CreateJourneyModal({
                 className="w-full bg-[var(--bg-surface)]/50 border border-[var(--border-base)] focus:border-orange-400 rounded-2xl px-5 py-4 text-2xl font-light text-[var(--fg-base)] placeholder:text-[var(--fg-subtle)] focus:outline-none focus:bg-[var(--bg-base)]/50 transition-all input-premium"
               />
             </div>
+
+            {/* Emoji Picker */}
+            <EmojiPicker value={emoji} onChange={setEmoji} />
 
             {/* Unlock After */}
             <div>
