@@ -1000,9 +1000,9 @@ const handleAudioError = (message: string) => {
       {/* Filter Panel - slides up when showFilters is true */}
       {mode === 'photo' && cameraActive && cameraReady && showFilters && (
         <div className="absolute bottom-0 left-0 right-0 z-40 safe-bottom animate-enter">
-          <div className="p-6 pt-8 pb-8 bg-black/95 backdrop-blur-xl border-t border-white/10">
-            <div className="flex justify-between items-center mb-4">
-              <span className="text-sm font-medium text-white">Filters</span>
+          <div className="p-4 pt-4 pb-6 bg-black/95 backdrop-blur-xl border-t border-white/10">
+            <div className="flex justify-between items-center mb-2">
+              <span className="text-xs font-medium text-white">Filters</span>
               <button
                 onClick={() => setShowFilters(false)}
                 className="text-xs text-zinc-400 hover:text-white transition-colors"
