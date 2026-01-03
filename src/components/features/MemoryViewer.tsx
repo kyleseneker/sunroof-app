@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { X, Trash2, ChevronLeft, ChevronRight, Download, Copy, Check, Share, Mic, MapPin } from 'lucide-react';
+import { X, Trash2, ChevronLeft, ChevronRight, Download, Copy, Check, Share, Mic, MapPin, Quote, Image, Calendar, Cloud } from 'lucide-react';
 import { IconButton } from '@/components/ui';
 import { AudioPlayer } from '@/components/features';
 import type { Memory } from '@/types';
@@ -191,26 +191,51 @@ export default function MemoryViewer({
       )}
 
       {/* Content */}
-      <div className="flex-1 flex items-center justify-center p-4">
-        {memory.type === 'photo' && memory.url ? (
-          <img
-            src={memory.url}
-            alt=""
-            className="max-w-full max-h-full object-contain rounded-lg"
-            onError={(e) => {
-              e.currentTarget.src =
-                'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiM2NjYiIHN0cm9rZS13aWR0aD0iMiI+PHJlY3QgeD0iMyIgeT0iMyIgd2lkdGg9IjE4IiBoZWlnaHQ9IjE4IiByeD0iMiIvPjxjaXJjbGUgY3g9IjguNSIgY3k9IjguNSIgcj0iMS41Ii8+PHBhdGggZD0ibTIxIDE1LTUtNS01IDV6Ii8+PC9zdmc+';
-            }}
-          />
-        ) : memory.type === 'audio' && memory.url ? (
+      <div className="flex-1 flex flex-col items-center justify-center p-4 pt-20 pb-8 overflow-auto">
+        {/* Photo */}
+        {memory.type === 'photo' && memory.url && (
+          <div className="flex flex-col items-center max-w-2xl w-full">
+            <img
+              src={memory.url}
+              alt=""
+              className="max-w-full max-h-[60vh] object-contain rounded-2xl border border-pink-500/20"
+              onError={(e) => {
+                e.currentTarget.src =
+                  'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiM2NjYiIHN0cm9rZS13aWR0aD0iMiI+PHJlY3QgeD0iMyIgeT0iMyIgd2lkdGg9IjE4IiBoZWlnaHQ9IjE4IiByeD0iMiIvPjxjaXJjbGUgY3g9IjguNSIgY3k9IjguNSIgcj0iMS41Ii8+PHBhdGggZD0ibTIxIDE1LTUtNS01IDV6Ii8+PC9zdmc+';
+              }}
+            />
+            {/* Photo metadata */}
+            <div className="mt-4 flex flex-wrap items-center justify-center gap-3">
+              <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-pink-500/10 border border-pink-500/20">
+                <Calendar className="w-3.5 h-3.5 text-pink-400" />
+                <span className="text-sm text-pink-300">{formattedDate}</span>
+              </div>
+              {memory.location_name && (
+                <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-pink-500/10 border border-pink-500/20">
+                  <MapPin className="w-3.5 h-3.5 text-pink-400" />
+                  <span className="text-sm text-pink-300">{memory.location_name}</span>
+                </div>
+              )}
+              {memory.weather && (
+                <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-pink-500/10 border border-pink-500/20">
+                  <span className="text-sm">{memory.weather.icon}</span>
+                  <span className="text-sm text-pink-300">{memory.weather.temp}°F {memory.weather.condition}</span>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+        
+        {/* Audio */}
+        {memory.type === 'audio' && memory.url && (
           <div className="w-full max-w-md">
             <div className="text-center mb-6">
-              <div className="w-20 h-20 rounded-full bg-gradient-to-br from-orange-500 to-pink-500 flex items-center justify-center mx-auto mb-4">
-                <Mic className="w-10 h-10 text-white" />
+              <div className="w-20 h-20 rounded-2xl bg-orange-500/20 flex items-center justify-center mx-auto mb-4">
+                <Mic className="w-10 h-10 text-orange-400" />
               </div>
               <h3 className="text-lg font-medium text-white mb-1">Voice Note</h3>
               {memory.duration && (
-                <p className="text-sm text-zinc-500">
+                <p className="text-sm text-orange-400/60">
                   {Math.floor(memory.duration / 60)}:{(memory.duration % 60).toString().padStart(2, '0')}
                 </p>
               )}
@@ -220,37 +245,65 @@ export default function MemoryViewer({
               duration={memory.duration}
               showWaveform={true}
             />
+            {/* Audio metadata */}
+            <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
+              <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-orange-500/10 border border-orange-500/20">
+                <Calendar className="w-3.5 h-3.5 text-orange-400" />
+                <span className="text-sm text-orange-300">{formattedDate}</span>
+              </div>
+              {memory.location_name && (
+                <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-orange-500/10 border border-orange-500/20">
+                  <MapPin className="w-3.5 h-3.5 text-orange-400" />
+                  <span className="text-sm text-orange-300">{memory.location_name}</span>
+                </div>
+              )}
+              {memory.weather && (
+                <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-orange-500/10 border border-orange-500/20">
+                  <span className="text-sm">{memory.weather.icon}</span>
+                  <span className="text-sm text-orange-300">{memory.weather.temp}°F</span>
+                </div>
+              )}
+            </div>
           </div>
-        ) : (
-          <div className="max-w-md p-8 bg-zinc-900 rounded-2xl">
-            <p className="text-xl text-white leading-relaxed">{memory.note}</p>
+        )}
+        
+        {/* Note */}
+        {memory.type === 'text' && (
+          <div className="w-full max-w-md">
+            <div className="p-6 bg-blue-500/10 border border-blue-500/20 rounded-2xl">
+              <div className="flex items-start gap-3 mb-4">
+                <div className="w-10 h-10 rounded-xl bg-blue-500/20 flex items-center justify-center flex-shrink-0">
+                  <Quote className="w-5 h-5 text-blue-400" />
+                </div>
+              </div>
+              <p className="text-lg text-zinc-100 leading-relaxed">{memory.note}</p>
+            </div>
+            {/* Note metadata */}
+            <div className="mt-4 flex flex-wrap items-center justify-center gap-3">
+              <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-blue-500/10 border border-blue-500/20">
+                <Calendar className="w-3.5 h-3.5 text-blue-400" />
+                <span className="text-sm text-blue-300">{formattedDate}</span>
+              </div>
+              {memory.location_name && (
+                <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-blue-500/10 border border-blue-500/20">
+                  <MapPin className="w-3.5 h-3.5 text-blue-400" />
+                  <span className="text-sm text-blue-300">{memory.location_name}</span>
+                </div>
+              )}
+              {memory.weather && (
+                <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-blue-500/10 border border-blue-500/20">
+                  <span className="text-sm">{memory.weather.icon}</span>
+                  <span className="text-sm text-blue-300">{memory.weather.temp}°F</span>
+                </div>
+              )}
+            </div>
           </div>
         )}
       </div>
 
-      {/* Footer */}
-      <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black/80 to-transparent safe-bottom">
-        {/* Location & Weather */}
-        {(memory.location_name || memory.weather) && (
-          <div className="flex justify-center items-center gap-3 mb-2 text-sm">
-            {memory.location_name && (
-              <span className="flex items-center gap-1 text-zinc-400">
-                <MapPin className="w-3.5 h-3.5" />
-                {memory.location_name}
-              </span>
-            )}
-            {memory.location_name && memory.weather && (
-              <span className="text-zinc-600">•</span>
-            )}
-            {memory.weather && (
-              <span className="text-zinc-400">
-                {memory.weather.icon} {memory.weather.temp}°F {memory.weather.condition}
-              </span>
-            )}
-          </div>
-        )}
-        <p className="text-center text-sm text-zinc-500">{formattedDate}</p>
-        <p className="text-center text-xs text-zinc-600 mt-1">
+      {/* Position indicator */}
+      <div className="absolute bottom-6 left-0 right-0 text-center safe-bottom">
+        <p className="text-xs text-zinc-600">
           {currentIndex + 1} of {memories.length}
         </p>
       </div>
