@@ -355,9 +355,13 @@ export default function GalleryView({ journey, onClose, onMemoryDeleted }: Galle
                 day: 'numeric' 
               });
               
-              // Get location/weather from first memory of the day that has it
-              const dayLocation = dayMemories.find(m => m.location_name)?.location_name;
-              const dayWeather = dayMemories.find(m => m.weather)?.weather;
+              // Get weather range for the day
+              const temps = dayMemories
+                .filter(m => m.weather?.temp)
+                .map(m => m.weather!.temp);
+              const minTemp = temps.length > 0 ? Math.min(...temps) : null;
+              const maxTemp = temps.length > 0 ? Math.max(...temps) : null;
+              const weatherIcon = dayMemories.find(m => m.weather?.icon)?.weather?.icon;
               
               return (
                 <div 
@@ -390,11 +394,12 @@ export default function GalleryView({ journey, onClose, onMemoryDeleted }: Galle
                           )}
                         </p>
                       </div>
-                      {(dayLocation || dayWeather) && (
-                        <div className="flex items-center gap-2 text-xs text-zinc-400 flex-shrink-0">
-                          {dayWeather && (
-                            <span>{dayWeather.icon} {dayWeather.temp}°</span>
-                          )}
+                      {minTemp !== null && (
+                        <div className="flex items-center gap-1 text-xs text-zinc-400 flex-shrink-0">
+                          {weatherIcon && <span>{weatherIcon}</span>}
+                          <span>
+                            {minTemp === maxTemp ? `${minTemp}°` : `${minTemp}–${maxTemp}°`}
+                          </span>
                         </div>
                       )}
                     </div>
@@ -432,8 +437,16 @@ export default function GalleryView({ journey, onClose, onMemoryDeleted }: Galle
                                   e.currentTarget.style.display = 'none';
                                 }}
                               />
-                              <div className="absolute bottom-3 left-3 px-2.5 py-1 rounded-full bg-black/60 backdrop-blur-sm">
-                                <p className="text-[11px] text-white/80">{memoryTime}</p>
+                              <div className="absolute bottom-3 left-3 flex items-center gap-2">
+                                <div className="px-2.5 py-1 rounded-full bg-black/60 backdrop-blur-sm">
+                                  <p className="text-[11px] text-white/80">{memoryTime}</p>
+                                </div>
+                                {memory.location_name && (
+                                  <div className="px-2.5 py-1 rounded-full bg-black/60 backdrop-blur-sm flex items-center gap-1">
+                                    <MapPin className="w-2.5 h-2.5 text-white/60" />
+                                    <p className="text-[11px] text-white/80">{memory.location_name}</p>
+                                  </div>
+                                )}
                               </div>
                             </button>
                           )}
@@ -450,7 +463,18 @@ export default function GalleryView({ journey, onClose, onMemoryDeleted }: Galle
                                   <p className="text-base text-zinc-200 leading-relaxed line-clamp-4">
                                     {memory.note}
                                   </p>
-                                  <p className="text-xs text-zinc-500 mt-3">{memoryTime}</p>
+                                  <div className="flex items-center gap-2 mt-3 text-xs text-zinc-500">
+                                    <span>{memoryTime}</span>
+                                    {memory.location_name && (
+                                      <>
+                                        <span>•</span>
+                                        <span className="flex items-center gap-1">
+                                          <MapPin className="w-2.5 h-2.5" />
+                                          {memory.location_name}
+                                        </span>
+                                      </>
+                                    )}
+                                  </div>
                                 </div>
                               </div>
                             </button>
@@ -475,7 +499,15 @@ export default function GalleryView({ journey, onClose, onMemoryDeleted }: Galle
                                     }
                                   </p>
                                 </div>
-                                <p className="text-xs text-zinc-500">{memoryTime}</p>
+                                <div className="text-right">
+                                  <p className="text-xs text-zinc-500">{memoryTime}</p>
+                                  {memory.location_name && (
+                                    <p className="text-[10px] text-zinc-600 flex items-center gap-1 justify-end mt-0.5">
+                                      <MapPin className="w-2 h-2" />
+                                      {memory.location_name}
+                                    </p>
+                                  )}
+                                </div>
                               </div>
                             </button>
                           )}
