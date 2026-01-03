@@ -897,25 +897,24 @@ const handleAudioError = (message: string) => {
               />
             )}
             
-            {/* Zoom controls */}
+            {/* Zoom controls - minimal pill */}
             {cameraActive && cameraReady && supportsZoom && maxZoom > 1 && (
-              <div className="absolute bottom-52 left-1/2 -translate-x-1/2 z-20 flex items-center gap-2">
-                {/* Zoom level indicator */}
-                <div className="flex items-center gap-1 px-3 py-1.5 rounded-full bg-black/40 backdrop-blur-md border border-white/10">
+              <div className="absolute bottom-48 left-1/2 -translate-x-1/2 z-20">
+                <div className="flex items-center gap-0.5 px-2 py-1 rounded-full bg-black/30 backdrop-blur-sm text-[10px]">
                   <button
                     onClick={() => applyZoom(zoomLevel - 0.5)}
                     disabled={zoomLevel <= minZoom}
-                    className="w-6 h-6 flex items-center justify-center text-white/80 hover:text-white disabled:text-white/30 disabled:cursor-not-allowed"
+                    className="w-5 h-5 flex items-center justify-center text-white/70 hover:text-white disabled:text-white/20 disabled:cursor-not-allowed"
                   >
                     −
                   </button>
-                  <span className="text-xs font-medium text-white min-w-[2.5rem] text-center">
+                  <span className="font-medium text-white/90 min-w-[1.75rem] text-center">
                     {zoomLevel.toFixed(1)}×
                   </span>
                   <button
                     onClick={() => applyZoom(zoomLevel + 0.5)}
                     disabled={zoomLevel >= maxZoom}
-                    className="w-6 h-6 flex items-center justify-center text-white/80 hover:text-white disabled:text-white/30 disabled:cursor-not-allowed"
+                    className="w-5 h-5 flex items-center justify-center text-white/70 hover:text-white disabled:text-white/20 disabled:cursor-not-allowed"
                   >
                     +
                   </button>
