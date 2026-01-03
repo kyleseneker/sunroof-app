@@ -228,11 +228,17 @@ export default function Dashboard({ activeJourneys: initialActiveJourneys = [], 
     }
   };
 
-  // Update journey in local state
+  // Update journey in local state, preserving memory_count if not provided
   const handleJourneyUpdated = (updated: Journey) => {
-    setActiveJourneys(prev => prev.map(j => j.id === updated.id ? updated : j));
-    setPastJourneys(prev => prev.map(j => j.id === updated.id ? updated : j));
-    if (focusedJourney?.id === updated.id) setFocusedJourney(updated);
+    setActiveJourneys(prev => prev.map(j => 
+      j.id === updated.id ? { ...updated, memory_count: updated.memory_count ?? j.memory_count } : j
+    ));
+    setPastJourneys(prev => prev.map(j => 
+      j.id === updated.id ? { ...updated, memory_count: updated.memory_count ?? j.memory_count } : j
+    ));
+    if (focusedJourney?.id === updated.id) {
+      setFocusedJourney({ ...updated, memory_count: updated.memory_count ?? focusedJourney.memory_count });
+    }
   };
 
   // Handle memory count update from ManageMemoriesSheet

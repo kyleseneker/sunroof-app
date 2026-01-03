@@ -227,8 +227,10 @@ export default function GalleryView({ journey: initialJourney, onClose, onMemory
           journey={journey}
           onClose={() => setShowEditModal(false)}
           onSuccess={(updatedJourney) => {
-            setJourney(updatedJourney);
-            onJourneyUpdated?.(updatedJourney);
+            // Preserve memory_count since updateJourney doesn't return it
+            const merged = { ...updatedJourney, memory_count: journey.memory_count };
+            setJourney(merged);
+            onJourneyUpdated?.(merged);
           }}
         />
       )}
