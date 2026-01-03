@@ -53,6 +53,7 @@ export default function Dashboard({ activeJourneys: initialActiveJourneys = [], 
   
   // Data states
   const [pastJourneys, setPastJourneys] = useState<Journey[]>([]);
+  const [pastJourneysLoading, setPastJourneysLoading] = useState(true);
   const [isDeleting, setIsDeleting] = useState(false);
   
   // Search/filter state
@@ -93,9 +94,11 @@ export default function Dashboard({ activeJourneys: initialActiveJourneys = [], 
     const { data, error } = await fetchPastJourneysService(user.id);
     if (error) {
       console.error('Error fetching past journeys:', error);
+      setPastJourneysLoading(false);
       return;
     }
     setPastJourneys(data || []);
+    setPastJourneysLoading(false);
   }, [user]);
 
   useEffect(() => {
@@ -588,6 +591,12 @@ export default function Dashboard({ activeJourneys: initialActiveJourneys = [], 
                   </div>
                 ))}
               </div>
+            </div>
+          ) : pastJourneysLoading ? (
+            /* Loading state while fetching past journeys */
+            <div className="text-center py-8 animate-enter">
+              <div className="w-8 h-8 mx-auto mb-4 rounded-full border-2 border-zinc-700 border-t-zinc-400 animate-spin" />
+              <p className="text-zinc-500 text-sm">Loading your journeys...</p>
             </div>
           ) : pastJourneys.length === 0 ? (
             /* Empty state - first time user */
