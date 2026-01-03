@@ -3,18 +3,21 @@
 import { useState, useEffect } from 'react';
 import { api, getJourneyGradient } from '@/lib';
 import { deleteJourney, deleteMemory, fetchMemoriesForJourney } from '@/services';
-import { X, Trash2, Camera, Sparkles, Mic, MapPin, Play, ChevronDown, Quote } from 'lucide-react';
+import { X, Trash2, Camera, Sparkles, Mic, MapPin, Play, ChevronDown, Quote, Pencil } from 'lucide-react';
 import { useToast, ConfirmDialog, IconButton } from '@/components/ui';
-import { AudioPlayer, MemoryViewer, AIRecapSheet } from '@/components/features';
+import { AudioPlayer, MemoryViewer, AIRecapSheet, EditJourneyModal } from '@/components/features';
 import type { Journey, Memory } from '@/types';
 
 interface GalleryViewProps {
   journey: Journey;
   onClose: () => void;
   onMemoryDeleted?: () => void;
+  onJourneyUpdated?: (journey: Journey) => void;
 }
 
-export default function GalleryView({ journey, onClose, onMemoryDeleted }: GalleryViewProps) {
+export default function GalleryView({ journey: initialJourney, onClose, onMemoryDeleted, onJourneyUpdated }: GalleryViewProps) {
+  const [journey, setJourney] = useState<Journey>(initialJourney);
+  const [showEditModal, setShowEditModal] = useState(false);
   const { showToast } = useToast();
   const [memories, setMemories] = useState<Memory[]>([]);
   const [loading, setLoading] = useState(true);
@@ -218,6 +221,18 @@ export default function GalleryView({ journey, onClose, onMemoryDeleted }: Galle
         loading={isDeleting}
       />
 
+      {/* Edit Journey Modal */}
+      {showEditModal && (
+        <EditJourneyModal
+          journey={journey}
+          onClose={() => setShowEditModal(false)}
+          onSuccess={(updatedJourney) => {
+            setJourney(updatedJourney);
+            onJourneyUpdated?.(updatedJourney);
+          }}
+        />
+      )}
+
       {/* Gradient header accent */}
       <div
         className="absolute top-0 left-0 right-0 h-32 opacity-40"
@@ -284,10 +299,18 @@ export default function GalleryView({ journey, onClose, onMemoryDeleted }: Galle
           )}
           
           <IconButton
+            icon={<Pencil className="w-4 h-4" />}
+            label="Edit journey"
+            onClick={() => setShowEditModal(true)}
+            variant="bordered"
+            dark
+          />
+          
+          <IconButton
             icon={<Trash2 className="w-4 h-4" />}
             label="Delete journey"
             onClick={() => setShowDeleteJourneyConfirm(true)}
-            variant="bordered"
+            variant="danger"
             dark
           />
         </div>

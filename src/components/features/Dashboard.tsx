@@ -336,6 +336,12 @@ export default function Dashboard({ activeJourneys: initialActiveJourneys = [], 
               : j
           ));
         }}
+        onJourneyUpdated={(updatedJourney) => {
+          setSelectedJourney(updatedJourney);
+          setPastJourneys(prev => prev.map(j => 
+            j.id === updatedJourney.id ? updatedJourney : j
+          ));
+        }}
       />
     );
   }
