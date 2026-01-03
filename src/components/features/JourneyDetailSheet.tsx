@@ -208,9 +208,9 @@ export default function JourneyDetailSheet({
       )}
 
       {/* Content */}
-      <div className={`relative z-10 p-6 pb-16 safe-bottom ${memories.length === 0 ? 'flex-1 flex flex-col justify-end' : ''}`}>
-        {/* Locked indicator - only show when no memories (preview card shows lock otherwise) */}
-        {memories.length === 0 && (
+      <div className={`relative z-10 p-6 pb-16 safe-bottom ${!memoriesLoading && memories.length === 0 ? 'flex-1 flex flex-col justify-end' : ''}`}>
+        {/* Locked indicator - only show when no memories */}
+        {!memoriesLoading && memories.length === 0 && (
           <div className="flex items-center gap-3 mb-4">
             <div className="w-10 h-10 rounded-full bg-amber-500/20 flex items-center justify-center relative lock-pulse">
               <div className="absolute inset-0 rounded-full bg-amber-400/10 animate-ping-slow" />
