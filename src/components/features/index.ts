@@ -8,6 +8,7 @@ export { default as AudioRecorder } from './AudioRecorder';
 export { default as CameraView, type CaptureMode } from './CameraView';
 export { default as CountdownTimer } from './CountdownTimer';
 export { default as EmojiPicker } from './EmojiPicker';
+export { default as FilterSelector } from './FilterSelector';
 export { 
   default as KeyboardShortcutsHelp, 
   useKeyboardShortcutsHelp,

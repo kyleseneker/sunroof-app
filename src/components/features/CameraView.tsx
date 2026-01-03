@@ -1,10 +1,10 @@
 'use client';
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { compressImage, getCompressionStats, getTimeOfDay, NOTE_PROMPTS, MAX_FILE_SIZE_BYTES, MAX_NOTE_LENGTH, ALLOWED_IMAGE_TYPES, IMAGE_COMPRESSION, getLocationContext, getWeather } from '@/lib';
+import { compressImage, getCompressionStats, getTimeOfDay, NOTE_PROMPTS, PHOTO_FILTERS, type PhotoFilterKey, MAX_FILE_SIZE_BYTES, MAX_NOTE_LENGTH, ALLOWED_IMAGE_TYPES, IMAGE_COMPRESSION, getLocationContext, getWeather } from '@/lib';
 import type { MemoryLocation, MemoryWeather } from '@/types';
 import { getCurrentUser, uploadMemoryPhoto, uploadMemoryAudio, createMemory } from '@/services';
 import { X, Camera, FileText, Send, Check, Loader2, Upload, Sparkles, Mic, SwitchCamera, ImageIcon, MapPin } from 'lucide-react';
-import { AudioRecorder } from '@/components/features';
+import { AudioRecorder, FilterSelector } from '@/components/features';
 import { IconButton } from '@/components/ui';
 import type { TimeOfDay } from '@/types';
 
@@ -61,6 +61,12 @@ export default function CameraView({
   const [locationContext, setLocationContext] = useState<MemoryLocation | null>(null);
   const [weatherContext, setWeatherContext] = useState<MemoryWeather | null>(null);
   const [contextLoading, setContextLoading] = useState(true);
+  
+  // Photo preview & filter state
+  const [previewBlob, setPreviewBlob] = useState<Blob | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [selectedFilter, setSelectedFilter] = useState<PhotoFilterKey>('none');
+  const filterCanvasRef = useRef<HTMLCanvasElement>(null);
   
 
   const showSuccess = () => {
@@ -331,7 +337,7 @@ export default function CameraView({
     setLoading(true);
     setError(null);
     
-    // Convert to blob, compress, and upload
+    // Convert to blob and show preview for filter selection
     try {
       const rawBlob = await new Promise<Blob | null>((resolve) => {
         canvas.toBlob(resolve, 'image/jpeg', 0.95);
@@ -350,15 +356,70 @@ export default function CameraView({
       const stats = getCompressionStats(rawBlob.size, blob.size);
       console.log(`Image compressed: ${stats.originalKB}KB → ${stats.compressedKB}KB (saved ${stats.percentage}%)`);
       
-      if (!userId) {
-        setError('Not authenticated');
-        setTimeout(() => setError(null), 3000);
-        setLoading(false);
-        return;
+      // Create preview URL and show filter selection
+      const url = URL.createObjectURL(blob);
+      setPreviewBlob(blob);
+      setPreviewUrl(url);
+      setSelectedFilter('none');
+      setLoading(false);
+    } catch (err) {
+      console.error('Capture exception:', err);
+      setError('Something went wrong. Try again.');
+      setTimeout(() => setError(null), 3000);
+      setLoading(false);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [journeyId, facingMode, userId, locationContext, weatherContext]);
+
+  // Apply filter and upload the photo
+  const savePhotoWithFilter = useCallback(async () => {
+    if (!previewBlob || !previewUrl || !userId) {
+      setError('Photo not ready');
+      setTimeout(() => setError(null), 3000);
+      return;
+    }
+    
+    setLoading(true);
+    setError(null);
+    
+    try {
+      let finalBlob = previewBlob;
+      
+      // Apply filter if not 'none'
+      if (selectedFilter !== 'none') {
+        const filterValue = PHOTO_FILTERS[selectedFilter].filter;
+        
+        // Create an image element to draw
+        const img = new Image();
+        img.src = previewUrl;
+        
+        await new Promise<void>((resolve, reject) => {
+          img.onload = () => resolve();
+          img.onerror = () => reject(new Error('Failed to load image'));
+        });
+        
+        // Create canvas and apply filter
+        const canvas = document.createElement('canvas');
+        canvas.width = img.width;
+        canvas.height = img.height;
+        const ctx = canvas.getContext('2d');
+        
+        if (ctx) {
+          ctx.filter = filterValue;
+          ctx.drawImage(img, 0, 0);
+          
+          // Convert back to blob
+          finalBlob = await new Promise<Blob>((resolve, reject) => {
+            canvas.toBlob((blob) => {
+              if (blob) resolve(blob);
+              else reject(new Error('Failed to create blob'));
+            }, 'image/jpeg', 0.92);
+          });
+        }
       }
       
       // Upload photo
-      const { data: uploadData, error: uploadError } = await uploadMemoryPhoto(userId, journeyId, blob);
+      const { data: uploadData, error: uploadError } = await uploadMemoryPhoto(userId, journeyId, finalBlob);
 
       if (uploadError || !uploadData) {
         console.error('Upload error:', uploadError);
@@ -389,16 +450,31 @@ export default function CameraView({
         return;
       }
       
+      // Cleanup preview
+      URL.revokeObjectURL(previewUrl);
+      setPreviewBlob(null);
+      setPreviewUrl(null);
+      setSelectedFilter('none');
+      
       setLoading(false);
       showSuccess();
     } catch (err) {
-      console.error('Capture exception:', err);
+      console.error('Save exception:', err);
       setError('Something went wrong. Try again.');
       setTimeout(() => setError(null), 3000);
       setLoading(false);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [journeyId, facingMode, userId, locationContext, weatherContext]);
+  }, [previewBlob, previewUrl, selectedFilter, userId, journeyId, locationContext, weatherContext]);
+
+  // Cancel photo preview
+  const cancelPreview = useCallback(() => {
+    if (previewUrl) {
+      URL.revokeObjectURL(previewUrl);
+    }
+    setPreviewBlob(null);
+    setPreviewUrl(null);
+    setSelectedFilter('none');
+  }, [previewUrl]);
 
   const handleCapture = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files?.length) return;
@@ -438,46 +514,18 @@ export default function CameraView({
     }
     
     try {
-      // Compress the image before upload
+      // Compress the image before showing preview
       const compressedBlob = await compressImage(file, IMAGE_COMPRESSION);
       
       const stats = getCompressionStats(file.size, compressedBlob.size);
       console.log(`Image compressed: ${stats.originalKB}KB → ${stats.compressedKB}KB (saved ${stats.percentage}%)`);
       
-      // Upload photo
-      const { data: uploadData, error: uploadError } = await uploadMemoryPhoto(userId, journeyId, compressedBlob);
-
-      if (uploadError || !uploadData) {
-        console.error('Upload error:', uploadError);
-        setError('Upload failed. Check your connection.');
-        setTimeout(() => setError(null), 3000);
-        setLoading(false);
-        if (fileInputRef.current) fileInputRef.current.value = '';
-        return;
-      }
-
-      // Create memory record with location and weather
-      const { error: insertError } = await createMemory({
-        journeyId,
-        type: 'photo',
-        imageUrl: uploadData.publicUrl,
-        latitude: locationContext?.latitude,
-        longitude: locationContext?.longitude,
-        locationName: locationContext?.name,
-        weather: weatherContext || undefined,
-      });
-      
-      if (insertError) {
-        console.error('Insert error:', insertError);
-        setError('Failed to save memory. Try again.');
-        setTimeout(() => setError(null), 3000);
-        setLoading(false);
-        if (fileInputRef.current) fileInputRef.current.value = '';
-        return;
-      }
-      
+      // Create preview URL and show filter selection
+      const url = URL.createObjectURL(compressedBlob);
+      setPreviewBlob(compressedBlob);
+      setPreviewUrl(url);
+      setSelectedFilter('none');
       setLoading(false);
-      showSuccess();
     } catch (err) {
       console.error('Capture exception:', err);
       setError('Something went wrong. Try again.');
@@ -595,6 +643,80 @@ const handleAudioError = (message: string) => {
   setError(message);
   setTimeout(() => setError(null), 4000);
 };
+
+  // Photo preview mode with filter selection
+  if (previewUrl) {
+    return (
+      <div className="fixed inset-0 bg-black text-white z-50 flex flex-col safe-top safe-bottom">
+        {/* Top Bar */}
+        <div className="absolute top-0 left-0 right-0 z-30 safe-top">
+          <div className="flex justify-between items-center p-6 bg-gradient-to-b from-black/80 via-black/40 to-transparent">
+            <IconButton 
+              icon={<X className="w-5 h-5" />}
+              label="Cancel"
+              onClick={cancelPreview}
+              variant="bordered"
+              dark
+            />
+            <span className="text-sm font-medium opacity-60">Choose a filter</span>
+            <div className="w-10" /> {/* Spacer */}
+          </div>
+        </div>
+
+        {/* Photo Preview */}
+        <div className="flex-1 flex items-center justify-center p-4 pt-24 pb-48">
+          <img
+            src={previewUrl}
+            alt="Preview"
+            className="max-w-full max-h-full object-contain rounded-2xl"
+            style={{ filter: PHOTO_FILTERS[selectedFilter].filter }}
+          />
+        </div>
+
+        {/* Bottom Controls */}
+        <div className="absolute bottom-0 left-0 right-0 z-30 safe-bottom">
+          <div className="p-6 pt-8 bg-gradient-to-t from-black via-black/90 to-transparent">
+            {/* Filter Selector */}
+            <div className="mb-6">
+              <FilterSelector
+                imageUrl={previewUrl}
+                selectedFilter={selectedFilter}
+                onSelectFilter={setSelectedFilter}
+              />
+            </div>
+            
+            {/* Save Button */}
+            <button
+              onClick={savePhotoWithFilter}
+              disabled={loading}
+              className="w-full py-4 rounded-2xl bg-white text-black font-semibold flex items-center justify-center gap-2 active:scale-[0.98] transition-transform disabled:opacity-50"
+            >
+              {loading ? (
+                <>
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                  Saving...
+                </>
+              ) : (
+                <>
+                  <Check className="w-5 h-5" />
+                  Save Photo
+                </>
+              )}
+            </button>
+          </div>
+        </div>
+
+        {/* Error message */}
+        {error && (
+          <div className="absolute top-24 left-6 right-6 z-40">
+            <div className="bg-red-500/90 backdrop-blur-sm text-white px-4 py-3 rounded-xl text-center text-sm">
+              {error}
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  }
 
   return (
     <div className="fixed inset-0 bg-black text-white z-50 flex flex-col safe-top safe-bottom">

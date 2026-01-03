@@ -133,3 +133,41 @@ export const NOTE_PROMPTS = {
 } as const;
 
 export type TimeOfDay = keyof typeof NOTE_PROMPTS;
+
+// Photo filters
+export const PHOTO_FILTERS = {
+  none: {
+    name: 'Original',
+    filter: 'none',
+  },
+  warm: {
+    name: 'Warm',
+    filter: 'sepia(0.2) saturate(1.3) brightness(1.05)',
+  },
+  cool: {
+    name: 'Cool',
+    filter: 'saturate(0.9) hue-rotate(10deg) brightness(1.05)',
+  },
+  vivid: {
+    name: 'Vivid',
+    filter: 'saturate(1.5) contrast(1.1) brightness(1.05)',
+  },
+  vintage: {
+    name: 'Vintage',
+    filter: 'sepia(0.4) saturate(0.8) contrast(0.9) brightness(1.1)',
+  },
+  bw: {
+    name: 'B&W',
+    filter: 'grayscale(1) contrast(1.1)',
+  },
+  fade: {
+    name: 'Fade',
+    filter: 'saturate(0.7) contrast(0.85) brightness(1.15)',
+  },
+  dramatic: {
+    name: 'Dramatic',
+    filter: 'contrast(1.3) saturate(1.2) brightness(0.95)',
+  },
+} as const;
+
+export type PhotoFilterKey = keyof typeof PHOTO_FILTERS;
