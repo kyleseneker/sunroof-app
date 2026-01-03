@@ -152,7 +152,7 @@ export default function ManageMemoriesSheet({
                     </div>
                     <div>
                       <p className="font-medium text-sm text-[var(--fg-base)]">
-                        {memory.type === 'photo' ? 'Photo' : memory.type === 'audio' ? 'Voice Note' : 'Note'}
+                        {memory.type === 'photo' ? 'Photo' : memory.type === 'audio' ? 'Voice' : 'Note'}
                       </p>
                       <p className="text-xs text-[var(--fg-muted)]">{formattedDate}</p>
                     </div>

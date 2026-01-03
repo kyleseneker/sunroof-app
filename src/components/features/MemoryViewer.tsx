@@ -233,7 +233,7 @@ export default function MemoryViewer({
               <div className="w-20 h-20 rounded-2xl bg-orange-500/20 flex items-center justify-center mx-auto mb-4">
                 <Mic className="w-10 h-10 text-orange-400" />
               </div>
-              <h3 className="text-lg font-medium text-white mb-1">Voice Note</h3>
+              <h3 className="text-lg font-medium text-white mb-1">Voice</h3>
               {memory.duration && (
                 <p className="text-sm text-orange-400/60">
                   {Math.floor(memory.duration / 60)}:{(memory.duration % 60).toString().padStart(2, '0')}

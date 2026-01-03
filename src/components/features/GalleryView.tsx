@@ -484,7 +484,7 @@ export default function GalleryView({ journey, onClose, onMemoryDeleted }: Galle
                                   <Play className="w-4 h-4 text-orange-400 ml-0.5" />
                                 </div>
                                 <div className="flex-1 text-left min-w-0">
-                                  <p className="text-sm text-zinc-200">Voice Note</p>
+                                  <p className="text-sm text-zinc-200">Voice</p>
                                   <p className="text-xs text-orange-400/60">
                                     {memory.duration 
                                       ? `${Math.floor(memory.duration / 60)}:${(memory.duration % 60).toString().padStart(2, '0')}`
