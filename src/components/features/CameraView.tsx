@@ -327,6 +327,9 @@ export default function CameraView({
       ctx.translate(canvas.width, 0);
       ctx.scale(-1, 1);
     }
+    
+    // Apply selected filter
+    ctx.filter = PHOTO_FILTERS[selectedFilter].filter;
     ctx.drawImage(video, 0, 0);
     
     // Haptic feedback
@@ -337,7 +340,7 @@ export default function CameraView({
     setLoading(true);
     setError(null);
     
-    // Convert to blob and show preview for filter selection
+    // Convert to blob and upload directly (filter already applied)
     try {
       const rawBlob = await new Promise<Blob | null>((resolve) => {
         canvas.toBlob(resolve, 'image/jpeg', 0.95);
@@ -356,12 +359,49 @@ export default function CameraView({
       const stats = getCompressionStats(rawBlob.size, blob.size);
       console.log(`Image compressed: ${stats.originalKB}KB → ${stats.compressedKB}KB (saved ${stats.percentage}%)`);
       
-      // Create preview URL and show filter selection
-      const url = URL.createObjectURL(blob);
-      setPreviewBlob(blob);
-      setPreviewUrl(url);
+      if (!userId) {
+        setError('Not authenticated');
+        setTimeout(() => setError(null), 3000);
+        setLoading(false);
+        return;
+      }
+      
+      // Upload photo directly (filter was applied to canvas)
+      const { data: uploadData, error: uploadError } = await uploadMemoryPhoto(userId, journeyId, blob);
+
+      if (uploadError || !uploadData) {
+        console.error('Upload error:', uploadError);
+        setError(`Upload failed: ${uploadError || 'Unknown error'}`);
+        setTimeout(() => setError(null), 4000);
+        setLoading(false);
+        return;
+      }
+      
+      console.log('Upload successful:', uploadData);
+
+      // Create memory record with location and weather
+      const { error: insertError } = await createMemory({
+        journeyId,
+        type: 'photo',
+        imageUrl: uploadData.publicUrl,
+        latitude: locationContext?.latitude,
+        longitude: locationContext?.longitude,
+        locationName: locationContext?.name,
+        weather: weatherContext || undefined,
+      });
+      
+      if (insertError) {
+        console.error('Insert error:', insertError);
+        setError('Failed to save memory. Try again.');
+        setTimeout(() => setError(null), 3000);
+        setLoading(false);
+        return;
+      }
+      
+      // Reset filter for next photo
       setSelectedFilter('none');
       setLoading(false);
+      showSuccess();
     } catch (err) {
       console.error('Capture exception:', err);
       setError('Something went wrong. Try again.');
@@ -369,7 +409,7 @@ export default function CameraView({
       setLoading(false);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [journeyId, facingMode, userId, locationContext, weatherContext]);
+  }, [journeyId, facingMode, userId, locationContext, weatherContext, selectedFilter]);
 
   // Apply filter and upload the photo
   const savePhotoWithFilter = useCallback(async () => {
@@ -808,7 +848,10 @@ const handleAudioError = (message: string) => {
               className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-300 ${
                 cameraActive && cameraReady ? 'opacity-100' : 'opacity-0'
               }`}
-              style={{ transform: facingMode === 'user' ? 'scaleX(-1)' : 'none' }}
+              style={{ 
+                transform: facingMode === 'user' ? 'scaleX(-1)' : 'none',
+                filter: PHOTO_FILTERS[selectedFilter].filter,
+              }}
             />
             
             {/* Canvas for capturing (hidden) */}
@@ -978,6 +1021,18 @@ const handleAudioError = (message: string) => {
       {/* Bottom Controls */}
       <div className="absolute bottom-0 left-0 right-0 z-30 safe-bottom">
         <div className="p-6 pt-8 bg-gradient-to-t from-black via-black/90 to-transparent">
+          
+          {/* Live Filter Selector - show when camera is active in photo mode */}
+          {mode === 'photo' && cameraActive && cameraReady && (
+            <div className="mb-4">
+              <FilterSelector
+                imageUrl=""
+                selectedFilter={selectedFilter}
+                onSelectFilter={setSelectedFilter}
+                livePreview
+              />
+            </div>
+          )}
           
           {/* Mode Switcher */}
           <div className="flex justify-center gap-6 mb-6">
