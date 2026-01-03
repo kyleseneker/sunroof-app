@@ -277,7 +277,10 @@ export default function GalleryView({ journey: initialJourney, onClose, onMemory
           dark 
         />
         <div className="flex-1 min-w-0 mx-4">
-          <h1 className="text-xl font-medium truncate">{journey.name}</h1>
+          <h1 className="text-xl font-medium truncate">
+            {journey.emoji && <span className="mr-2">{journey.emoji}</span>}
+            {journey.name}
+          </h1>
           <p className="text-xs text-zinc-500">
             {(journey.memory_count ?? 0) === 0 ? 'No memories' : `${journey.memory_count} ${journey.memory_count === 1 ? 'memory' : 'memories'}`}
           </p>
