@@ -7,7 +7,7 @@ import {
 } from '@/services';
 import { useAuth } from '@/providers';
 import { hapticSuccess, getJourneyGradient, formatDate, getTimeUntilUnlock, isJourneyUnlocked, getGreeting, MAX_ACTIVE_JOURNEYS } from '@/lib';
-import { Plus, ArrowRight, X, Lock, ChevronRight, Sparkles, Trash2, HelpCircle, Camera, ImageIcon, Pencil, Timer, Archive, Search, RefreshCw, EllipsisVertical, UserPlus } from 'lucide-react';
+import { Plus, ArrowRight, X, Lock, ChevronRight, Sparkles, Trash2, HelpCircle, Camera, ImageIcon, Pencil, Timer, Archive, Search, RefreshCw, EllipsisVertical, UserPlus, Mic, FileText } from 'lucide-react';
 import { useToast, Avatar, ConfirmDialog, IconButton, Badge } from '@/components/ui';
 import { 
   GalleryView, 
@@ -606,14 +606,30 @@ export default function Dashboard({ activeJourneys: initialActiveJourneys = [], 
                         {journey.emoji && <span className="mr-2">{journey.emoji}</span>}
                         {journey.name}
                       </h2>
-                      <button 
-                        onClick={(e) => { e.stopPropagation(); onCapture?.(journey); }}
-                        className="group w-full h-12 bg-white text-black rounded-full font-semibold text-sm tracking-wide flex items-center justify-center gap-2 hover:bg-zinc-100 active:scale-[0.98] transition-all btn-shine shadow-lg shadow-white/10"
-                      >
-                        <Camera className="w-4 h-4" />
-                        Capture Memory
-                        <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
-                      </button>
+                      {/* Quick Capture Buttons */}
+                      <div className="flex gap-2">
+                        <button 
+                          onClick={(e) => { e.stopPropagation(); onCapture?.(journey, 'photo'); }}
+                          className="flex-1 h-10 bg-white/15 backdrop-blur-sm border border-white/20 rounded-full font-medium text-sm text-white flex items-center justify-center gap-1.5 hover:bg-white/25 active:scale-[0.98] transition-all"
+                        >
+                          <Camera className="w-4 h-4" />
+                          Photo
+                        </button>
+                        <button 
+                          onClick={(e) => { e.stopPropagation(); onCapture?.(journey, 'audio'); }}
+                          className="flex-1 h-10 bg-white/15 backdrop-blur-sm border border-white/20 rounded-full font-medium text-sm text-white flex items-center justify-center gap-1.5 hover:bg-white/25 active:scale-[0.98] transition-all"
+                        >
+                          <Mic className="w-4 h-4" />
+                          Voice
+                        </button>
+                        <button 
+                          onClick={(e) => { e.stopPropagation(); onCapture?.(journey, 'text'); }}
+                          className="flex-1 h-10 bg-white/15 backdrop-blur-sm border border-white/20 rounded-full font-medium text-sm text-white flex items-center justify-center gap-1.5 hover:bg-white/25 active:scale-[0.98] transition-all"
+                        >
+                          <FileText className="w-4 h-4" />
+                          Note
+                        </button>
+                      </div>
                     </div>
                   </div>
                 ))}
@@ -748,9 +764,19 @@ export default function Dashboard({ activeJourneys: initialActiveJourneys = [], 
         title={actionSheetJourney?.name}
         options={[
           {
-            label: 'Capture Memory',
+            label: 'Capture Photo',
             icon: <Camera className="w-5 h-5" />,
-            onClick: () => { if (actionSheetJourney) onCapture?.(actionSheetJourney); },
+            onClick: () => { if (actionSheetJourney) onCapture?.(actionSheetJourney, 'photo'); },
+          },
+          {
+            label: 'Record Voice',
+            icon: <Mic className="w-5 h-5" />,
+            onClick: () => { if (actionSheetJourney) onCapture?.(actionSheetJourney, 'audio'); },
+          },
+          {
+            label: 'Write Note',
+            icon: <FileText className="w-5 h-5" />,
+            onClick: () => { if (actionSheetJourney) onCapture?.(actionSheetJourney, 'text'); },
           },
           {
             label: 'Edit Journey',

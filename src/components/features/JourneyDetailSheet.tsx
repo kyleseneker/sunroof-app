@@ -322,7 +322,7 @@ export default function JourneyDetailSheet({
               onClose();
               onCapture(journey, 'photo');
             }}
-            className="flex-1 h-14 rounded-2xl bg-gradient-to-r from-white to-zinc-100 text-black font-semibold flex items-center justify-center gap-2 active:scale-[0.98] transition-transform shadow-lg shadow-white/10"
+            className="flex-1 h-14 rounded-2xl bg-white/10 backdrop-blur-sm border border-white/20 text-white font-semibold flex items-center justify-center gap-2 active:scale-[0.98] active:bg-white/20 transition-all"
           >
             <Camera className="w-5 h-5" />
             <span>Photo</span>
@@ -332,7 +332,7 @@ export default function JourneyDetailSheet({
               onClose();
               onCapture(journey, 'audio');
             }}
-            className="flex-1 h-14 rounded-2xl bg-white/10 backdrop-blur-sm border border-white/20 text-white font-semibold flex items-center justify-center gap-2 active:scale-[0.98] transition-transform"
+            className="flex-1 h-14 rounded-2xl bg-white/10 backdrop-blur-sm border border-white/20 text-white font-semibold flex items-center justify-center gap-2 active:scale-[0.98] active:bg-white/20 transition-all"
           >
             <Mic className="w-5 h-5" />
             <span>Voice</span>
@@ -342,7 +342,7 @@ export default function JourneyDetailSheet({
               onClose();
               onCapture(journey, 'text');
             }}
-            className="flex-1 h-14 rounded-2xl bg-white/10 backdrop-blur-sm border border-white/20 text-white font-semibold flex items-center justify-center gap-2 active:scale-[0.98] transition-transform"
+            className="flex-1 h-14 rounded-2xl bg-white/10 backdrop-blur-sm border border-white/20 text-white font-semibold flex items-center justify-center gap-2 active:scale-[0.98] active:bg-white/20 transition-all"
           >
             <FileText className="w-5 h-5" />
             <span>Note</span>
