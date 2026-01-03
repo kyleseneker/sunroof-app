@@ -191,9 +191,9 @@ export default function JourneyDetailSheet({
             <IconButton 
               icon={<Trash2 className="w-4 h-4" />} 
               label="Delete journey" 
-              onClick={() => { onClose(); onDelete(journey.id); }} 
+              onClick={() => onDelete(journey.id)} 
               variant="bordered"
-              dark 
+              dark
             />
           </div>
         )}
