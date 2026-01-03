@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { api, getJourneyGradient } from '@/lib';
 import { deleteJourney, deleteMemory, fetchMemoriesForJourney } from '@/services';
-import { X, Trash2, Camera, Sparkles, Mic, MapPin, Quote, Play, ChevronDown } from 'lucide-react';
+import { X, Trash2, Camera, Sparkles, Mic, MapPin, Play, ChevronDown } from 'lucide-react';
 import { useToast, ConfirmDialog, IconButton } from '@/components/ui';
 import { AudioPlayer, MemoryViewer, AIRecapSheet } from '@/components/features';
 import type { Journey, Memory } from '@/types';
@@ -446,26 +446,26 @@ export default function GalleryView({ journey, onClose, onMemoryDeleted }: Galle
                           {memory.type === 'text' && (
                             <button
                               onClick={() => setSelectedMemory(memory)}
-                              className="w-full text-left p-5 rounded-2xl bg-gradient-to-br from-zinc-800/80 to-zinc-900/80 border border-zinc-700/50 hover:border-zinc-600/50 transition-colors"
+                              className="w-full text-left p-5 rounded-2xl bg-gradient-to-br from-amber-500/10 via-amber-500/5 to-transparent border border-amber-500/20 hover:border-amber-500/40 transition-colors relative overflow-hidden"
                             >
-                              <div className="flex items-start gap-3">
-                                <Quote className="w-5 h-5 text-zinc-500 flex-shrink-0 mt-0.5" />
-                                <div className="flex-1 min-w-0">
-                                  <p className="text-base text-zinc-200 leading-relaxed line-clamp-4">
-                                    {memory.note}
-                                  </p>
-                                  <div className="flex items-center gap-2 mt-3 text-xs text-zinc-500">
-                                    <span>{memoryTime}</span>
-                                    {memory.location_name && (
-                                      <>
-                                        <span>•</span>
-                                        <span className="flex items-center gap-1">
-                                          <MapPin className="w-2.5 h-2.5" />
-                                          {memory.location_name}
-                                        </span>
-                                      </>
-                                    )}
-                                  </div>
+                              {/* Decorative large quote */}
+                              <div className="absolute -top-2 -left-1 text-6xl text-amber-500/10 font-serif select-none">"</div>
+                              
+                              <div className="relative">
+                                <p className="text-base text-zinc-100 leading-relaxed line-clamp-4 italic pl-4">
+                                  {memory.note}
+                                </p>
+                                <div className="flex items-center gap-2 mt-4 text-xs text-amber-400/60 pl-4">
+                                  <span>{memoryTime}</span>
+                                  {memory.location_name && (
+                                    <>
+                                      <span>•</span>
+                                      <span className="flex items-center gap-1">
+                                        <MapPin className="w-2.5 h-2.5" />
+                                        {memory.location_name}
+                                      </span>
+                                    </>
+                                  )}
                                 </div>
                               </div>
                             </button>
