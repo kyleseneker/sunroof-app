@@ -192,14 +192,14 @@ export default function MemoryViewer({
       )}
 
       {/* Content */}
-      <div className="flex-1 flex flex-col items-center justify-center p-4 overflow-auto">
+      <div className="flex-1 flex flex-col items-center justify-center p-4 overflow-hidden">
         {/* Photo */}
         {memory.type === 'photo' && memory.url && (
-          <div className="flex flex-col items-center max-w-3xl w-full">
+          <div className="flex flex-col items-center max-w-3xl w-full h-full">
             <img
               src={memory.url}
               alt=""
-              className="max-w-full max-h-[70vh] object-contain rounded-2xl border border-pink-500/20"
+              className="max-w-full max-h-[calc(100%-4rem)] object-contain rounded-2xl border border-pink-500/20"
               onError={(e) => {
                 e.currentTarget.src =
                   'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiM2NjYiIHN0cm9rZS13aWR0aD0iMiI+PHJlY3QgeD0iMyIgeT0iMyIgd2lkdGg9IjE4IiBoZWlnaHQ9IjE4IiByeD0iMiIvPjxjaXJjbGUgY3g9IjguNSIgY3k9IjguNSIgcj0iMS41Ii8+PHBhdGggZD0ibTIxIDE1LTUtNS01IDV6Ii8+PC9zdmc+';
