@@ -301,12 +301,6 @@ export default function MemoryViewer({
         )}
       </div>
 
-      {/* Position indicator */}
-      <div className="absolute bottom-6 left-0 right-0 text-center safe-bottom">
-        <p className="text-xs text-zinc-600">
-          {currentIndex + 1} of {memories.length}
-        </p>
-      </div>
     </div>
   );
 }
