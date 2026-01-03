@@ -5,7 +5,7 @@ import { X, Lock, Pencil, Trash2, UserPlus, Users, Clock, Camera, Unlock } from 
 import { getEmailByUserId, updateJourney, fetchMemoriesForJourney } from '@/services';
 import { useToast, IconButton, ConfirmDialog } from '@/components/ui';
 import { MemoryPreviewCard, MemoryStatBadge } from '@/components/features';
-import { getTimeUntilUnlock, getJourneyGradient, hapticSuccess } from '@/lib';
+import { getTimeUntilUnlock, getJourneyGradient, hapticSuccess, formatRelativeDate } from '@/lib';
 import type { Journey, Memory } from '@/types';
 
 interface JourneyDetailSheetProps {
@@ -137,6 +137,13 @@ export default function JourneyDetailSheet({
   const photoCount = memories.filter(m => m.type === 'photo').length;
   const noteCount = memories.filter(m => m.type === 'text').length;
   const audioCount = memories.filter(m => m.type === 'audio').length;
+  
+  // Get most recent memory timestamp
+  const lastMemoryDate = memories.length > 0 
+    ? memories.reduce((latest, m) => 
+        new Date(m.created_at) > new Date(latest.created_at) ? m : latest
+      ).created_at
+    : null;
 
   return (
     <div className="fixed inset-0 z-50 bg-black flex flex-col safe-top safe-bottom overflow-hidden">
@@ -228,10 +235,16 @@ export default function JourneyDetailSheet({
         
         {/* Memory type breakdown - compact version */}
         {memories.length > 0 && (
-          <div className="flex items-center gap-2 mb-4">
+          <div className="flex items-center gap-2 mb-4 text-sm">
             <MemoryStatBadge type="photo" count={photoCount} />
             <MemoryStatBadge type="note" count={noteCount} />
             <MemoryStatBadge type="audio" count={audioCount} />
+            {lastMemoryDate && (
+              <>
+                <span className="text-white/20">•</span>
+                <span className="text-white/40">Last {formatRelativeDate(lastMemoryDate)}</span>
+              </>
+            )}
           </div>
         )}
         
