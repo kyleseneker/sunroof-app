@@ -237,25 +237,26 @@ export default function JourneyDetailSheet({
           {journey.name}
         </h1>
         
-        {/* Memory Stats Row - only show if no memories (preview card shows otherwise) */}
-        {!memoriesLoading && memories.length === 0 && (
-          <p className="text-white/50 mb-4 text-sm">No memories captured yet</p>
-        )}
-        
-        {/* Memory type breakdown - compact version */}
-        {memories.length > 0 && (
-          <div className="flex items-center gap-2 mb-4 text-sm">
-            <MemoryStatBadge type="photo" count={photoCount} />
-            <MemoryStatBadge type="note" count={noteCount} />
-            <MemoryStatBadge type="audio" count={audioCount} />
-            {lastMemoryDate && (
-              <>
-                <span className="text-white/20">•</span>
-                <span className="text-white/40">Last {formatRelativeDate(lastMemoryDate)}</span>
-              </>
-            )}
-          </div>
-        )}
+        {/* Memory Stats Row - reserve consistent height */}
+        <div className="h-5 mb-4 text-sm">
+          {memoriesLoading ? (
+            <div className="w-32 h-4 bg-white/10 rounded animate-pulse" />
+          ) : memories.length === 0 ? (
+            <p className="text-white/50">No memories captured yet</p>
+          ) : (
+            <div className="flex items-center gap-2">
+              <MemoryStatBadge type="photo" count={photoCount} />
+              <MemoryStatBadge type="note" count={noteCount} />
+              <MemoryStatBadge type="audio" count={audioCount} />
+              {lastMemoryDate && (
+                <>
+                  <span className="text-white/20">•</span>
+                  <span className="text-white/40">Last {formatRelativeDate(lastMemoryDate)}</span>
+                </>
+              )}
+            </div>
+          )}
+        </div>
         
         {/* Shared with indicator */}
         {(journey.shared_with?.length || 0) > 0 && (
