@@ -292,17 +292,30 @@ export default function Dashboard({ activeJourneys: initialActiveJourneys = [], 
   // Journey Detail Sheet (focused journey)
   if (focusedJourney) {
     return (
-      <JourneyDetailSheet
-        journey={focusedJourney}
-        onClose={() => setFocusedJourney(null)}
-        onCapture={(j) => { setFocusedJourney(null); onCapture?.(j); }}
-        onEdit={(j) => setEditingJourney(j)}
-        onDelete={(id) => setDeleteConfirm(id)}
-        onManageMemories={(j) => setManagingJourney(j)}
-        onInvite={(j) => setInviteJourney(j)}
-        isOwner={isOwner(focusedJourney)}
-        onJourneyUpdated={handleJourneyUpdated}
-      />
+      <>
+        <JourneyDetailSheet
+          journey={focusedJourney}
+          onClose={() => setFocusedJourney(null)}
+          onCapture={(j) => { setFocusedJourney(null); onCapture?.(j); }}
+          onEdit={(j) => setEditingJourney(j)}
+          onDelete={(id) => setDeleteConfirm(id)}
+          onManageMemories={(j) => setManagingJourney(j)}
+          onInvite={(j) => setInviteJourney(j)}
+          isOwner={isOwner(focusedJourney)}
+          onJourneyUpdated={handleJourneyUpdated}
+        />
+        {/* Delete Confirmation Dialog - needs to render on top of detail sheet */}
+        <ConfirmDialog
+          isOpen={!!deleteConfirm}
+          onClose={() => setDeleteConfirm(null)}
+          onConfirm={() => deleteConfirm && handleDeleteJourney(deleteConfirm)}
+          title="Delete Journey?"
+          description="This will permanently delete this journey and all its memories. This cannot be undone."
+          confirmLabel={isDeleting ? 'Deleting...' : 'Delete'}
+          variant="danger"
+          loading={isDeleting}
+        />
+      </>
     );
   }
 
