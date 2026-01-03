@@ -204,17 +204,19 @@ export default function JourneyDetailSheet({
 
       {/* Content */}
       <div className={`relative z-10 p-6 pb-12 ${memories.length === 0 ? 'flex-1 flex flex-col justify-end' : ''}`}>
-        {/* Locked indicator with pulse */}
-        <div className="flex items-center gap-3 mb-4">
-          <div className="w-10 h-10 rounded-full bg-amber-500/20 flex items-center justify-center relative lock-pulse">
-            <div className="absolute inset-0 rounded-full bg-amber-400/10 animate-ping-slow" />
-            <Lock className="w-5 h-5 text-amber-400 relative z-10" />
+        {/* Locked indicator - only show when no memories (preview card shows lock otherwise) */}
+        {memories.length === 0 && (
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-10 h-10 rounded-full bg-amber-500/20 flex items-center justify-center relative lock-pulse">
+              <div className="absolute inset-0 rounded-full bg-amber-400/10 animate-ping-slow" />
+              <Lock className="w-5 h-5 text-amber-400 relative z-10" />
+            </div>
+            <div>
+              <span className="text-xs font-semibold tracking-wider uppercase text-amber-400 block">Locked</span>
+              <span className="text-[10px] text-amber-400/50">Capture memories to seal them</span>
+            </div>
           </div>
-          <div>
-            <span className="text-xs font-semibold tracking-wider uppercase text-amber-400 block">Locked</span>
-            <span className="text-[10px] text-amber-400/50">Memories are sealed</span>
-          </div>
-        </div>
+        )}
         
         {/* Journey Name */}
         <h1 className="text-4xl font-bold mb-3 text-white">{journey.name}</h1>
