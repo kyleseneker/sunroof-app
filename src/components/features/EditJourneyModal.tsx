@@ -96,16 +96,16 @@ export default function EditJourneyModal({
   if (!journey) return null;
 
   return (
-    <div className="fixed inset-0 z-50 bg-[var(--bg-base)]/90 backdrop-blur-md flex flex-col safe-top safe-bottom">
-      <div className="flex-1 flex flex-col p-6 animate-enter">
+    <div className="fixed inset-0 z-50 bg-[var(--bg-base)]/90 backdrop-blur-md flex flex-col safe-top safe-bottom overflow-y-auto">
+      <div className="flex-1 flex flex-col p-6 pb-12 animate-enter min-h-0">
         <button 
           onClick={handleClose}
-          className="self-end w-10 h-10 flex items-center justify-center rounded-full bg-[var(--bg-hover)] mb-6"
+          className="self-end w-10 h-10 flex items-center justify-center rounded-full bg-[var(--bg-hover)] mb-6 flex-shrink-0"
         >
           <X className="w-5 h-5 text-[var(--fg-muted)]" />
         </button>
         
-        <div className="flex-1 flex flex-col justify-center max-w-sm mx-auto w-full">
+        <div className="flex-1 flex flex-col justify-center max-w-sm mx-auto w-full py-8">
           <h2 className="text-3xl font-light tracking-tight text-[var(--fg-base)] mb-8">Edit Journey</h2>
           
           <div className="space-y-6">
@@ -131,7 +131,8 @@ export default function EditJourneyModal({
                 value={editDate}
                 onChange={(e) => setEditDate(e.target.value)}
                 min={new Date().toISOString().split('T')[0]}
-                className="w-full bg-[var(--bg-surface)] rounded-xl py-3 px-4 text-lg text-[var(--fg-base)] focus:outline-none focus:ring-2 focus:ring-[var(--fg-base)]/20"
+                className="w-full bg-[var(--bg-surface)] rounded-xl py-3 px-4 text-lg text-[var(--fg-base)] focus:outline-none focus:ring-2 focus:ring-[var(--fg-base)]/20 appearance-none"
+                style={{ minWidth: 0 }}
               />
             </div>
 
