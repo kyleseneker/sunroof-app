@@ -3,7 +3,7 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import { compressImage, getCompressionStats, getTimeOfDay, NOTE_PROMPTS, PHOTO_FILTERS, type PhotoFilterKey, MAX_FILE_SIZE_BYTES, MAX_NOTE_LENGTH, ALLOWED_IMAGE_TYPES, IMAGE_COMPRESSION, getLocationContext, getWeather } from '@/lib';
 import type { MemoryLocation, MemoryWeather } from '@/types';
 import { getCurrentUser, uploadMemoryPhoto, uploadMemoryAudio, createMemory } from '@/services';
-import { X, Camera, FileText, Send, Check, Loader2, Upload, Sparkles, Mic, SwitchCamera, ImageIcon, MapPin, Palette } from 'lucide-react';
+import { X, Camera, FileText, Send, Check, Loader2, Upload, Sparkles, Mic, SwitchCamera, ImageIcon, Palette } from 'lucide-react';
 import { AudioRecorder, FilterSelector } from '@/components/features';
 import { IconButton } from '@/components/ui';
 import type { TimeOfDay } from '@/types';
@@ -780,27 +780,6 @@ const handleAudioError = (message: string) => {
           <div className="w-10" />
         </div>
         
-        {/* Location & Weather Context Indicator (photo mode only) */}
-        {mode === 'photo' && !contextLoading && (locationContext || weatherContext) && (
-          <div className="flex justify-center -mt-2 pb-2">
-            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-black/40 backdrop-blur-md border border-white/10 text-[11px]">
-              {locationContext && (
-                <span className="flex items-center gap-1 text-white/70">
-                  <MapPin className="w-3 h-3" />
-                  {locationContext.name || 'Location captured'}
-                </span>
-              )}
-              {locationContext && weatherContext && (
-                <span className="text-white/30">•</span>
-              )}
-              {weatherContext && (
-                <span className="text-white/70">
-                  {weatherContext.icon} {weatherContext.temp}°F
-                </span>
-              )}
-            </div>
-          </div>
-        )}
       </div>
 
       {/* Success Toast */}
