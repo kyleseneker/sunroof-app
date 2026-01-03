@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { api, getJourneyGradient } from '@/lib';
 import { deleteJourney, deleteMemory, fetchMemoriesForJourney } from '@/services';
-import { X, Trash2, Camera, ArrowUpDown, Sparkles, Mic, MapPin, Quote, Play, ChevronDown } from 'lucide-react';
+import { X, Trash2, Camera, Sparkles, Mic, MapPin, Quote, Play, ChevronDown } from 'lucide-react';
 import { useToast, ConfirmDialog, IconButton } from '@/components/ui';
 import { AudioPlayer, MemoryViewer, AIRecapSheet } from '@/components/features';
 import type { Journey, Memory } from '@/types';
@@ -21,7 +21,6 @@ export default function GalleryView({ journey, onClose, onMemoryDeleted }: Galle
   const [selectedMemory, setSelectedMemory] = useState<Memory | null>(null);
   const [memoryToDelete, setMemoryToDelete] = useState<Memory | null>(null);
   const [showDeleteJourneyConfirm, setShowDeleteJourneyConfirm] = useState(false);
-  const [sortNewestFirst, setSortNewestFirst] = useState(false);
   const [collapsedDays, setCollapsedDays] = useState<Set<string>>(new Set());
   const [showCelebration, setShowCelebration] = useState(false);
   const [confetti, setConfetti] = useState<Array<{ id: number; left: number; color: string; delay: number }>>([]);
@@ -63,11 +62,11 @@ export default function GalleryView({ journey, onClose, onMemoryDeleted }: Galle
     }
   }, [journey.unlock_date]);
 
-  // Sorted memories
+  // Sorted memories (oldest first for story timeline)
   const sortedMemories = [...memories].sort((a, b) => {
     const dateA = new Date(a.created_at).getTime();
     const dateB = new Date(b.created_at).getTime();
-    return sortNewestFirst ? dateB - dateA : dateA - dateB;
+    return dateA - dateB;
   });
 
   // Group memories by day for timeline view
@@ -83,7 +82,7 @@ export default function GalleryView({ journey, onClose, onMemoryDeleted }: Galle
 
   // Get ordered day keys and calculate day numbers
   const dayKeys = Object.keys(memoriesByDay);
-  const firstDayDate = dayKeys.length > 0 ? new Date(dayKeys[sortNewestFirst ? dayKeys.length - 1 : 0]) : null;
+  const firstDayDate = dayKeys.length > 0 ? new Date(dayKeys[0]) : null;
 
   // Toggle day collapse
   const toggleDayCollapse = (dayKey: string) => {
@@ -288,14 +287,6 @@ export default function GalleryView({ journey, onClose, onMemoryDeleted }: Galle
             className={recap ? 'bg-purple-500/20 text-purple-400' : ''}
           />
         )}
-        
-        <IconButton
-          icon={<ArrowUpDown className="w-4 h-4" />}
-          label={sortNewestFirst ? 'Showing newest first' : 'Showing oldest first'}
-          onClick={() => setSortNewestFirst(!sortNewestFirst)}
-          active={sortNewestFirst}
-          dark
-        />
         
         <IconButton
           icon={<Trash2 className="w-4 h-4" />}
