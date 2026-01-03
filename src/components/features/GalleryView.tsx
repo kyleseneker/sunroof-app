@@ -274,8 +274,8 @@ export default function GalleryView({ journey, onClose, onMemoryDeleted }: Galle
         </div>
         
         <div className="flex gap-2">
-          {/* AI Recap button */}
-          {memories.length > 0 && (
+          {/* AI Recap button - use journey.memory_count to avoid layout shift */}
+          {(journey.memory_count ?? 0) > 0 && (
             <IconButton
               icon={<Sparkles className="w-4 h-4" />}
               label="AI Journey Recap"
