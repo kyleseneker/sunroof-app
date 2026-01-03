@@ -253,10 +253,8 @@ export default function GalleryView({ journey, onClose, onMemoryDeleted }: Galle
       )}
 
       {/* Header */}
-      <header className="relative z-10 p-6 pb-10 max-w-2xl mx-auto w-full">
-        {/* Fade into content */}
-        <div className="absolute bottom-0 left-0 right-0 h-10 bg-gradient-to-b from-transparent to-black pointer-events-none" />
-        <div className="flex items-center gap-4">
+      <header className="relative z-10 p-6 safe-top">
+        <div className="flex items-center gap-4 max-w-2xl mx-auto">
         <IconButton 
           icon={<X className="w-5 h-5" />} 
           label="Close" 
