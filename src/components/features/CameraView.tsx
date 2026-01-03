@@ -919,7 +919,7 @@ const handleAudioError = (message: string) => {
             
             {/* Zoom controls */}
             {cameraActive && cameraReady && supportsZoom && maxZoom > 1 && (
-              <div className="absolute bottom-48 left-1/2 -translate-x-1/2 z-20 flex items-center gap-2">
+              <div className="absolute bottom-64 left-1/2 -translate-x-1/2 z-20 flex items-center gap-2">
                 {/* Zoom level indicator */}
                 <div className="flex items-center gap-1 px-3 py-1.5 rounded-full bg-black/40 backdrop-blur-md border border-white/10">
                   <button
