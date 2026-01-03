@@ -412,11 +412,11 @@ export default function GalleryView({ journey, onClose, onMemoryDeleted }: Galle
                           className="animate-enter relative group"
                           style={{ animationDelay: `${(dayIndex * 100) + (memoryIndex * 50)}ms`, opacity: 0 }}
                         >
-                          {/* Photo Memory */}
+                          {/* Photo Memory - Pink theme */}
                           {memory.type === 'photo' && memory.url && (
                             <button
                               onClick={() => setSelectedMemory(memory)}
-                              className={`w-full rounded-2xl overflow-hidden bg-zinc-900 hover:opacity-95 transition-opacity ${
+                              className={`w-full rounded-2xl overflow-hidden bg-zinc-900 border border-pink-500/20 hover:border-pink-500/40 transition-colors ${
                                 isFirstPhoto ? 'aspect-[4/3]' : 'aspect-square'
                               }`}
                             >
@@ -429,71 +429,73 @@ export default function GalleryView({ journey, onClose, onMemoryDeleted }: Galle
                                 }}
                               />
                               <div className="absolute bottom-3 left-3 flex items-center gap-2">
-                                <div className="px-2.5 py-1 rounded-full bg-black/60 backdrop-blur-sm">
-                                  <p className="text-[11px] text-white/80">{memoryTime}</p>
+                                <div className="px-2.5 py-1 rounded-full bg-black/60 backdrop-blur-sm border border-pink-500/20">
+                                  <p className="text-[11px] text-pink-300/90">{memoryTime}</p>
                                 </div>
                                 {memory.location_name && (
-                                  <div className="px-2.5 py-1 rounded-full bg-black/60 backdrop-blur-sm flex items-center gap-1">
-                                    <MapPin className="w-2.5 h-2.5 text-white/60" />
-                                    <p className="text-[11px] text-white/80">{memory.location_name}</p>
+                                  <div className="px-2.5 py-1 rounded-full bg-black/60 backdrop-blur-sm border border-pink-500/20 flex items-center gap-1">
+                                    <MapPin className="w-2.5 h-2.5 text-pink-400/60" />
+                                    <p className="text-[11px] text-pink-300/90">{memory.location_name}</p>
                                   </div>
                                 )}
                               </div>
                             </button>
                           )}
                           
-                          {/* Note Memory */}
+                          {/* Note Memory - Blue theme */}
                           {memory.type === 'text' && (
                             <button
                               onClick={() => setSelectedMemory(memory)}
-                              className="w-full text-left p-5 rounded-2xl bg-gradient-to-br from-amber-500/10 via-amber-500/5 to-transparent border border-amber-500/20 hover:border-amber-500/40 transition-colors relative overflow-hidden"
+                              className="w-full text-left p-4 rounded-2xl bg-gradient-to-br from-blue-500/10 to-blue-500/5 border border-blue-500/20 hover:border-blue-500/40 transition-colors"
                             >
-                              {/* Decorative large quote */}
-                              <div className="absolute -top-2 -left-1 text-6xl text-amber-500/10 font-serif select-none">"</div>
-                              
-                              <div className="relative">
-                                <p className="text-base text-zinc-100 leading-relaxed line-clamp-4 italic pl-4">
-                                  {memory.note}
-                                </p>
-                                <div className="flex items-center gap-2 mt-4 text-xs text-amber-400/60 pl-4">
-                                  <span>{memoryTime}</span>
-                                  {memory.location_name && (
-                                    <>
-                                      <span>•</span>
-                                      <span className="flex items-center gap-1">
-                                        <MapPin className="w-2.5 h-2.5" />
-                                        {memory.location_name}
-                                      </span>
-                                    </>
-                                  )}
+                              <div className="flex items-start gap-3">
+                                <div className="w-10 h-10 rounded-xl bg-blue-500/20 flex items-center justify-center flex-shrink-0">
+                                  <span className="text-blue-400 text-lg">"</span>
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <p className="text-sm text-zinc-200 leading-relaxed line-clamp-3">
+                                    {memory.note}
+                                  </p>
+                                  <div className="flex items-center gap-2 mt-2 text-xs text-blue-400/60">
+                                    <span>{memoryTime}</span>
+                                    {memory.location_name && (
+                                      <>
+                                        <span>•</span>
+                                        <span className="flex items-center gap-1">
+                                          <MapPin className="w-2.5 h-2.5" />
+                                          {memory.location_name}
+                                        </span>
+                                      </>
+                                    )}
+                                  </div>
                                 </div>
                               </div>
                             </button>
                           )}
                           
-                          {/* Audio Memory */}
+                          {/* Audio Memory - Orange theme */}
                           {memory.type === 'audio' && (
                             <button
                               onClick={() => setSelectedMemory(memory)}
-                              className="w-full p-4 rounded-2xl bg-gradient-to-br from-orange-500/10 to-pink-500/10 border border-orange-500/20 hover:border-orange-500/40 transition-colors"
+                              className="w-full p-4 rounded-2xl bg-gradient-to-br from-orange-500/10 to-orange-500/5 border border-orange-500/20 hover:border-orange-500/40 transition-colors"
                             >
-                              <div className="flex items-center gap-4">
-                                <div className="w-14 h-14 rounded-full bg-gradient-to-br from-orange-500 to-pink-500 flex items-center justify-center flex-shrink-0">
-                                  <Play className="w-6 h-6 text-white ml-0.5" />
+                              <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 rounded-xl bg-orange-500/20 flex items-center justify-center flex-shrink-0">
+                                  <Play className="w-4 h-4 text-orange-400 ml-0.5" />
                                 </div>
-                                <div className="flex-1 text-left">
-                                  <p className="text-sm font-medium text-white mb-0.5">Voice Note</p>
-                                  <p className="text-xs text-zinc-400">
+                                <div className="flex-1 text-left min-w-0">
+                                  <p className="text-sm text-zinc-200">Voice Note</p>
+                                  <p className="text-xs text-orange-400/60">
                                     {memory.duration 
                                       ? `${Math.floor(memory.duration / 60)}:${(memory.duration % 60).toString().padStart(2, '0')}`
                                       : 'Tap to play'
                                     }
                                   </p>
                                 </div>
-                                <div className="text-right">
-                                  <p className="text-xs text-zinc-500">{memoryTime}</p>
+                                <div className="text-right flex-shrink-0">
+                                  <p className="text-xs text-orange-400/60">{memoryTime}</p>
                                   {memory.location_name && (
-                                    <p className="text-[10px] text-zinc-600 flex items-center gap-1 justify-end mt-0.5">
+                                    <p className="text-[10px] text-orange-400/40 flex items-center gap-1 justify-end mt-0.5">
                                       <MapPin className="w-2 h-2" />
                                       {memory.location_name}
                                     </p>
