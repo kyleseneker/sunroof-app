@@ -96,7 +96,7 @@ export default function EditJourneyModal({
   if (!journey) return null;
 
   return (
-    <div className="fixed inset-0 z-50 bg-[var(--bg-base)] flex flex-col safe-top safe-bottom overflow-y-auto">
+    <div className="fixed inset-0 z-[60] bg-[var(--bg-base)] flex flex-col safe-top safe-bottom overflow-y-auto">
       <div className="flex-1 flex flex-col p-6 animate-enter">
         <button 
           onClick={handleClose}

@@ -296,7 +296,7 @@ export default function Dashboard({ activeJourneys: initialActiveJourneys = [], 
         journey={focusedJourney}
         onClose={() => setFocusedJourney(null)}
         onCapture={(j) => { setFocusedJourney(null); onCapture?.(j); }}
-        onEdit={(j) => { setFocusedJourney(null); setEditingJourney(j); }}
+        onEdit={(j) => setEditingJourney(j)}
         onDelete={(id) => { setFocusedJourney(null); setDeleteConfirm(id); }}
         onManageMemories={(j) => setManagingJourney(j)}
         onInvite={(j) => setInviteJourney(j)}

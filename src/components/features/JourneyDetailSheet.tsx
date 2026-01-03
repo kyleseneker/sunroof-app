@@ -184,7 +184,7 @@ export default function JourneyDetailSheet({
             <IconButton 
               icon={<Pencil className="w-4 h-4" />} 
               label="Edit journey" 
-              onClick={() => { onClose(); onEdit(journey); }} 
+              onClick={() => onEdit(journey)} 
               variant="bordered"
               dark 
             />
