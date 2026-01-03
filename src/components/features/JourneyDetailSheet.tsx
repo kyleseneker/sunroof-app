@@ -200,7 +200,7 @@ export default function JourneyDetailSheet({
       </div>
       
       {/* Blurred Memory Preview Card or Loading Skeleton */}
-      {memoriesLoading ? (
+      {memoriesLoading && (journey.memory_count ?? 0) > 0 ? (
         <div className="relative z-10 flex-1 flex items-center justify-center p-6 pt-2">
           <div className="relative w-full max-w-sm aspect-[4/3] rounded-3xl overflow-hidden border border-white/10 bg-white/5 animate-pulse">
             <div className="absolute inset-0 flex items-center justify-center">
