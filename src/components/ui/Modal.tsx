@@ -20,6 +20,8 @@ interface ModalProps {
   showCloseButton?: boolean;
   closeOnOverlayClick?: boolean;
   closeOnEscape?: boolean;
+  /** Position modal near top on mobile (useful when modal has inputs to avoid keyboard overlap) */
+  mobileTopAlign?: boolean;
 }
 
 const sizeStyles = {
@@ -39,6 +41,7 @@ export default function Modal({
   showCloseButton = true,
   closeOnOverlayClick = true,
   closeOnEscape = true,
+  mobileTopAlign = false,
 }: ModalProps) {
   const modalRef = useFocusTrap<HTMLDivElement>(isOpen);
   const overlayRef = useRef<HTMLDivElement>(null);
@@ -83,7 +86,10 @@ export default function Modal({
     <div
       ref={overlayRef}
       onClick={handleOverlayClick}
-      className="fixed inset-0 z-[70] flex items-center justify-center p-4 bg-[var(--bg-base)]/80 backdrop-blur-sm animate-fade-in"
+      className={cn(
+        "fixed inset-0 z-[70] flex justify-center p-4 bg-[var(--bg-base)]/80 backdrop-blur-sm animate-fade-in",
+        mobileTopAlign ? "items-start pt-20 sm:items-center sm:pt-4" : "items-center"
+      )}
       role="dialog"
       aria-modal="true"
       aria-labelledby={titleId}

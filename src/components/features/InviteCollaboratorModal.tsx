@@ -109,6 +109,7 @@ $$ LANGUAGE sql SECURITY DEFINER;
       onClose={handleClose}
       size="sm"
       showCloseButton={false}
+      mobileTopAlign
     >
       <div className="text-center">
         {/* Icon */}
