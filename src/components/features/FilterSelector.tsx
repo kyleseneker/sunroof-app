@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect, useRef } from 'react';
 import { PHOTO_FILTERS, type PhotoFilterKey } from '@/lib/constants';
 
 interface FilterSelectorProps {
@@ -16,6 +17,14 @@ export default function FilterSelector({
   livePreview = false,
 }: FilterSelectorProps) {
   const filterKeys = Object.keys(PHOTO_FILTERS) as PhotoFilterKey[];
+  const selectedRef = useRef<HTMLButtonElement>(null);
+
+  // Scroll selected filter into view on mount
+  useEffect(() => {
+    if (selectedRef.current) {
+      selectedRef.current.scrollIntoView({ behavior: 'instant', inline: 'center', block: 'nearest' });
+    }
+  }, []);
 
   return (
     <div className="w-full">
@@ -28,6 +37,7 @@ export default function FilterSelector({
           return (
             <button
               key={key}
+              ref={isSelected ? selectedRef : null}
               onClick={() => onSelectFilter(key)}
               className={`flex-shrink-0 flex flex-col items-center gap-1.5 transition-all ${
                 isSelected ? '' : 'opacity-60 hover:opacity-100'
