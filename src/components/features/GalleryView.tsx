@@ -196,7 +196,7 @@ export default function GalleryView({ journey: initialJourney, onClose, onMemory
 
   // --- MAIN GALLERY VIEW ---
   return (
-    <div className="fixed inset-0 z-40 bg-black flex flex-col safe-top safe-bottom overflow-hidden">
+    <div className="fixed inset-0 z-40 bg-[var(--bg-base)] flex flex-col safe-top safe-bottom overflow-hidden">
       {/* Delete Memory Confirmation */}
       <ConfirmDialog
         isOpen={!!memoryToDelete}
@@ -240,7 +240,7 @@ export default function GalleryView({ journey: initialJourney, onClose, onMemory
         className="absolute top-0 left-0 right-0 h-32 opacity-40"
         style={{ background: getJourneyGradient(journey.name).gradient }}
       />
-      <div className="absolute top-0 left-0 right-0 h-32 bg-gradient-to-b from-transparent to-black" />
+      <div className="absolute top-0 left-0 right-0 h-32 bg-gradient-to-b from-transparent to-[var(--bg-base)]" />
 
       {/* Celebration Confetti */}
       {showCelebration && (
@@ -260,10 +260,10 @@ export default function GalleryView({ journey: initialJourney, onClose, onMemory
             />
           ))}
           <div className="absolute inset-0 z-50 flex items-center justify-center pointer-events-none">
-            <div className="bg-black/80 backdrop-blur-xl rounded-3xl px-8 py-6 animate-enter text-center">
+            <div className="bg-[var(--bg-base)]/80 backdrop-blur-xl rounded-3xl px-8 py-6 animate-enter text-center border border-[var(--border-base)]">
               <div className="text-4xl mb-2">🎉</div>
-              <h2 className="text-2xl font-bold mb-1">Journey Unlocked!</h2>
-              <p className="text-zinc-400">Time to relive the memories</p>
+              <h2 className="text-2xl font-bold mb-1 text-[var(--fg-base)]">Journey Unlocked!</h2>
+              <p className="text-[var(--fg-muted)]">Time to relive the memories</p>
             </div>
           </div>
         </>
@@ -279,11 +279,11 @@ export default function GalleryView({ journey: initialJourney, onClose, onMemory
           dark 
         />
         <div className="flex-1 min-w-0 mx-4">
-          <h1 className="text-xl font-medium truncate">
+          <h1 className="text-xl font-medium truncate text-[var(--fg-base)]">
             {journey.emoji && <span className="mr-2">{journey.emoji}</span>}
             {journey.name}
           </h1>
-          <p className="text-xs text-zinc-500">
+          <p className="text-xs text-[var(--fg-muted)]">
             {(journey.memory_count ?? 0) === 0 ? 'No memories' : `${journey.memory_count} ${journey.memory_count === 1 ? 'memory' : 'memories'}`}
           </p>
         </div>
@@ -346,14 +346,14 @@ export default function GalleryView({ journey: initialJourney, onClose, onMemory
         ) : memories.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full text-center py-16 px-6">
             <div className="relative w-20 h-20 mb-6 empty-illustration">
-              <div className="absolute inset-0 rounded-full bg-gradient-to-br from-zinc-800 to-zinc-900 border border-zinc-800" />
+              <div className="absolute inset-0 rounded-full bg-gradient-to-br from-[var(--bg-hover)] to-[var(--bg-surface)] border border-[var(--border-base)]" />
               <div className="absolute inset-0 flex items-center justify-center">
-                <Camera className="w-8 h-8 text-zinc-600" />
+                <Camera className="w-8 h-8 text-[var(--fg-subtle)]" />
               </div>
               <div className="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-orange-500/50 animate-pulse" />
             </div>
-            <p className="text-lg text-zinc-400 mb-2">No memories yet</p>
-            <p className="text-sm text-zinc-600">Photos and notes will appear here</p>
+            <p className="text-lg text-[var(--fg-muted)] mb-2">No memories yet</p>
+            <p className="text-sm text-[var(--fg-subtle)]">Photos and notes will appear here</p>
           </div>
         ) : (
           <div className="pb-8 max-w-2xl mx-auto">
@@ -386,30 +386,30 @@ export default function GalleryView({ journey: initialJourney, onClose, onMemory
                   {/* Day Header - Clickable to collapse */}
                   <button
                     onClick={() => toggleDayCollapse(dayKey)}
-                    className="sticky top-0 z-10 w-full px-6 py-4 bg-gradient-to-b from-black via-black/95 to-transparent backdrop-blur-sm text-left"
+                    className="sticky top-0 z-10 w-full px-6 py-4 bg-gradient-to-b from-[var(--bg-base)] via-[var(--bg-base)]/95 to-transparent backdrop-blur-sm text-left"
                   >
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-orange-500 to-pink-500 flex items-center justify-center text-sm font-bold flex-shrink-0">
+                      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-orange-500 to-pink-500 flex items-center justify-center text-sm font-bold text-white flex-shrink-0">
                         {dayNumber}
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
-                          <h3 className="text-lg font-medium text-white">Day {dayNumber}</h3>
+                          <h3 className="text-lg font-medium text-[var(--fg-base)]">Day {dayNumber}</h3>
                           <ChevronDown 
-                            className={`w-4 h-4 text-zinc-500 transition-transform duration-200 flex-shrink-0 ${
+                            className={`w-4 h-4 text-[var(--fg-muted)] transition-transform duration-200 flex-shrink-0 ${
                               collapsedDays.has(dayKey) ? '-rotate-90' : ''
                             }`} 
                           />
                         </div>
-                        <p className="text-xs text-zinc-500 truncate">
+                        <p className="text-xs text-[var(--fg-muted)] truncate">
                           {formattedDate}
                           {collapsedDays.has(dayKey) && (
-                            <span className="text-zinc-600"> • {dayMemories.length} {dayMemories.length === 1 ? 'memory' : 'memories'}</span>
+                            <span className="text-[var(--fg-subtle)]"> • {dayMemories.length} {dayMemories.length === 1 ? 'memory' : 'memories'}</span>
                           )}
                         </p>
                       </div>
                       {minTemp !== null && (
-                        <div className="flex items-center gap-1 text-xs text-zinc-400 flex-shrink-0">
+                        <div className="flex items-center gap-1 text-xs text-[var(--fg-muted)] flex-shrink-0">
                           {weatherIcon && <span>{weatherIcon}</span>}
                           <span>
                             {minTemp === maxTemp ? `${minTemp}°` : `${minTemp}–${maxTemp}°`}
@@ -439,7 +439,7 @@ export default function GalleryView({ journey: initialJourney, onClose, onMemory
                           {memory.type === 'photo' && memory.url && (
                             <button
                               onClick={() => setSelectedMemory(memory)}
-                              className={`w-full rounded-2xl overflow-hidden bg-zinc-900 border border-pink-500/20 hover:border-pink-500/40 transition-colors ${
+                              className={`w-full rounded-2xl overflow-hidden bg-[var(--bg-surface)] border border-pink-500/20 hover:border-pink-500/40 transition-colors ${
                                 isFirstPhoto ? 'aspect-[4/3]' : 'aspect-square'
                               }`}
                             >
@@ -452,13 +452,13 @@ export default function GalleryView({ journey: initialJourney, onClose, onMemory
                                 }}
                               />
                               <div className="absolute bottom-3 left-3 flex items-center gap-2">
-                                <div className="px-2.5 py-1 rounded-full bg-black/60 backdrop-blur-sm border border-pink-500/20">
-                                  <p className="text-[11px] text-pink-300/90">{memoryTime}</p>
+                                <div className="px-2.5 py-1 rounded-full bg-[var(--bg-base)]/60 backdrop-blur-sm border border-pink-500/20">
+                                  <p className="text-[11px] text-pink-300">{memoryTime}</p>
                                 </div>
                                 {memory.location_name && (
-                                  <div className="px-2.5 py-1 rounded-full bg-black/60 backdrop-blur-sm border border-pink-500/20 flex items-center gap-1">
+                                  <div className="px-2.5 py-1 rounded-full bg-[var(--bg-base)]/60 backdrop-blur-sm border border-pink-500/20 flex items-center gap-1">
                                     <MapPin className="w-2.5 h-2.5 text-pink-400/60" />
-                                    <p className="text-[11px] text-pink-300/90">{memory.location_name}</p>
+                                    <p className="text-[11px] text-pink-300">{memory.location_name}</p>
                                   </div>
                                 )}
                               </div>
@@ -476,7 +476,7 @@ export default function GalleryView({ journey: initialJourney, onClose, onMemory
                                   <Quote className="w-4 h-4 text-blue-400" />
                                 </div>
                                 <div className="flex-1 min-w-0">
-                                  <p className="text-sm text-zinc-200 leading-relaxed line-clamp-3">
+                                  <p className="text-sm text-[var(--fg-base)] leading-relaxed line-clamp-3">
                                     {memory.note}
                                   </p>
                                   <div className="flex items-center gap-2 mt-2 text-xs text-blue-400/60">
@@ -507,7 +507,7 @@ export default function GalleryView({ journey: initialJourney, onClose, onMemory
                                   <Play className="w-4 h-4 text-orange-400 ml-0.5" />
                                 </div>
                                 <div className="flex-1 text-left min-w-0">
-                                  <p className="text-sm text-zinc-200">Voice</p>
+                                  <p className="text-sm text-[var(--fg-base)]">Voice</p>
                                   <p className="text-xs text-orange-400/60">
                                     {memory.duration 
                                       ? `${Math.floor(memory.duration / 60)}:${(memory.duration % 60).toString().padStart(2, '0')}`
