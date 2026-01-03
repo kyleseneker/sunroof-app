@@ -1,17 +1,19 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { X, Lock, Pencil, Trash2, UserPlus, Users, Clock, Camera, Unlock } from 'lucide-react';
+import { X, Lock, Pencil, Trash2, UserPlus, Users, Clock, Camera, Unlock, Mic, FileText } from 'lucide-react';
 import { getEmailByUserId, updateJourney, fetchMemoriesForJourney } from '@/services';
 import { useToast, IconButton, ConfirmDialog } from '@/components/ui';
 import { MemoryPreviewCard, MemoryStatBadge, CountdownTimer } from '@/components/features';
 import { getJourneyGradient, hapticSuccess, formatRelativeDate } from '@/lib';
 import type { Journey, Memory } from '@/types';
 
+type CaptureMode = 'photo' | 'text' | 'audio';
+
 interface JourneyDetailSheetProps {
   journey: Journey | null;
   onClose: () => void;
-  onCapture: (journey: Journey) => void;
+  onCapture: (journey: Journey, mode?: CaptureMode) => void;
   onEdit: (journey: Journey) => void;
   onDelete: (journeyId: string) => void;
   onManageMemories: (journey: Journey) => void;
@@ -313,19 +315,39 @@ export default function JourneyDetailSheet({
           </button>
         )}
         
-        {/* Capture Button */}
-        <button
-          onClick={() => {
-            onClose();
-            onCapture(journey);
-          }}
-          className="w-full h-16 rounded-full bg-gradient-to-r from-white to-zinc-100 text-black font-semibold flex items-center justify-center gap-3 active:scale-[0.98] transition-transform shadow-xl shadow-white/10"
-        >
-          <div className="w-8 h-8 rounded-full bg-black/10 flex items-center justify-center">
-            <Camera className="w-4 h-4" />
-          </div>
-          Capture Memory
-        </button>
+        {/* Quick Capture Buttons */}
+        <div className="flex gap-3">
+          <button
+            onClick={() => {
+              onClose();
+              onCapture(journey, 'photo');
+            }}
+            className="flex-1 h-14 rounded-2xl bg-gradient-to-r from-white to-zinc-100 text-black font-semibold flex items-center justify-center gap-2 active:scale-[0.98] transition-transform shadow-lg shadow-white/10"
+          >
+            <Camera className="w-5 h-5" />
+            <span>Photo</span>
+          </button>
+          <button
+            onClick={() => {
+              onClose();
+              onCapture(journey, 'audio');
+            }}
+            className="flex-1 h-14 rounded-2xl bg-white/10 backdrop-blur-sm border border-white/20 text-white font-semibold flex items-center justify-center gap-2 active:scale-[0.98] transition-transform"
+          >
+            <Mic className="w-5 h-5" />
+            <span>Voice</span>
+          </button>
+          <button
+            onClick={() => {
+              onClose();
+              onCapture(journey, 'text');
+            }}
+            className="flex-1 h-14 rounded-2xl bg-white/10 backdrop-blur-sm border border-white/20 text-white font-semibold flex items-center justify-center gap-2 active:scale-[0.98] transition-transform"
+          >
+            <FileText className="w-5 h-5" />
+            <span>Note</span>
+          </button>
+        </div>
       </div>
     </div>
   );

@@ -3,7 +3,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/providers';
 import { fetchActiveJourneys } from '@/services';
-import { CameraView, Dashboard, Intro } from '@/components/features';
+import { CameraView, Dashboard, Intro, type CaptureMode } from '@/components/features';
 import type { Journey } from '@/types';
 
 export default function Home() {
@@ -16,6 +16,7 @@ export default function Home() {
   const [fetchError, setFetchError] = useState(false);
   const [viewMode, setViewMode] = useState<'capture' | 'dashboard'>('dashboard');
   const [selectedJourney, setSelectedJourney] = useState<Journey | null>(null);
+  const [captureMode, setCaptureMode] = useState<CaptureMode>('photo');
 
   // Redirect to login if not authenticated
   // Auth session is managed by Supabase's built-in storage (via lib/auth.tsx)
@@ -165,10 +166,12 @@ export default function Home() {
     return (
       <CameraView 
         journeyId={selectedJourney.id} 
-        journeyName={selectedJourney.name} 
+        journeyName={selectedJourney.name}
+        initialMode={captureMode}
         onClose={async () => {
           setViewMode('dashboard');
           setSelectedJourney(null);
+          setCaptureMode('photo');
           // Refetch journeys to get updated memory counts
           await loadActiveJourneys();
         }} 
@@ -180,8 +183,9 @@ export default function Home() {
   return (
     <Dashboard 
       activeJourneys={activeJourneys} 
-      onCapture={(journey) => {
+      onCapture={(journey, mode = 'photo') => {
         setSelectedJourney(journey);
+        setCaptureMode(mode);
         setViewMode('capture');
       }} 
     />

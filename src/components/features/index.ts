@@ -5,7 +5,7 @@
 export { default as ActionSheet, useLongPress } from './ActionSheet';
 export { default as AudioPlayer } from './AudioPlayer';
 export { default as AudioRecorder } from './AudioRecorder';
-export { default as CameraView } from './CameraView';
+export { default as CameraView, type CaptureMode } from './CameraView';
 export { default as CountdownTimer } from './CountdownTimer';
 export { default as EmojiPicker } from './EmojiPicker';
 export { 

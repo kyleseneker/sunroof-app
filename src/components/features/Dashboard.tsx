@@ -26,9 +26,11 @@ import Image from 'next/image';
 import Link from 'next/link';
 import type { Journey } from '@/types';
 
+type CaptureMode = 'photo' | 'text' | 'audio';
+
 interface DashboardProps {
   activeJourneys?: Journey[];
-  onCapture?: (journey: Journey) => void;
+  onCapture?: (journey: Journey, mode?: CaptureMode) => void;
 }
 
 export default function Dashboard({ activeJourneys: initialActiveJourneys = [], onCapture }: DashboardProps) {
@@ -292,7 +294,7 @@ export default function Dashboard({ activeJourneys: initialActiveJourneys = [], 
         <JourneyDetailSheet
           journey={focusedJourney}
           onClose={() => setFocusedJourney(null)}
-          onCapture={(j) => { setFocusedJourney(null); onCapture?.(j); }}
+          onCapture={(j, mode) => { setFocusedJourney(null); onCapture?.(j, mode); }}
           onEdit={(j) => setEditingJourney(j)}
           onDelete={(id) => setDeleteConfirm(id)}
           onManageMemories={(j) => setManagingJourney(j)}

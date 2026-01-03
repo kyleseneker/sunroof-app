@@ -8,16 +8,20 @@ import { AudioRecorder } from '@/components/features';
 import { IconButton } from '@/components/ui';
 import type { TimeOfDay } from '@/types';
 
+export type CaptureMode = 'photo' | 'text' | 'audio';
+
 export default function CameraView({ 
   journeyId, 
   journeyName, 
-  onClose 
+  onClose,
+  initialMode = 'photo',
 }: { 
   journeyId: string; 
   journeyName: string; 
   onClose: () => void;
+  initialMode?: CaptureMode;
 }) {
-  const [mode, setMode] = useState<'photo' | 'text' | 'audio'>('photo');
+  const [mode, setMode] = useState<CaptureMode>(initialMode);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
