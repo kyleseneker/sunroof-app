@@ -240,7 +240,9 @@ export default function GalleryView({ journey, onClose, onMemoryDeleted }: Galle
       )}
 
       {/* Header */}
-      <header className="relative z-10 flex items-center gap-4 p-6 border-b border-zinc-900/50">
+      <header className="relative z-10 flex items-center gap-4 p-6 pb-8">
+        {/* Fade into content */}
+        <div className="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-b from-transparent to-black pointer-events-none" />
         <IconButton 
           icon={<X className="w-5 h-5" />} 
           label="Close" 
@@ -348,7 +350,7 @@ export default function GalleryView({ journey, onClose, onMemoryDeleted }: Galle
                   style={{ animationDelay: `${dayIndex * 100}ms`, opacity: 0 }}
                 >
                   {/* Day Header */}
-                  <div className="sticky top-0 z-10 bg-black/90 backdrop-blur-md border-b border-zinc-800/50 px-6 py-4">
+                  <div className="sticky top-0 z-10 px-6 py-4 bg-gradient-to-b from-black via-black/95 to-transparent backdrop-blur-sm">
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 rounded-full bg-gradient-to-br from-orange-500 to-pink-500 flex items-center justify-center text-sm font-bold">
                         {dayNumber}
