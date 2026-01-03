@@ -282,10 +282,10 @@ export default function JourneyDetailSheet({
         {!journey.shared_with?.length && <div className="mb-4" />}
         
         {/* Countdown */}
-        <div className="rounded-2xl p-5 mb-4 bg-white/5 backdrop-blur-md border border-white/10">
-          <div className="flex items-center justify-center gap-2 mb-4">
-            <Clock className="w-4 h-4 text-white/50" />
-            <p className="text-xs text-white/50 uppercase tracking-wider">Unlocks in</p>
+        <div className="rounded-2xl p-4 mb-4 bg-white/5 backdrop-blur-md border border-white/10">
+          <div className="flex items-center justify-center gap-2 mb-3">
+            <Clock className="w-3.5 h-3.5 text-white/40" />
+            <p className="text-[10px] text-white/40 uppercase tracking-wider">Unlocks in</p>
           </div>
           <CountdownTimer unlockDate={journey.unlock_date} />
         </div>

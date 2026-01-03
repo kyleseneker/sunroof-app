@@ -110,16 +110,16 @@ function CountdownBlock({
     <div className="flex flex-col items-center">
       <div 
         className={`
-          countdown-block w-16 h-16 rounded-xl flex items-center justify-center
+          countdown-block w-14 h-12 rounded-lg flex items-center justify-center
           bg-white/10 border border-white/10 backdrop-blur-sm
           ${highlight ? 'animate-pulse-subtle' : ''}
         `}
       >
-        <span className="text-2xl font-bold tabular-nums text-white">
+        <span className="text-xl font-bold tabular-nums text-white">
           {String(value).padStart(2, '0')}
         </span>
       </div>
-      <span className="text-[10px] uppercase tracking-wider text-white/50 mt-1.5">
+      <span className="text-[9px] uppercase tracking-wider text-white/40 mt-1">
         {label}
       </span>
     </div>
@@ -128,8 +128,8 @@ function CountdownBlock({
 
 function Separator() {
   return (
-    <div className="flex flex-col items-center justify-center h-16 px-0.5">
-      <span className="text-white/30 text-xl font-light">:</span>
+    <div className="flex flex-col items-center justify-center h-12 px-0.5">
+      <span className="text-white/20 text-lg font-light">:</span>
     </div>
   );
 }
