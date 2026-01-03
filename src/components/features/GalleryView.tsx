@@ -324,7 +324,7 @@ export default function GalleryView({ journey, onClose, onMemoryDeleted }: Galle
             <p className="text-sm text-zinc-600">Photos and notes will appear here</p>
           </div>
         ) : (
-          <div className="pb-8">
+          <div className="pb-8 max-w-2xl mx-auto">
             {dayKeys.map((dayKey, dayIndex) => {
               const dayMemories = memoriesByDay[dayKey];
               const dayDate = new Date(dayKey);
