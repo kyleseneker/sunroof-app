@@ -133,21 +133,23 @@ export default function EditJourneyModal({
             {/* Emoji Picker */}
             <EmojiPicker value={editEmoji} onChange={setEditEmoji} />
             
-            {/* Unlock Date */}
-            <div>
-              <label className="flex items-center gap-2 text-[11px] uppercase tracking-[0.2em] text-[var(--fg-muted)] font-medium mb-3">
-                <Timer className="w-3 h-3" />
-                Unlock Date
-              </label>
-              <input 
-                type="date"
-                value={editDate}
-                onChange={(e) => setEditDate(e.target.value)}
-                min={new Date().toISOString().split('T')[0]}
-                className="w-full bg-[var(--bg-surface)]/50 border border-[var(--border-base)] focus:border-blue-400 rounded-2xl px-5 py-4 text-lg text-[var(--fg-base)] focus:outline-none focus:bg-[var(--bg-base)]/50 transition-all appearance-none"
-                style={{ minWidth: 0 }}
-              />
-            </div>
+            {/* Unlock Date - only show for active (locked) journeys */}
+            {journey.status === 'active' && (
+              <div>
+                <label className="flex items-center gap-2 text-[11px] uppercase tracking-[0.2em] text-[var(--fg-muted)] font-medium mb-3">
+                  <Timer className="w-3 h-3" />
+                  Unlock Date
+                </label>
+                <input 
+                  type="date"
+                  value={editDate}
+                  onChange={(e) => setEditDate(e.target.value)}
+                  min={new Date().toISOString().split('T')[0]}
+                  className="w-full bg-[var(--bg-surface)]/50 border border-[var(--border-base)] focus:border-blue-400 rounded-2xl px-5 py-4 text-lg text-[var(--fg-base)] focus:outline-none focus:bg-[var(--bg-base)]/50 transition-all appearance-none"
+                  style={{ minWidth: 0 }}
+                />
+              </div>
+            )}
             
             <Button 
               onClick={handleSave}

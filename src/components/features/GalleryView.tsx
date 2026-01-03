@@ -310,7 +310,7 @@ export default function GalleryView({ journey: initialJourney, onClose, onMemory
             icon={<Trash2 className="w-4 h-4" />}
             label="Delete journey"
             onClick={() => setShowDeleteJourneyConfirm(true)}
-            variant="danger"
+            variant="bordered"
             dark
           />
         </div>
