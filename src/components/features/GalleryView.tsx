@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { api, getJourneyGradient } from '@/lib';
 import { deleteJourney, deleteMemory, fetchMemoriesForJourney } from '@/services';
-import { X, Trash2, Camera, ArrowUpDown, Sparkles, Mic } from 'lucide-react';
+import { X, Trash2, Camera, ArrowUpDown, Sparkles, Mic, MapPin, Quote, Play } from 'lucide-react';
 import { useToast, ConfirmDialog, IconButton } from '@/components/ui';
 import { AudioPlayer, MemoryViewer, AIRecapSheet } from '@/components/features';
 import type { Journey, Memory } from '@/types';
@@ -68,6 +68,21 @@ export default function GalleryView({ journey, onClose, onMemoryDeleted }: Galle
     const dateB = new Date(b.created_at).getTime();
     return sortNewestFirst ? dateB - dateA : dateA - dateB;
   });
+
+  // Group memories by day for timeline view
+  const memoriesByDay = sortedMemories.reduce((acc, memory) => {
+    const date = new Date(memory.created_at);
+    const dayKey = date.toDateString();
+    if (!acc[dayKey]) {
+      acc[dayKey] = [];
+    }
+    acc[dayKey].push(memory);
+    return acc;
+  }, {} as Record<string, Memory[]>);
+
+  // Get ordered day keys and calculate day numbers
+  const dayKeys = Object.keys(memoriesByDay);
+  const firstDayDate = dayKeys.length > 0 ? new Date(dayKeys[sortNewestFirst ? dayKeys.length - 1 : 0]) : null;
 
   // Stats
   const photoCount = memories.filter((m) => m.type === 'photo').length;
@@ -288,23 +303,16 @@ export default function GalleryView({ journey, onClose, onMemoryDeleted }: Galle
         />
       )}
 
-      {/* Sort indicator */}
-      {memories.length > 0 && (
-        <div className="px-4 py-2 flex justify-end">
-          <span className="text-xs text-zinc-600">{sortNewestFirst ? 'Newest first' : 'Oldest first'}</span>
-        </div>
-      )}
-
-      {/* Gallery Grid */}
-      <div className="flex-1 overflow-y-auto p-4 pt-0">
+      {/* Story Timeline */}
+      <div className="flex-1 overflow-y-auto">
         {loading ? (
-          <div className="grid grid-cols-2 gap-2">
-            {[...Array(6)].map((_, i) => (
-              <div key={i} className="aspect-square rounded-xl skeleton" style={{ animationDelay: `${i * 100}ms` }} />
-            ))}
+          <div className="p-6 space-y-6">
+            <div className="h-8 w-32 rounded-lg skeleton" />
+            <div className="aspect-[4/3] rounded-2xl skeleton" />
+            <div className="h-24 rounded-2xl skeleton" />
           </div>
         ) : memories.length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-full text-center py-16">
+          <div className="flex flex-col items-center justify-center h-full text-center py-16 px-6">
             <div className="relative w-20 h-20 mb-6 empty-illustration">
               <div className="absolute inset-0 rounded-full bg-gradient-to-br from-zinc-800 to-zinc-900 border border-zinc-800" />
               <div className="absolute inset-0 flex items-center justify-center">
@@ -316,69 +324,151 @@ export default function GalleryView({ journey, onClose, onMemoryDeleted }: Galle
             <p className="text-sm text-zinc-600">Photos and notes will appear here</p>
           </div>
         ) : (
-          <div className="grid grid-cols-2 gap-2">
-            {sortedMemories.map((memory, i) => {
-              const tileDate = new Date(memory.created_at);
-              const tileTime = tileDate.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
-              const tileDay = tileDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+          <div className="pb-8">
+            {dayKeys.map((dayKey, dayIndex) => {
+              const dayMemories = memoriesByDay[dayKey];
+              const dayDate = new Date(dayKey);
+              const dayNumber = firstDayDate 
+                ? Math.abs(Math.floor((dayDate.getTime() - firstDayDate.getTime()) / (1000 * 60 * 60 * 24))) + 1
+                : dayIndex + 1;
+              const formattedDate = dayDate.toLocaleDateString('en-US', { 
+                weekday: 'long',
+                month: 'long', 
+                day: 'numeric' 
+              });
+              
+              // Get location/weather from first memory of the day that has it
+              const dayLocation = dayMemories.find(m => m.location_name)?.location_name;
+              const dayWeather = dayMemories.find(m => m.weather)?.weather;
+              
               return (
-                <div
-                  key={memory.id}
-                  className="animate-enter relative group"
-                  style={{ animationDelay: `${i * 50}ms`, opacity: 0 }}
+                <div 
+                  key={dayKey} 
+                  className="animate-enter"
+                  style={{ animationDelay: `${dayIndex * 100}ms`, opacity: 0 }}
                 >
-                  <button
-                    onClick={() => setSelectedMemory(memory)}
-                    className="w-full aspect-square rounded-xl overflow-hidden bg-zinc-900 hover:opacity-90 transition-opacity"
-                  >
-                    {memory.type === 'photo' && memory.url ? (
-                      <img
-                        src={memory.url}
-                        alt=""
-                        className="w-full h-full object-cover"
-                        onError={(e) => {
-                          e.currentTarget.parentElement!.innerHTML =
-                            '<div class="w-full h-full bg-zinc-800 flex items-center justify-center"><span class="text-zinc-600 text-xs">Failed to load</span></div>';
-                        }}
-                      />
-                    ) : memory.type === 'audio' ? (
-                      <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-orange-500/20 to-pink-500/20">
-                        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-orange-500 to-pink-500 flex items-center justify-center mb-2">
-                          <Mic className="w-6 h-6 text-white" />
+                  {/* Day Header */}
+                  <div className="sticky top-0 z-10 bg-black/90 backdrop-blur-md border-b border-zinc-800/50 px-6 py-4">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-orange-500 to-pink-500 flex items-center justify-center text-sm font-bold">
+                        {dayNumber}
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="text-lg font-medium text-white">Day {dayNumber}</h3>
+                        <p className="text-xs text-zinc-500">{formattedDate}</p>
+                      </div>
+                      {(dayLocation || dayWeather) && (
+                        <div className="flex items-center gap-2 text-xs text-zinc-400">
+                          {dayLocation && (
+                            <span className="flex items-center gap-1">
+                              <MapPin className="w-3 h-3" />
+                              {dayLocation}
+                            </span>
+                          )}
+                          {dayWeather && (
+                            <span>{dayWeather.icon} {dayWeather.temp}°</span>
+                          )}
                         </div>
-                        <p className="text-xs text-zinc-400">Voice Note</p>
-                        {memory.duration && (
-                          <p className="text-xs text-zinc-500 mt-0.5">
-                            {Math.floor(memory.duration / 60)}:{(memory.duration % 60).toString().padStart(2, '0')}
-                          </p>
-                        )}
-                      </div>
-                    ) : (
-                      <div className="w-full h-full p-4 flex items-center justify-center">
-                        <p className="text-sm text-zinc-300 text-center line-clamp-4">{memory.note}</p>
-                      </div>
-                    )}
-                  </button>
-                  <div className="absolute bottom-2 left-2 px-2 py-1 rounded-md bg-black/60 backdrop-blur-sm pointer-events-none">
-                    <p className="text-[10px] text-white/80">
-                      {tileDay} • {tileTime}
-                      {memory.weather && (
-                        <span className="ml-1.5">{memory.weather.icon} {memory.weather.temp}°</span>
                       )}
-                    </p>
+                    </div>
                   </div>
-                  <IconButton 
-                    icon={<Trash2 className="w-3 h-3" />}
-                    label="Delete memory"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setMemoryToDelete(memory);
-                    }}
-                    variant="danger"
-                    size="sm"
-                    dark
-                    className="absolute top-2 right-2 opacity-70 hover:opacity-100"
-                  />
+                  
+                  {/* Day Memories */}
+                  <div className="px-6 py-4 space-y-4">
+                    {dayMemories.map((memory, memoryIndex) => {
+                      const memoryTime = new Date(memory.created_at).toLocaleTimeString('en-US', { 
+                        hour: 'numeric', 
+                        minute: '2-digit' 
+                      });
+                      const isFirstPhoto = memoryIndex === 0 && memory.type === 'photo';
+                      
+                      return (
+                        <div
+                          key={memory.id}
+                          className="animate-enter relative group"
+                          style={{ animationDelay: `${(dayIndex * 100) + (memoryIndex * 50)}ms`, opacity: 0 }}
+                        >
+                          {/* Photo Memory */}
+                          {memory.type === 'photo' && memory.url && (
+                            <button
+                              onClick={() => setSelectedMemory(memory)}
+                              className={`w-full rounded-2xl overflow-hidden bg-zinc-900 hover:opacity-95 transition-opacity ${
+                                isFirstPhoto ? 'aspect-[4/3]' : 'aspect-square'
+                              }`}
+                            >
+                              <img
+                                src={memory.url}
+                                alt=""
+                                className="w-full h-full object-cover"
+                                onError={(e) => {
+                                  e.currentTarget.style.display = 'none';
+                                }}
+                              />
+                              <div className="absolute bottom-3 left-3 px-2.5 py-1 rounded-full bg-black/60 backdrop-blur-sm">
+                                <p className="text-[11px] text-white/80">{memoryTime}</p>
+                              </div>
+                            </button>
+                          )}
+                          
+                          {/* Note Memory */}
+                          {memory.type === 'text' && (
+                            <button
+                              onClick={() => setSelectedMemory(memory)}
+                              className="w-full text-left p-5 rounded-2xl bg-gradient-to-br from-zinc-800/80 to-zinc-900/80 border border-zinc-700/50 hover:border-zinc-600/50 transition-colors"
+                            >
+                              <div className="flex items-start gap-3">
+                                <Quote className="w-5 h-5 text-zinc-500 flex-shrink-0 mt-0.5" />
+                                <div className="flex-1 min-w-0">
+                                  <p className="text-base text-zinc-200 leading-relaxed line-clamp-4">
+                                    {memory.note}
+                                  </p>
+                                  <p className="text-xs text-zinc-500 mt-3">{memoryTime}</p>
+                                </div>
+                              </div>
+                            </button>
+                          )}
+                          
+                          {/* Audio Memory */}
+                          {memory.type === 'audio' && (
+                            <button
+                              onClick={() => setSelectedMemory(memory)}
+                              className="w-full p-4 rounded-2xl bg-gradient-to-br from-orange-500/10 to-pink-500/10 border border-orange-500/20 hover:border-orange-500/40 transition-colors"
+                            >
+                              <div className="flex items-center gap-4">
+                                <div className="w-14 h-14 rounded-full bg-gradient-to-br from-orange-500 to-pink-500 flex items-center justify-center flex-shrink-0">
+                                  <Play className="w-6 h-6 text-white ml-0.5" />
+                                </div>
+                                <div className="flex-1 text-left">
+                                  <p className="text-sm font-medium text-white mb-0.5">Voice Note</p>
+                                  <p className="text-xs text-zinc-400">
+                                    {memory.duration 
+                                      ? `${Math.floor(memory.duration / 60)}:${(memory.duration % 60).toString().padStart(2, '0')}`
+                                      : 'Tap to play'
+                                    }
+                                  </p>
+                                </div>
+                                <p className="text-xs text-zinc-500">{memoryTime}</p>
+                              </div>
+                            </button>
+                          )}
+                          
+                          {/* Delete button */}
+                          <IconButton 
+                            icon={<Trash2 className="w-3 h-3" />}
+                            label="Delete memory"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setMemoryToDelete(memory);
+                            }}
+                            variant="danger"
+                            size="sm"
+                            dark
+                            className="absolute top-3 right-3 opacity-0 group-hover:opacity-70 hover:!opacity-100 transition-opacity"
+                          />
+                        </div>
+                      );
+                    })}
+                  </div>
                 </div>
               );
             })}
