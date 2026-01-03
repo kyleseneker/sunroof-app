@@ -330,7 +330,7 @@ export default function Dashboard({ activeJourneys: initialActiveJourneys = [], 
 
   // --- MAIN DASHBOARD ---
   return (
-    <div className="min-h-[100dvh] flex flex-col safe-top safe-bottom">
+    <div className="h-[100dvh] flex flex-col safe-top safe-bottom overflow-hidden">
       {/* Delete Confirmation Dialog */}
       <ConfirmDialog
         isOpen={!!deleteConfirm}
