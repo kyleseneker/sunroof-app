@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { api, getJourneyGradient } from '@/lib';
 import { deleteJourney, deleteMemory, fetchMemoriesForJourney } from '@/services';
-import { X, Trash2, Camera, Sparkles, Mic, MapPin, Play, ChevronDown } from 'lucide-react';
+import { X, Trash2, Camera, Sparkles, Mic, MapPin, Play, ChevronDown, Quote } from 'lucide-react';
 import { useToast, ConfirmDialog, IconButton } from '@/components/ui';
 import { AudioPlayer, MemoryViewer, AIRecapSheet } from '@/components/features';
 import type { Journey, Memory } from '@/types';
@@ -450,7 +450,7 @@ export default function GalleryView({ journey, onClose, onMemoryDeleted }: Galle
                             >
                               <div className="flex items-start gap-3">
                                 <div className="w-10 h-10 rounded-xl bg-blue-500/20 flex items-center justify-center flex-shrink-0">
-                                  <span className="text-blue-400 text-lg">"</span>
+                                  <Quote className="w-4 h-4 text-blue-400" />
                                 </div>
                                 <div className="flex-1 min-w-0">
                                   <p className="text-sm text-zinc-200 leading-relaxed line-clamp-3">
