@@ -795,7 +795,7 @@ const handleAudioError = (message: string) => {
                 if (e.target.value) setShowPrompts(false);
               }}
               maxLength={10000}
-              className="flex-1 w-full bg-transparent text-xl font-light text-white placeholder:text-zinc-600 focus:outline-none resize-none leading-relaxed"
+              className="min-h-[120px] max-h-[40vh] w-full bg-transparent text-xl font-light text-white placeholder:text-zinc-600 focus:outline-none resize-none leading-relaxed"
             />
             
             {/* Character hint */}
