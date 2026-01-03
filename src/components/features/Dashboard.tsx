@@ -704,9 +704,9 @@ export default function Dashboard({ activeJourneys: initialActiveJourneys = [], 
         {pastJourneys.length > 0 && (
           <section className="animate-enter delay-200" style={{ opacity: 0 }}>
             <div className="flex items-center gap-2 mb-4">
-              <Archive className="w-3.5 h-3.5 text-zinc-600" />
-              <span className="text-[11px] font-semibold tracking-[0.2em] uppercase text-zinc-500">Memory Vault</span>
-              <div className="flex-1 h-px bg-gradient-to-r from-zinc-800 to-transparent ml-2" />
+              <Archive className="w-3.5 h-3.5 text-[var(--fg-subtle)]" />
+              <span className="text-[11px] font-semibold tracking-[0.2em] uppercase text-[var(--fg-muted)]">Memory Vault</span>
+              <div className="flex-1 h-px bg-gradient-to-r from-[var(--border-base)] to-transparent ml-2" />
             </div>
             
             <div className="space-y-3">
@@ -717,8 +717,8 @@ export default function Dashboard({ activeJourneys: initialActiveJourneys = [], 
                   disabled={!isUnlocked(journey)}
                   className={`w-full p-4 rounded-2xl flex items-center gap-4 text-left transition-all relative overflow-hidden ${
                     isUnlocked(journey) 
-                      ? 'bg-zinc-900/50 hover:bg-zinc-800/50 active:scale-[0.99]' 
-                      : 'bg-zinc-900/30 opacity-50 cursor-not-allowed'
+                      ? 'bg-[var(--bg-hover)] hover:bg-[var(--bg-surface)] active:scale-[0.99]' 
+                      : 'bg-[var(--bg-hover)]/50 opacity-50 cursor-not-allowed'
                   }`}
                 >
                   <div className="absolute left-0 top-0 bottom-0 w-1 rounded-l-2xl" style={{ background: getJourneyGradient(journey.name).gradient }} />
@@ -735,12 +735,12 @@ export default function Dashboard({ activeJourneys: initialActiveJourneys = [], 
                   
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
-                      <h3 className="font-medium text-white truncate">{journey.name}</h3>
+                      <h3 className="font-medium text-[var(--fg-base)] truncate">{journey.name}</h3>
                       {!isOwner(journey) && (
                         <Badge variant="info">Shared</Badge>
                       )}
                     </div>
-                    <p className="text-xs text-zinc-500">
+                    <p className="text-xs text-[var(--fg-muted)]">
                       {isUnlocked(journey) 
                         ? `${journey.memory_count || 0} memories · ${formatDate(journey.unlock_date)}`
                         : `Unlocks in ${getTimeUntilUnlock(journey.unlock_date)}`
@@ -748,7 +748,7 @@ export default function Dashboard({ activeJourneys: initialActiveJourneys = [], 
                     </p>
                   </div>
                   
-                  {isUnlocked(journey) && <ChevronRight className="w-5 h-5 text-zinc-600" />}
+                  {isUnlocked(journey) && <ChevronRight className="w-5 h-5 text-[var(--fg-subtle)]" />}
                 </button>
               ))}
             </div>
@@ -757,12 +757,12 @@ export default function Dashboard({ activeJourneys: initialActiveJourneys = [], 
 
         {/* Footer */}
         <footer className="mt-8 pb-6 text-center space-y-3">
-          <nav className="text-xs text-zinc-600">
-            <Link href="/privacy" className="hover:text-zinc-400 transition-colors">Privacy</Link>
-            <span className="mx-3 text-zinc-700">•</span>
-            <Link href="/terms" className="hover:text-zinc-400 transition-colors">Terms</Link>
+          <nav className="text-xs text-[var(--fg-subtle)]">
+            <Link href="/privacy" className="hover:text-[var(--fg-muted)] transition-colors">Privacy</Link>
+            <span className="mx-3 text-[var(--fg-subtle)]">•</span>
+            <Link href="/terms" className="hover:text-[var(--fg-muted)] transition-colors">Terms</Link>
           </nav>
-          <p className="text-[10px] text-zinc-700">© {new Date().getFullYear()} Sunroof. All rights reserved.</p>
+          <p className="text-[10px] text-[var(--fg-subtle)]">© {new Date().getFullYear()} Sunroof. All rights reserved.</p>
         </footer>
       </main>
       
