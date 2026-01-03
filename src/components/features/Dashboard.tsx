@@ -262,7 +262,14 @@ export default function Dashboard({ activeJourneys: initialActiveJourneys = [], 
       <EditJourneyModal
         journey={editingJourney}
         onClose={() => setEditingJourney(null)}
-        onSuccess={() => window.location.reload()}
+        onSuccess={(updatedJourney) => {
+          // Update journey in lists
+          handleJourneyUpdated(updatedJourney);
+          // If we were viewing this journey, update the focused journey too
+          if (focusedJourney?.id === updatedJourney.id) {
+            setFocusedJourney(updatedJourney);
+          }
+        }}
       />
     );
   }

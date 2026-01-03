@@ -11,7 +11,7 @@ import type { Journey } from '@/types';
 interface EditJourneyModalProps {
   journey: Journey | null;
   onClose: () => void;
-  onSuccess?: () => void;
+  onSuccess?: (updatedJourney: Journey) => void;
 }
 
 export default function EditJourneyModal({
@@ -68,14 +68,14 @@ export default function EditJourneyModal({
     }
     
     try {
-      const { error } = await updateJourney({
+      const { data: updatedJourney, error } = await updateJourney({
         id: journey.id,
         name: cleanName,
         unlockDate: unlockDateStr,
         emoji: editEmoji,
       });
       
-      if (error) {
+      if (error || !updatedJourney) {
         console.error('Edit journey error:', error);
         showToast('Failed to update journey', 'error');
         setIsSaving(false);
@@ -85,7 +85,7 @@ export default function EditJourneyModal({
       hapticSuccess();
       showToast('Journey updated!', 'success');
       handleClose();
-      onSuccess?.();
+      onSuccess?.(updatedJourney);
     } catch (err) {
       console.error('Edit journey exception:', err);
       showToast('Something went wrong', 'error');
