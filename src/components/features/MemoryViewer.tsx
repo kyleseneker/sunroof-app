@@ -192,21 +192,23 @@ export default function MemoryViewer({
       )}
 
       {/* Content */}
-      <div className="flex-1 flex flex-col items-center justify-center p-4 overflow-hidden">
+      <div className="flex-1 flex flex-col items-center p-4 min-h-0">
         {/* Photo */}
         {memory.type === 'photo' && memory.url && (
-          <div className="flex flex-col items-center max-w-3xl w-full h-full">
-            <img
-              src={memory.url}
-              alt=""
-              className="max-w-full max-h-[calc(100%-4rem)] object-contain rounded-2xl border border-pink-500/20"
-              onError={(e) => {
-                e.currentTarget.src =
-                  'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiM2NjYiIHN0cm9rZS13aWR0aD0iMiI+PHJlY3QgeD0iMyIgeT0iMyIgd2lkdGg9IjE4IiBoZWlnaHQ9IjE4IiByeD0iMiIvPjxjaXJjbGUgY3g9IjguNSIgY3k9IjguNSIgcj0iMS41Ii8+PHBhdGggZD0ibTIxIDE1LTUtNS01IDV6Ii8+PC9zdmc+';
-              }}
-            />
+          <div className="flex flex-col items-center max-w-3xl w-full h-full min-h-0">
+            <div className="flex-1 flex items-center justify-center min-h-0 w-full">
+              <img
+                src={memory.url}
+                alt=""
+                className="max-w-full max-h-full object-contain rounded-2xl border border-pink-500/20"
+                onError={(e) => {
+                  e.currentTarget.src =
+                    'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiM2NjYiIHN0cm9rZS13aWR0aD0iMiI+PHJlY3QgeD0iMyIgeT0iMyIgd2lkdGg9IjE4IiBoZWlnaHQ9IjE4IiByeD0iMiIvPjxjaXJjbGUgY3g9IjguNSIgY3k9IjguNSIgcj0iMS41Ii8+PHBhdGggZD0ibTIxIDE1LTUtNS01IDV6Ii8+PC9zdmc+';
+                }}
+              />
+            </div>
             {/* Photo metadata */}
-            <div className="mt-4 flex flex-wrap items-center justify-center gap-3">
+            <div className="flex-shrink-0 mt-4 pb-2 flex flex-wrap items-center justify-center gap-3">
               <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-pink-500/10 border border-pink-500/20">
                 <Calendar className="w-3.5 h-3.5 text-pink-400" />
                 <span className="text-sm text-pink-300">{formattedDate}</span>
