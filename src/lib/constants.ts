@@ -134,39 +134,54 @@ export const NOTE_PROMPTS = {
 
 export type TimeOfDay = keyof typeof NOTE_PROMPTS;
 
-// Photo filters
+// Photo filters - inspired by Instagram, VSCO, and iPhone
 export const PHOTO_FILTERS = {
   none: {
     name: 'Original',
     filter: 'none',
   },
-  warm: {
-    name: 'Warm',
-    filter: 'sepia(0.2) saturate(1.3) brightness(1.05)',
+  // Instagram-inspired
+  clarendon: {
+    name: 'Clarendon',
+    filter: 'contrast(1.2) saturate(1.35) brightness(1.05)',
   },
-  cool: {
-    name: 'Cool',
-    filter: 'saturate(0.9) hue-rotate(10deg) brightness(1.05)',
+  juno: {
+    name: 'Juno',
+    filter: 'sepia(0.1) saturate(1.4) contrast(1.1) brightness(1.05)',
   },
-  vivid: {
-    name: 'Vivid',
-    filter: 'saturate(1.5) contrast(1.1) brightness(1.05)',
+  lark: {
+    name: 'Lark',
+    filter: 'saturate(0.9) contrast(1.1) brightness(1.15) hue-rotate(-5deg)',
   },
-  vintage: {
-    name: 'Vintage',
-    filter: 'sepia(0.4) saturate(0.8) contrast(0.9) brightness(1.1)',
+  gingham: {
+    name: 'Gingham',
+    filter: 'sepia(0.15) saturate(0.8) contrast(0.9) brightness(1.1)',
   },
-  bw: {
-    name: 'B&W',
-    filter: 'grayscale(1) contrast(1.1)',
-  },
+  // VSCO-inspired
   fade: {
     name: 'Fade',
-    filter: 'saturate(0.7) contrast(0.85) brightness(1.15)',
+    filter: 'saturate(0.75) contrast(0.85) brightness(1.2)',
+  },
+  film: {
+    name: 'Film',
+    filter: 'sepia(0.2) saturate(1.1) contrast(1.05) brightness(0.98)',
+  },
+  // iPhone-inspired
+  vivid: {
+    name: 'Vivid',
+    filter: 'saturate(1.5) contrast(1.15) brightness(1.02)',
   },
   dramatic: {
     name: 'Dramatic',
-    filter: 'contrast(1.3) saturate(1.2) brightness(0.95)',
+    filter: 'contrast(1.4) saturate(1.1) brightness(0.9)',
+  },
+  mono: {
+    name: 'Mono',
+    filter: 'grayscale(1) contrast(1.1)',
+  },
+  noir: {
+    name: 'Noir',
+    filter: 'grayscale(1) contrast(1.4) brightness(0.9)',
   },
 } as const;
 
