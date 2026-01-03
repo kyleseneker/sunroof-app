@@ -267,17 +267,6 @@ export default function Dashboard({ activeJourneys: initialActiveJourneys = [], 
     );
   }
 
-  // Invite Collaborator Modal
-  if (inviteJourney) {
-    return (
-      <InviteCollaboratorModal
-        journey={inviteJourney}
-        onClose={() => setInviteJourney(null)}
-        onSuccess={handleJourneyUpdated}
-      />
-    );
-  }
-
   // Manage Memories Sheet
   if (managingJourney) {
     return (
@@ -314,6 +303,12 @@ export default function Dashboard({ activeJourneys: initialActiveJourneys = [], 
           confirmLabel={isDeleting ? 'Deleting...' : 'Delete'}
           variant="danger"
           loading={isDeleting}
+        />
+        {/* Invite Modal - needs to render on top of detail sheet */}
+        <InviteCollaboratorModal
+          journey={inviteJourney}
+          onClose={() => setInviteJourney(null)}
+          onSuccess={handleJourneyUpdated}
         />
       </>
     );
@@ -354,6 +349,13 @@ export default function Dashboard({ activeJourneys: initialActiveJourneys = [], 
         confirmLabel={isDeleting ? 'Deleting...' : 'Delete'}
         variant="danger"
         loading={isDeleting}
+      />
+      
+      {/* Invite Collaborator Modal */}
+      <InviteCollaboratorModal
+        journey={inviteJourney}
+        onClose={() => setInviteJourney(null)}
+        onSuccess={handleJourneyUpdated}
       />
 
       {/* Header */}

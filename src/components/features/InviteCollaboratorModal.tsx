@@ -1,8 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { X, UserPlus, Loader2 } from 'lucide-react';
-import { useToast, IconButton } from '@/components/ui';
+import { UserPlus } from 'lucide-react';
+import { useToast, Modal, Button } from '@/components/ui';
 import { updateJourney, getUserIdByEmail } from '@/services';
 import { hapticSuccess } from '@/lib';
 import type { Journey } from '@/types';
@@ -104,42 +104,34 @@ $$ LANGUAGE sql SECURITY DEFINER;
   if (!journey) return null;
 
   return (
-    <div 
-      className="fixed inset-0 z-[60] bg-[var(--bg-base)]/90 backdrop-blur-md flex items-center justify-center p-6 safe-top safe-bottom"
-      onClick={handleClose}
+    <Modal
+      isOpen={!!journey}
+      onClose={handleClose}
+      size="sm"
+      showCloseButton={false}
     >
-      <div 
-        className="bg-[var(--bg-surface)] rounded-2xl p-6 max-w-sm w-full animate-enter border border-[var(--border-base)]"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-[var(--color-info-subtle)] flex items-center justify-center">
-              <UserPlus className="w-5 h-5 text-[var(--color-info)]" />
-            </div>
-            <h2 className="text-lg font-medium text-[var(--fg-base)]">Share Journey</h2>
-          </div>
-          <IconButton 
-            icon={<X className="w-4 h-4" />}
-            label="Close"
-            onClick={handleClose}
-            variant="ghost"
-            size="sm"
-          />
+      <div className="text-center">
+        {/* Icon */}
+        <div className="w-12 h-12 rounded-full bg-blue-500/10 flex items-center justify-center mx-auto mb-4">
+          <UserPlus className="w-6 h-6 text-blue-400" />
         </div>
-        
-        <p className="text-sm text-[var(--fg-muted)] mb-4">
-          Invite someone to contribute to <span className="text-[var(--fg-base)]">{journey.name}</span>. 
+
+        {/* Title */}
+        <h3 className="text-lg font-medium text-white mb-2">Share Journey</h3>
+
+        {/* Description */}
+        <p className="text-sm text-zinc-500 mb-4">
+          Invite someone to contribute to <span className="text-white">{journey.name}</span>. 
           They&apos;ll be able to add memories and see the journey unlock.
         </p>
         
         {/* Current collaborators */}
         {(journey.shared_with?.length || 0) > 0 && (
-          <div className="mb-4 p-3 rounded-xl bg-[var(--bg-hover)]">
-            <p className="text-xs text-[var(--fg-muted)] mb-2">Already shared with:</p>
+          <div className="mb-4 p-3 rounded-xl bg-zinc-800/50 text-left">
+            <p className="text-xs text-zinc-500 mb-2">Already shared with:</p>
             <div className="flex flex-wrap gap-2">
               {journey.shared_with?.map((userId, i) => (
-                <div key={i} className="px-3 py-1 rounded-full bg-[var(--color-info-subtle)] text-[var(--color-info)] text-xs">
+                <div key={i} className="px-3 py-1 rounded-full bg-blue-500/20 text-blue-400 text-xs">
                   Collaborator {i + 1}
                 </div>
               ))}
@@ -153,36 +145,32 @@ $$ LANGUAGE sql SECURITY DEFINER;
             placeholder="Enter their email address"
             value={inviteEmail}
             onChange={(e) => setInviteEmail(e.target.value)}
-            className="w-full h-12 px-4 bg-[var(--bg-muted)] border border-[var(--border-base)] rounded-xl text-[var(--fg-base)] placeholder:text-[var(--fg-subtle)] focus:outline-none focus:border-[var(--color-info)] mb-4"
+            className="w-full h-12 px-4 bg-zinc-800/50 border border-zinc-700 rounded-xl text-white placeholder:text-zinc-500 focus:outline-none focus:border-blue-500 mb-4"
             autoFocus
           />
           
           <div className="flex gap-3">
-            <button
+            <Button
               type="button"
+              variant="secondary"
               onClick={handleClose}
-              className="flex-1 h-12 bg-[var(--bg-hover)] text-[var(--fg-base)] rounded-xl font-medium hover:bg-[var(--bg-active)] transition-colors"
+              fullWidth
             >
               Cancel
-            </button>
-            <button
+            </Button>
+            <Button
               type="submit"
-              disabled={!inviteEmail.trim() || inviteLoading}
-              className="flex-1 h-12 bg-[var(--color-info)] text-white rounded-xl font-medium disabled:opacity-40 disabled:cursor-not-allowed hover:opacity-90 transition-colors flex items-center justify-center gap-2"
+              variant="primary"
+              disabled={!inviteEmail.trim()}
+              loading={inviteLoading}
+              fullWidth
             >
-              {inviteLoading ? (
-                <Loader2 className="w-4 h-4 animate-spin" />
-              ) : (
-                <>
-                  <UserPlus className="w-4 h-4" />
-                  Invite
-                </>
-              )}
-            </button>
+              Invite
+            </Button>
           </div>
         </form>
       </div>
-    </div>
+    </Modal>
   );
 }
 
