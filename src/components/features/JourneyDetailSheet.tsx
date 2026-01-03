@@ -4,8 +4,8 @@ import { useState, useEffect } from 'react';
 import { X, Lock, Pencil, Trash2, UserPlus, Users, Clock, Camera, Unlock } from 'lucide-react';
 import { getEmailByUserId, updateJourney, fetchMemoriesForJourney } from '@/services';
 import { useToast, IconButton, ConfirmDialog } from '@/components/ui';
-import { MemoryPreviewCard, MemoryStatBadge } from '@/components/features';
-import { getTimeUntilUnlock, getJourneyGradient, hapticSuccess, formatRelativeDate } from '@/lib';
+import { MemoryPreviewCard, MemoryStatBadge, CountdownTimer } from '@/components/features';
+import { getJourneyGradient, hapticSuccess, formatRelativeDate } from '@/lib';
 import type { Journey, Memory } from '@/types';
 
 interface JourneyDetailSheetProps {
@@ -130,8 +130,6 @@ export default function JourneyDetailSheet({
   };
 
   if (!journey) return null;
-
-  const countdown = getTimeUntilUnlock(journey.unlock_date);
   
   // Memory stats
   const photoCount = memories.filter(m => m.type === 'photo').length;
@@ -284,12 +282,12 @@ export default function JourneyDetailSheet({
         {!journey.shared_with?.length && <div className="mb-4" />}
         
         {/* Countdown */}
-        <div className="rounded-2xl p-6 mb-4 bg-white/5 backdrop-blur-md border border-white/10">
-          <div className="flex items-center gap-2 mb-2">
-            <Clock className="w-4 h-4 text-white/60" />
-            <p className="text-xs text-white/60 uppercase tracking-wider">Unlocks in</p>
+        <div className="rounded-2xl p-5 mb-4 bg-white/5 backdrop-blur-md border border-white/10">
+          <div className="flex items-center justify-center gap-2 mb-4">
+            <Clock className="w-4 h-4 text-white/50" />
+            <p className="text-xs text-white/50 uppercase tracking-wider">Unlocks in</p>
           </div>
-          <p className="text-4xl font-light tracking-wide text-white">{countdown}</p>
+          <CountdownTimer unlockDate={journey.unlock_date} />
         </div>
         
         {/* Unlock Now button (owner only) */}

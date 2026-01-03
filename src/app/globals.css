@@ -856,3 +856,22 @@ button, a, [role="button"] {
 .animate-ping-slow {
   animation: ping 2s cubic-bezier(0, 0, 0.2, 1) infinite;
 }
+
+/* Subtle pulse for countdown seconds */
+@keyframes pulse-subtle {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+.animate-pulse-subtle {
+  animation: pulse-subtle 1s ease-in-out infinite;
+}
+
+/* Countdown block styling */
+.countdown-block {
+  transition: transform 0.15s ease;
+}
+
+.countdown-block:hover {
+  transform: scale(1.05);
+}
