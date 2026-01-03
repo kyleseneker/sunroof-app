@@ -20,7 +20,7 @@ export default function FilterSelector({
   return (
     <div className="w-full">
       {/* Horizontal scrollable filter strip */}
-      <div className="flex gap-3 overflow-x-auto pb-2 px-1 scrollbar-hide justify-center">
+      <div className="flex gap-3 overflow-x-auto py-2 px-1 scrollbar-hide justify-center">
         {filterKeys.map((key) => {
           const filter = PHOTO_FILTERS[key];
           const isSelected = selectedFilter === key;
@@ -30,7 +30,7 @@ export default function FilterSelector({
               key={key}
               onClick={() => onSelectFilter(key)}
               className={`flex-shrink-0 flex flex-col items-center gap-1.5 transition-all ${
-                isSelected ? 'scale-105' : 'opacity-70 hover:opacity-100'
+                isSelected ? '' : 'opacity-60 hover:opacity-100'
               }`}
             >
               {/* Thumbnail - either image or gradient placeholder */}
