@@ -1,11 +1,11 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { X, Lock, Pencil, Trash2, UserPlus, Users, ChevronRight, Clock, Camera, Unlock } from 'lucide-react';
-import { getEmailByUserId, updateJourney } from '@/services';
+import { X, Lock, Pencil, Trash2, UserPlus, Users, ChevronRight, Clock, Camera, Unlock, ImageIcon, FileText, Mic } from 'lucide-react';
+import { getEmailByUserId, updateJourney, fetchMemoriesForJourney } from '@/services';
 import { useToast, IconButton, ConfirmDialog } from '@/components/ui';
 import { getTimeUntilUnlock, getJourneyGradient, hapticSuccess } from '@/lib';
-import type { Journey } from '@/types';
+import type { Journey, Memory } from '@/types';
 
 interface JourneyDetailSheetProps {
   journey: Journey | null;
@@ -38,6 +38,26 @@ export default function JourneyDetailSheet({
   // Unlock now state
   const [showUnlockConfirm, setShowUnlockConfirm] = useState(false);
   const [unlocking, setUnlocking] = useState(false);
+  
+  // Memory preview state
+  const [memories, setMemories] = useState<Memory[]>([]);
+  const [memoriesLoading, setMemoriesLoading] = useState(true);
+
+  // Fetch memories for preview wall
+  useEffect(() => {
+    if (!journey?.id) return;
+    
+    const loadMemories = async () => {
+      setMemoriesLoading(true);
+      const { data } = await fetchMemoriesForJourney(journey.id);
+      if (data) {
+        setMemories(data);
+      }
+      setMemoriesLoading(false);
+    };
+    
+    loadMemories();
+  }, [journey?.id]);
 
   // Fetch collaborator emails when journey changes
   useEffect(() => {
@@ -111,9 +131,14 @@ export default function JourneyDetailSheet({
   if (!journey) return null;
 
   const countdown = getTimeUntilUnlock(journey.unlock_date);
+  
+  // Memory stats
+  const photoCount = memories.filter(m => m.type === 'photo').length;
+  const noteCount = memories.filter(m => m.type === 'text').length;
+  const audioCount = memories.filter(m => m.type === 'audio').length;
 
   return (
-    <div className="fixed inset-0 z-50 bg-black flex flex-col safe-top safe-bottom">
+    <div className="fixed inset-0 z-50 bg-black flex flex-col safe-top safe-bottom overflow-hidden">
       {/* Unlock Now Confirmation */}
       <ConfirmDialog
         isOpen={showUnlockConfirm}
@@ -140,6 +165,68 @@ export default function JourneyDetailSheet({
                             radial-gradient(circle at 70% 80%, rgba(255,255,255,0.1) 0%, transparent 40%)`
         }}
       />
+      
+      {/* Blurred Memory Preview Wall */}
+      {memories.length > 0 && (
+        <div className="absolute inset-0 overflow-hidden vault-gradient">
+          {/* Memory grid - heavily blurred */}
+          <div className="absolute inset-0 grid grid-cols-3 gap-1 p-1 opacity-40">
+            {memories.slice(0, 12).map((memory, index) => (
+              <div 
+                key={memory.id}
+                className="relative aspect-square overflow-hidden animate-fade-in"
+                style={{ 
+                  animationDelay: `${index * 100}ms`,
+                  opacity: 0
+                }}
+              >
+                {memory.type === 'photo' && memory.url ? (
+                  <img 
+                    src={memory.url} 
+                    alt=""
+                    className="w-full h-full object-cover blur-[30px] scale-110"
+                  />
+                ) : memory.type === 'audio' ? (
+                  <div className="w-full h-full bg-gradient-to-br from-orange-500/30 to-pink-500/30 blur-[20px] flex items-center justify-center">
+                    <div className="w-8 h-8 rounded-full bg-white/20" />
+                  </div>
+                ) : (
+                  <div className="w-full h-full bg-gradient-to-br from-blue-500/30 to-purple-500/30 blur-[20px] flex items-center justify-center">
+                    <div className="w-8 h-8 rounded-full bg-white/20" />
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+          
+          {/* Frosted overlay with vignette */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black via-black/70 to-black/40" />
+          <div 
+            className="absolute inset-0"
+            style={{
+              background: 'radial-gradient(ellipse at center, transparent 0%, rgba(0,0,0,0.6) 100%)'
+            }}
+          />
+          
+          {/* Floating particles */}
+          <div className="absolute inset-0 pointer-events-none">
+            {[...Array(8)].map((_, i) => (
+              <div
+                key={i}
+                className="vault-particle"
+                style={{
+                  left: `${15 + (i * 10)}%`,
+                  top: `${20 + (i * 8) % 60}%`,
+                  animationDelay: `${i * 0.5}s`,
+                  opacity: 0.3 + (i * 0.05),
+                  width: `${3 + (i % 3)}px`,
+                  height: `${3 + (i % 3)}px`,
+                }}
+              />
+            ))}
+          </div>
+        </div>
+      )}
       
       {/* Top Bar */}
       <div className="relative z-10 flex justify-between items-center p-6">
@@ -175,27 +262,93 @@ export default function JourneyDetailSheet({
       
       {/* Content */}
       <div className="relative z-10 flex-1 flex flex-col justify-end p-6 pb-12">
-        {/* Locked indicator */}
-        <div className="flex items-center gap-2 mb-4">
-          <div className="w-8 h-8 rounded-full bg-amber-500/20 flex items-center justify-center">
-            <Lock className="w-4 h-4 text-amber-400" />
+        {/* Locked indicator with pulse */}
+        <div className="flex items-center gap-3 mb-4">
+          <div className="w-10 h-10 rounded-full bg-amber-500/20 flex items-center justify-center relative lock-pulse">
+            <div className="absolute inset-0 rounded-full bg-amber-400/10 animate-ping" style={{ animationDuration: '2s' }} />
+            <Lock className="w-5 h-5 text-amber-400 relative z-10" />
           </div>
-          <span className="text-xs font-semibold tracking-wider uppercase text-amber-400">Locked</span>
+          <div>
+            <span className="text-xs font-semibold tracking-wider uppercase text-amber-400 block">Locked</span>
+            <span className="text-[10px] text-amber-400/50">Memories are sealed</span>
+          </div>
         </div>
         
         {/* Journey Name */}
-        <h1 className="text-4xl font-bold mb-2 text-white">{journey.name}</h1>
+        <h1 className="text-4xl font-bold mb-3 text-white">{journey.name}</h1>
         
-        {/* Memory count with manage link */}
-        <button 
-          onClick={() => onManageMemories(journey)}
-          className="text-white/70 mb-4 flex items-center gap-2 hover:text-white transition-colors"
-        >
-          <span>{journey.memory_count || 0} {(journey.memory_count || 0) === 1 ? 'memory' : 'memories'} captured</span>
-          {(journey.memory_count || 0) > 0 && (
-            <ChevronRight className="w-4 h-4" />
-          )}
-        </button>
+        {/* Memory Stats Row */}
+        {memoriesLoading ? (
+          <div className="flex items-center gap-3 mb-4">
+            <div className="h-4 w-32 rounded bg-white/10 animate-pulse" />
+          </div>
+        ) : memories.length > 0 ? (
+          <button 
+            onClick={() => onManageMemories(journey)}
+            className="mb-4 group"
+          >
+            {/* Vault preview teaser */}
+            <div className="flex items-center gap-2 mb-2">
+              <div className="flex items-center">
+                {/* Stacked memory type icons */}
+                <div className="flex -space-x-2">
+                  {photoCount > 0 && (
+                    <div className="w-7 h-7 rounded-full bg-pink-500/20 border border-pink-500/30 flex items-center justify-center">
+                      <ImageIcon className="w-3.5 h-3.5 text-pink-400" />
+                    </div>
+                  )}
+                  {noteCount > 0 && (
+                    <div className="w-7 h-7 rounded-full bg-blue-500/20 border border-blue-500/30 flex items-center justify-center">
+                      <FileText className="w-3.5 h-3.5 text-blue-400" />
+                    </div>
+                  )}
+                  {audioCount > 0 && (
+                    <div className="w-7 h-7 rounded-full bg-orange-500/20 border border-orange-500/30 flex items-center justify-center">
+                      <Mic className="w-3.5 h-3.5 text-orange-400" />
+                    </div>
+                  )}
+                </div>
+                
+                {/* Memory count stats */}
+                <div className="ml-3 flex items-center gap-3 text-sm text-white/60">
+                  {photoCount > 0 && (
+                    <span className="flex items-center gap-1">
+                      <span className="text-white/80">{photoCount}</span> 
+                      <span className="text-white/50">{photoCount === 1 ? 'photo' : 'photos'}</span>
+                    </span>
+                  )}
+                  {noteCount > 0 && (
+                    <>
+                      {photoCount > 0 && <span className="text-white/30">•</span>}
+                      <span className="flex items-center gap-1">
+                        <span className="text-white/80">{noteCount}</span> 
+                        <span className="text-white/50">{noteCount === 1 ? 'note' : 'notes'}</span>
+                      </span>
+                    </>
+                  )}
+                  {audioCount > 0 && (
+                    <>
+                      {(photoCount > 0 || noteCount > 0) && <span className="text-white/30">•</span>}
+                      <span className="flex items-center gap-1">
+                        <span className="text-white/80">{audioCount}</span> 
+                        <span className="text-white/50">{audioCount === 1 ? 'voice' : 'voices'}</span>
+                      </span>
+                    </>
+                  )}
+                </div>
+              </div>
+              
+              <ChevronRight className="w-4 h-4 text-white/40 group-hover:text-white/70 group-hover:translate-x-0.5 transition-all" />
+            </div>
+            
+            {/* Teaser message */}
+            <p className="text-xs text-white/40 group-hover:text-white/60 transition-colors">
+              {memories.length} {memories.length === 1 ? 'memory' : 'memories'} waiting to be unlocked ✨
+            </p>
+          </button>
+        ) : (
+          <p className="text-white/50 mb-4 text-sm">No memories captured yet</p>
+        )}
         
         {/* Shared with indicator */}
         {(journey.shared_with?.length || 0) > 0 && (
