@@ -54,31 +54,30 @@ export default function EmojiPicker({ value, onChange, label = 'Icon' }: EmojiPi
         type="button"
         onClick={() => setIsOpen(!isOpen)}
         className={`
-          w-full flex items-center gap-3 px-4 py-3 rounded-xl 
+          w-full flex items-center gap-3 px-4 py-3 rounded-xl h-14
           bg-[var(--bg-surface)] border transition-all
           ${isOpen ? 'border-[var(--fg-base)]' : 'border-[var(--border-base)]'}
           hover:border-[var(--fg-subtle)]
         `}
       >
-        {value ? (
-          <>
-            <span className="text-2xl">{value}</span>
-            <span className="text-sm text-[var(--fg-muted)] flex-1 text-left">Change icon</span>
-            <button
-              type="button"
-              onClick={handleClear}
-              className="w-6 h-6 rounded-full bg-[var(--bg-hover)] flex items-center justify-center hover:bg-[var(--bg-muted)] transition-colors"
-            >
-              <X className="w-3 h-3 text-[var(--fg-muted)]" />
-            </button>
-          </>
-        ) : (
-          <>
-            <div className="w-8 h-8 rounded-lg bg-[var(--bg-hover)] flex items-center justify-center">
-              <Smile className="w-4 h-4 text-[var(--fg-subtle)]" />
-            </div>
-            <span className="text-sm text-[var(--fg-subtle)]">Add an icon to your journey</span>
-          </>
+        <div className="w-8 h-8 rounded-lg bg-[var(--bg-hover)] flex items-center justify-center flex-shrink-0">
+          {value ? (
+            <span className="text-lg">{value}</span>
+          ) : (
+            <Smile className="w-4 h-4 text-[var(--fg-subtle)]" />
+          )}
+        </div>
+        <span className="text-sm text-[var(--fg-subtle)] flex-1 text-left">
+          {value ? 'Tap to change' : 'Add an icon'}
+        </span>
+        {value && (
+          <button
+            type="button"
+            onClick={handleClear}
+            className="w-6 h-6 rounded-full bg-[var(--bg-hover)] flex items-center justify-center hover:bg-[var(--bg-muted)] transition-colors flex-shrink-0"
+          >
+            <X className="w-3 h-3 text-[var(--fg-muted)]" />
+          </button>
         )}
       </button>
 
