@@ -133,8 +133,8 @@ export default function EditJourneyModal({
             {/* Emoji Picker */}
             <EmojiPicker value={editEmoji} onChange={setEditEmoji} />
             
-            {/* Unlock Date - only show for active (locked) journeys */}
-            {journey.status === 'active' && (
+            {/* Unlock Date - only show for locked journeys (unlock date in future) */}
+            {new Date(journey.unlock_date) > new Date() && (
               <div>
                 <label className="flex items-center gap-2 text-[11px] uppercase tracking-[0.2em] text-[var(--fg-muted)] font-medium mb-3">
                   <Timer className="w-3 h-3" />
