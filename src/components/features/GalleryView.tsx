@@ -3,9 +3,9 @@
 import { useState, useEffect } from 'react';
 import { api, getJourneyGradient } from '@/lib';
 import { deleteJourney, deleteMemory, fetchMemoriesForJourney } from '@/services';
-import { X, Trash2, Camera, Sparkles, Mic, MapPin, Play, ChevronDown, Quote, Pencil } from 'lucide-react';
+import { X, Trash2, Camera, Sparkles, MapPin, Play, ChevronDown, Quote, Pencil, MoreVertical } from 'lucide-react';
 import { useToast, ConfirmDialog, IconButton } from '@/components/ui';
-import { AudioPlayer, MemoryViewer, AIRecapSheet, EditJourneyModal } from '@/components/features';
+import { AudioPlayer, MemoryViewer, AIRecapSheet, EditJourneyModal, ActionSheet } from '@/components/features';
 import type { Journey, Memory } from '@/types';
 
 interface GalleryViewProps {
@@ -18,6 +18,7 @@ interface GalleryViewProps {
 export default function GalleryView({ journey: initialJourney, onClose, onMemoryDeleted, onJourneyUpdated }: GalleryViewProps) {
   const [journey, setJourney] = useState<Journey>(initialJourney);
   const [showEditModal, setShowEditModal] = useState(false);
+  const [showActionSheet, setShowActionSheet] = useState(false);
   const { showToast } = useToast();
   const [memories, setMemories] = useState<Memory[]>([]);
   const [loading, setLoading] = useState(true);
@@ -288,37 +289,12 @@ export default function GalleryView({ journey: initialJourney, onClose, onMemory
           </p>
         </div>
         
-        <div className="flex gap-2">
-          {/* AI Recap button - use journey.memory_count to avoid layout shift */}
-          {(journey.memory_count ?? 0) > 0 && (
-            <IconButton
-              icon={<Sparkles className="w-4 h-4" />}
-              label="AI Journey Recap"
-              onClick={fetchRecap}
-              loading={recapLoading}
-              active={!!recap}
-              variant="bordered"
-              dark
-              className={recap ? 'bg-purple-500/20 text-purple-400' : ''}
-            />
-          )}
-          
-          <IconButton
-            icon={<Pencil className="w-4 h-4" />}
-            label="Edit journey"
-            onClick={() => setShowEditModal(true)}
-            variant="bordered"
-            dark
-          />
-          
-          <IconButton
-            icon={<Trash2 className="w-4 h-4" />}
-            label="Delete journey"
-            onClick={() => setShowDeleteJourneyConfirm(true)}
-            variant="bordered"
-            dark
-          />
-        </div>
+        <IconButton
+          icon={<MoreVertical className="w-5 h-5" />}
+          label="More options"
+          onClick={() => setShowActionSheet(true)}
+          variant="bordered"
+        />
       </div>
 
       {/* AI Recap Sheet */}
@@ -334,6 +310,31 @@ export default function GalleryView({ journey: initialJourney, onClose, onMemory
           noteCount={noteCount}
         />
       )}
+
+      {/* Action Sheet */}
+      <ActionSheet
+        isOpen={showActionSheet}
+        onClose={() => setShowActionSheet(false)}
+        title={journey.name}
+        options={[
+          ...((journey.memory_count ?? 0) > 0 ? [{
+            label: recap ? 'View AI Recap' : 'Generate AI Recap',
+            icon: <Sparkles className="w-5 h-5" />,
+            onClick: () => { fetchRecap(); },
+          }] : []),
+          {
+            label: 'Edit Journey',
+            icon: <Pencil className="w-5 h-5" />,
+            onClick: () => setShowEditModal(true),
+          },
+          {
+            label: 'Delete Journey',
+            icon: <Trash2 className="w-5 h-5" />,
+            variant: 'danger' as const,
+            onClick: () => setShowDeleteJourneyConfirm(true),
+          },
+        ]}
+      />
 
       {/* Story Timeline */}
       <div className="flex-1 overflow-y-auto">
