@@ -17,6 +17,8 @@ export { default as Intro } from './Intro';
 export { default as InstallPrompt } from './InstallPrompt';
 export { ErrorBoundary } from './ErrorBoundary';
 export { default as MemoryBadge } from './MemoryBadge';
+export { default as MemoryPreviewCard } from './MemoryPreviewCard';
+export { default as MemoryStatBadge } from './MemoryStatBadge';
 export { default as OfflineIndicator } from './OfflineIndicator';
 export { default as NotificationPrompt, NotificationSettings } from './NotificationPrompt';
 export { default as ThemeToggle } from './ThemeToggle';

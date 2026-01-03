@@ -791,6 +791,23 @@ button, a, [role="button"] {
    MEMORY VAULT PREVIEW
    ============================================================================= */
 
+/* Pattern overlay for sheets/modals */
+.pattern-overlay {
+  background-image: 
+    radial-gradient(circle at 30% 20%, rgba(255,255,255,0.15) 0%, transparent 40%),
+    radial-gradient(circle at 70% 80%, rgba(255,255,255,0.1) 0%, transparent 40%);
+}
+
+/* Memory preview card */
+.memory-preview-card {
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+}
+
+/* Memory tile with initial opacity for animation */
+.memory-tile {
+  opacity: 0;
+}
+
 /* Floating particles for locked journeys */
 @keyframes float-particle {
   0%, 100% { 
@@ -821,27 +838,6 @@ button, a, [role="button"] {
   animation: float-particle 8s ease-in-out infinite;
 }
 
-/* Memory tile hover shimmer */
-@keyframes memory-shimmer {
-  0% { 
-    background-position: -200% 0; 
-  }
-  100% { 
-    background-position: 200% 0; 
-  }
-}
-
-.memory-shimmer {
-  background: linear-gradient(
-    90deg,
-    transparent 0%,
-    rgba(255, 255, 255, 0.1) 50%,
-    transparent 100%
-  );
-  background-size: 200% 100%;
-  animation: memory-shimmer 3s ease-in-out infinite;
-}
-
 /* Lock pulse glow */
 @keyframes lock-pulse {
   0%, 100% { 
@@ -856,16 +852,7 @@ button, a, [role="button"] {
   animation: lock-pulse 3s ease-in-out infinite;
 }
 
-/* Vault gradient shift */
-@keyframes vault-gradient {
-  0%, 100% { 
-    filter: hue-rotate(0deg); 
-  }
-  50% { 
-    filter: hue-rotate(15deg); 
-  }
-}
-
-.vault-gradient {
-  animation: vault-gradient 10s ease-in-out infinite;
+/* Slow ping animation for lock indicator */
+.animate-ping-slow {
+  animation: ping 2s cubic-bezier(0, 0, 0.2, 1) infinite;
 }

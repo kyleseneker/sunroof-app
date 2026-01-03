@@ -1,9 +1,10 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { X, Lock, Pencil, Trash2, UserPlus, Users, Clock, Camera, Unlock, ImageIcon, FileText, Mic } from 'lucide-react';
+import { X, Lock, Pencil, Trash2, UserPlus, Users, Clock, Camera, Unlock } from 'lucide-react';
 import { getEmailByUserId, updateJourney, fetchMemoriesForJourney } from '@/services';
 import { useToast, IconButton, ConfirmDialog } from '@/components/ui';
+import { MemoryPreviewCard, MemoryStatBadge } from '@/components/features';
 import { getTimeUntilUnlock, getJourneyGradient, hapticSuccess } from '@/lib';
 import type { Journey, Memory } from '@/types';
 
@@ -158,13 +159,7 @@ export default function JourneyDetailSheet({
       />
       <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-black/20" />
       {/* Subtle pattern overlay */}
-      <div 
-        className="absolute inset-0 opacity-15"
-        style={{
-          backgroundImage: `radial-gradient(circle at 30% 20%, rgba(255,255,255,0.15) 0%, transparent 40%),
-                            radial-gradient(circle at 70% 80%, rgba(255,255,255,0.1) 0%, transparent 40%)`
-        }}
-      />
+      <div className="absolute inset-0 opacity-15 pattern-overlay" />
       
       
       {/* Top Bar */}
@@ -201,79 +196,10 @@ export default function JourneyDetailSheet({
       
       {/* Blurred Memory Preview Card */}
       {memories.length > 0 && (
-        <div className="relative z-10 flex-1 flex items-center justify-center p-6 pt-2">
-          <button 
-            onClick={() => onManageMemories(journey)}
-            className="relative w-full max-w-sm aspect-[4/3] rounded-3xl overflow-hidden border border-white/10 group active:scale-[0.98] transition-transform"
-          >
-            {/* Blurred memory grid */}
-            <div className="absolute inset-0 grid grid-cols-3 grid-rows-2 gap-0.5">
-              {memories.slice(0, 6).map((memory, index) => (
-                <div 
-                  key={memory.id}
-                  className="relative overflow-hidden animate-fade-in"
-                  style={{ 
-                    animationDelay: `${index * 80}ms`,
-                    opacity: 0
-                  }}
-                >
-                  {memory.type === 'photo' && memory.url ? (
-                    <img 
-                      src={memory.url} 
-                      alt=""
-                      className="w-full h-full object-cover blur-[20px] scale-125"
-                    />
-                  ) : memory.type === 'audio' ? (
-                    <div className="w-full h-full bg-gradient-to-br from-orange-500/40 to-pink-500/40" />
-                  ) : (
-                    <div className="w-full h-full bg-gradient-to-br from-blue-500/40 to-purple-500/40" />
-                  )}
-                </div>
-              ))}
-              {/* Fill empty slots if less than 6 memories */}
-              {memories.length < 6 && [...Array(6 - Math.min(memories.length, 6))].map((_, i) => (
-                <div key={`empty-${i}`} className="bg-white/5" />
-              ))}
-            </div>
-            
-            {/* Frosted overlay */}
-            <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
-            
-            {/* Lock icon in center */}
-            <div className="absolute inset-0 flex flex-col items-center justify-center">
-              <div className="w-16 h-16 rounded-full bg-black/40 backdrop-blur-md border border-white/20 flex items-center justify-center mb-3 lock-pulse">
-                <Lock className="w-7 h-7 text-amber-400" />
-              </div>
-              <p className="text-white/80 font-medium text-sm">
-                {memories.length} {memories.length === 1 ? 'memory' : 'memories'} sealed
-              </p>
-              <p className="text-white/40 text-xs mt-1 group-hover:text-white/60 transition-colors">
-                Tap to preview
-              </p>
-            </div>
-            
-            {/* Floating particles */}
-            <div className="absolute inset-0 pointer-events-none overflow-hidden">
-              {[
-                { left: 25, top: 30 },
-                { left: 70, top: 25 },
-                { left: 45, top: 55 },
-                { left: 30, top: 70 },
-                { left: 65, top: 60 },
-              ].map((pos, i) => (
-                <div
-                  key={i}
-                  className="vault-particle"
-                  style={{
-                    left: `${pos.left}%`,
-                    top: `${pos.top}%`,
-                    animationDelay: `${i * 1.2}s`,
-                  }}
-                />
-              ))}
-            </div>
-          </button>
-        </div>
+        <MemoryPreviewCard 
+          memories={memories} 
+          onTap={() => onManageMemories(journey)} 
+        />
       )}
 
       {/* Content */}
@@ -281,7 +207,7 @@ export default function JourneyDetailSheet({
         {/* Locked indicator with pulse */}
         <div className="flex items-center gap-3 mb-4">
           <div className="w-10 h-10 rounded-full bg-amber-500/20 flex items-center justify-center relative lock-pulse">
-            <div className="absolute inset-0 rounded-full bg-amber-400/10 animate-ping" style={{ animationDuration: '2s' }} />
+            <div className="absolute inset-0 rounded-full bg-amber-400/10 animate-ping-slow" />
             <Lock className="w-5 h-5 text-amber-400 relative z-10" />
           </div>
           <div>
@@ -300,25 +226,10 @@ export default function JourneyDetailSheet({
         
         {/* Memory type breakdown - compact version */}
         {memories.length > 0 && (
-          <div className="flex items-center gap-2 mb-4 text-sm text-white/60">
-            {photoCount > 0 && (
-              <span className="flex items-center gap-1">
-                <ImageIcon className="w-3.5 h-3.5 text-pink-400" />
-                <span>{photoCount}</span>
-              </span>
-            )}
-            {noteCount > 0 && (
-              <span className="flex items-center gap-1">
-                <FileText className="w-3.5 h-3.5 text-blue-400" />
-                <span>{noteCount}</span>
-              </span>
-            )}
-            {audioCount > 0 && (
-              <span className="flex items-center gap-1">
-                <Mic className="w-3.5 h-3.5 text-orange-400" />
-                <span>{audioCount}</span>
-              </span>
-            )}
+          <div className="flex items-center gap-2 mb-4">
+            <MemoryStatBadge type="photo" count={photoCount} />
+            <MemoryStatBadge type="note" count={noteCount} />
+            <MemoryStatBadge type="audio" count={audioCount} />
           </div>
         )}
         
@@ -370,7 +281,7 @@ export default function JourneyDetailSheet({
         {isOwner && (
           <button
             onClick={() => setShowUnlockConfirm(true)}
-            className="flex items-center justify-center gap-2 text-sm text-white/50 hover:text-white/80 transition-colors mb-4"
+            className="w-full flex items-center justify-center gap-2 text-sm text-white/50 hover:text-white/80 transition-colors mb-4"
           >
             <Unlock className="w-4 h-4" />
             <span>Unlock now</span>
