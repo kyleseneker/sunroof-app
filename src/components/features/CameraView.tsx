@@ -27,7 +27,7 @@ export default function CameraView({
   const [error, setError] = useState<string | null>(null);
   const [note, setNote] = useState('');
   const [userId, setUserId] = useState<string | null>(null);
-  const [showPrompts, setShowPrompts] = useState(true);
+  const [showPrompts, setShowPrompts] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   
   // Get contextual prompts - use useState to avoid calling Math.random during render
@@ -805,36 +805,48 @@ const handleAudioError = (message: string) => {
               </div>
             )}
             
-            {/* Smart prompts - show at bottom as suggestion chips when empty */}
-            {showPrompts && !note && prompts.length > 0 && (
-              <div className="mt-auto pt-4 animate-enter">
-                <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center gap-2 text-xs text-purple-400">
+            {/* Smart prompts - collapsed toggle when empty */}
+            {!note && prompts.length > 0 && (
+              <div className="pt-2">
+                {!showPrompts ? (
+                  <button
+                    onClick={() => setShowPrompts(true)}
+                    className="flex items-center gap-2 text-xs text-purple-400 hover:text-purple-300 transition-colors py-2"
+                  >
                     <Sparkles className="w-3 h-3" />
                     <span>Need inspiration?</span>
-                  </div>
-                  <button
-                    onClick={() => setShowPrompts(false)}
-                    className="text-xs text-zinc-600 hover:text-zinc-400 transition-colors"
-                  >
-                    Hide
                   </button>
-                </div>
-                <div className="space-y-2">
-                  {prompts.map((prompt, i) => (
-                    <button
-                      key={i}
-                      onClick={() => {
-                        setNote(prompt + '\n\n');
-                        setShowPrompts(false);
-                      }}
-                      className="w-full text-left p-3 rounded-xl bg-white/5 border border-white/10 text-zinc-400 hover:bg-white/10 hover:text-white hover:border-white/20 transition-all text-sm"
-                      style={{ animationDelay: `${i * 100}ms` }}
-                    >
-                      {prompt}
-                    </button>
-                  ))}
-                </div>
+                ) : (
+                  <div className="animate-enter">
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center gap-2 text-xs text-purple-400">
+                        <Sparkles className="w-3 h-3" />
+                        <span>Try one of these:</span>
+                      </div>
+                      <button
+                        onClick={() => setShowPrompts(false)}
+                        className="text-xs text-zinc-600 hover:text-zinc-400 transition-colors"
+                      >
+                        Hide
+                      </button>
+                    </div>
+                    <div className="space-y-2">
+                      {prompts.map((prompt, i) => (
+                        <button
+                          key={i}
+                          onClick={() => {
+                            setNote(prompt + '\n\n');
+                            setShowPrompts(false);
+                          }}
+                          className="w-full text-left p-3 rounded-xl bg-white/5 border border-white/10 text-zinc-400 hover:bg-white/10 hover:text-white hover:border-white/20 transition-all text-sm"
+                          style={{ animationDelay: `${i * 50}ms` }}
+                        >
+                          {prompt}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             )}
           </div>
