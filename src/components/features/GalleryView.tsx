@@ -401,11 +401,8 @@ export default function GalleryView({ journey, onClose, onMemoryDeleted }: Galle
                   </button>
                   
                   {/* Day Memories - Collapsible */}
-                  <div 
-                    className={`px-6 space-y-4 overflow-hidden transition-all duration-300 ${
-                      collapsedDays.has(dayKey) ? 'max-h-0 py-0' : 'max-h-[9999px] py-4'
-                    }`}
-                  >
+                  {!collapsedDays.has(dayKey) && (
+                  <div className="px-6 py-4 space-y-4">
                     {dayMemories.map((memory, memoryIndex) => {
                       const memoryTime = new Date(memory.created_at).toLocaleTimeString('en-US', { 
                         hour: 'numeric', 
@@ -500,6 +497,7 @@ export default function GalleryView({ journey, onClose, onMemoryDeleted }: Galle
                       );
                     })}
                   </div>
+                  )}
                 </div>
               );
             })}
