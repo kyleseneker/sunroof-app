@@ -371,36 +371,32 @@ export default function GalleryView({ journey, onClose, onMemoryDeleted }: Galle
                     className="sticky top-0 z-10 w-full px-6 py-4 bg-gradient-to-b from-black via-black/95 to-transparent backdrop-blur-sm text-left"
                   >
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-orange-500 to-pink-500 flex items-center justify-center text-sm font-bold">
+                      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-orange-500 to-pink-500 flex items-center justify-center text-sm font-bold flex-shrink-0">
                         {dayNumber}
                       </div>
-                      <div className="flex-1">
-                        <h3 className="text-lg font-medium text-white">Day {dayNumber}</h3>
-                        <p className="text-xs text-zinc-500">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <h3 className="text-lg font-medium text-white">Day {dayNumber}</h3>
+                          <ChevronDown 
+                            className={`w-4 h-4 text-zinc-500 transition-transform duration-200 flex-shrink-0 ${
+                              collapsedDays.has(dayKey) ? '-rotate-90' : ''
+                            }`} 
+                          />
+                        </div>
+                        <p className="text-xs text-zinc-500 truncate">
                           {formattedDate}
                           {collapsedDays.has(dayKey) && (
                             <span className="text-zinc-600"> • {dayMemories.length} {dayMemories.length === 1 ? 'memory' : 'memories'}</span>
                           )}
                         </p>
                       </div>
-                      {(dayLocation || dayWeather) && !collapsedDays.has(dayKey) && (
-                        <div className="flex items-center gap-2 text-xs text-zinc-400">
-                          {dayLocation && (
-                            <span className="flex items-center gap-1">
-                              <MapPin className="w-3 h-3" />
-                              {dayLocation}
-                            </span>
-                          )}
+                      {(dayLocation || dayWeather) && (
+                        <div className="flex items-center gap-2 text-xs text-zinc-400 flex-shrink-0">
                           {dayWeather && (
                             <span>{dayWeather.icon} {dayWeather.temp}°</span>
                           )}
                         </div>
                       )}
-                      <ChevronDown 
-                        className={`w-5 h-5 text-zinc-500 transition-transform duration-200 ${
-                          collapsedDays.has(dayKey) ? '-rotate-90' : ''
-                        }`} 
-                      />
                     </div>
                   </button>
                   
