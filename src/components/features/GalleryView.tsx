@@ -253,20 +253,19 @@ export default function GalleryView({ journey, onClose, onMemoryDeleted }: Galle
       )}
 
       {/* Header */}
-      <header className="relative z-10 p-6 safe-top">
-        <div className="flex items-center gap-4 max-w-2xl mx-auto">
+      <div className="flex items-center gap-4 p-6 bg-gradient-to-b from-black/80 to-transparent absolute top-0 left-0 right-0 z-20 safe-top">
         <IconButton 
           icon={<X className="w-5 h-5" />} 
           label="Close" 
           onClick={onClose}
           dark 
         />
-        <div className="flex-1">
-          <h1 className="text-xl font-medium">{journey.name}</h1>
+        <div className="flex-1 min-w-0">
+          <h1 className="text-xl font-medium truncate">{journey.name}</h1>
           <p className="text-xs text-zinc-500">
             {photoCount > 0 && <span>{photoCount} {photoCount === 1 ? 'photo' : 'photos'}</span>}
             {photoCount > 0 && (noteCount > 0 || audioCount > 0) && <span> • </span>}
-            {audioCount > 0 && <span>{audioCount} {audioCount === 1 ? 'voice note' : 'voice notes'}</span>}
+            {audioCount > 0 && <span>{audioCount} {audioCount === 1 ? 'voice' : 'voices'}</span>}
             {audioCount > 0 && noteCount > 0 && <span> • </span>}
             {noteCount > 0 && <span>{noteCount} {noteCount === 1 ? 'note' : 'notes'}</span>}
             {photoCount === 0 && noteCount === 0 && audioCount === 0 && <span>No memories</span>}
@@ -293,8 +292,7 @@ export default function GalleryView({ journey, onClose, onMemoryDeleted }: Galle
           variant="danger"
           dark
         />
-        </div>
-      </header>
+      </div>
 
       {/* AI Recap Sheet */}
       {recap && (
@@ -311,9 +309,9 @@ export default function GalleryView({ journey, onClose, onMemoryDeleted }: Galle
       )}
 
       {/* Story Timeline */}
-      <div className="flex-1 overflow-y-auto">
+      <div className="flex-1 overflow-y-auto pt-24">
         {loading ? (
-          <div className="p-6 space-y-6">
+          <div className="p-6 pt-0 space-y-6">
             <div className="h-8 w-32 rounded-lg skeleton" />
             <div className="aspect-[4/3] rounded-2xl skeleton" />
             <div className="h-24 rounded-2xl skeleton" />
