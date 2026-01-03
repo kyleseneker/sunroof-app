@@ -193,7 +193,7 @@ export default function GalleryView({ journey, onClose, onMemoryDeleted }: Galle
 
   // --- MAIN GALLERY VIEW ---
   return (
-    <div className="fixed inset-0 z-40 bg-black flex flex-col safe-top safe-bottom">
+    <div className="fixed inset-0 z-40 bg-black flex flex-col safe-top safe-bottom overflow-hidden">
       {/* Delete Memory Confirmation */}
       <ConfirmDialog
         isOpen={!!memoryToDelete}
@@ -253,14 +253,15 @@ export default function GalleryView({ journey, onClose, onMemoryDeleted }: Galle
       )}
 
       {/* Header */}
-      <div className="flex items-center gap-4 p-6 bg-gradient-to-b from-black/80 to-transparent absolute top-0 left-0 right-0 z-20 safe-top">
+      <div className="relative z-10 flex justify-between items-center p-6">
         <IconButton 
           icon={<X className="w-5 h-5" />} 
           label="Close" 
           onClick={onClose}
+          variant="bordered"
           dark 
         />
-        <div className="flex-1 min-w-0">
+        <div className="flex-1 min-w-0 mx-4">
           <h1 className="text-xl font-medium truncate">{journey.name}</h1>
           <p className="text-xs text-zinc-500">
             {photoCount > 0 && <span>{photoCount} {photoCount === 1 ? 'photo' : 'photos'}</span>}
@@ -272,26 +273,29 @@ export default function GalleryView({ journey, onClose, onMemoryDeleted }: Galle
           </p>
         </div>
         
-        {/* AI Recap button */}
-        {memories.length > 0 && (
+        <div className="flex gap-2">
+          {/* AI Recap button */}
+          {memories.length > 0 && (
+            <IconButton
+              icon={<Sparkles className="w-4 h-4" />}
+              label="AI Journey Recap"
+              onClick={fetchRecap}
+              loading={recapLoading}
+              active={!!recap}
+              variant="bordered"
+              dark
+              className={recap ? 'bg-purple-500/20 text-purple-400' : ''}
+            />
+          )}
+          
           <IconButton
-            icon={<Sparkles className="w-4 h-4" />}
-            label="AI Journey Recap"
-            onClick={fetchRecap}
-            loading={recapLoading}
-            active={!!recap}
+            icon={<Trash2 className="w-4 h-4" />}
+            label="Delete journey"
+            onClick={() => setShowDeleteJourneyConfirm(true)}
+            variant="bordered"
             dark
-            className={recap ? 'bg-purple-500/20 text-purple-400' : ''}
           />
-        )}
-        
-        <IconButton
-          icon={<Trash2 className="w-4 h-4" />}
-          label="Delete journey"
-          onClick={() => setShowDeleteJourneyConfirm(true)}
-          variant="danger"
-          dark
-        />
+        </div>
       </div>
 
       {/* AI Recap Sheet */}
@@ -309,7 +313,7 @@ export default function GalleryView({ journey, onClose, onMemoryDeleted }: Galle
       )}
 
       {/* Story Timeline */}
-      <div className="flex-1 overflow-y-auto pt-24">
+      <div className="flex-1 overflow-y-auto">
         {loading ? (
           <div className="p-6 pt-0 space-y-6">
             <div className="h-8 w-32 rounded-lg skeleton" />

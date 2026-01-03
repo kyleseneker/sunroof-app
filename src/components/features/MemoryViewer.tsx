@@ -145,30 +145,31 @@ export default function MemoryViewer({
 
   return (
     <div
-      className="fixed inset-0 z-50 bg-black flex flex-col"
+      className="fixed inset-0 z-50 bg-black flex flex-col safe-top safe-bottom overflow-hidden"
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
     >
       {/* Header */}
-      <div className="flex justify-between items-center p-6 bg-gradient-to-b from-black/80 to-transparent absolute top-0 left-0 right-0 z-10 safe-top">
-        <IconButton icon={<X className="w-5 h-5" />} label="Close" onClick={onClose} dark />
+      <div className="relative z-10 flex justify-between items-center p-6">
+        <IconButton icon={<X className="w-5 h-5" />} label="Close" onClick={onClose} variant="bordered" dark />
         <div className="flex gap-2">
           {typeof navigator !== 'undefined' && 'share' in navigator && (
-            <IconButton icon={<Share className="w-4 h-4" />} label="Share" onClick={handleShare} dark />
+            <IconButton icon={<Share className="w-4 h-4" />} label="Share" onClick={handleShare} variant="bordered" dark />
           )}
           {memory.type === 'photo' && (
-            <IconButton icon={<Download className="w-4 h-4" />} label="Download" onClick={handleDownload} dark />
+            <IconButton icon={<Download className="w-4 h-4" />} label="Download" onClick={handleDownload} variant="bordered" dark />
           )}
           {memory.type === 'text' && (
             <IconButton 
               icon={copied ? <Check className="w-4 h-4 text-green-400" /> : <Copy className="w-4 h-4" />} 
               label="Copy note" 
               onClick={() => handleCopyNote(memory.note || '')} 
+              variant="bordered"
               dark 
             />
           )}
-          <IconButton icon={<Trash2 className="w-4 h-4" />} label="Delete" onClick={() => onDelete(memory)} variant="danger" dark />
+          <IconButton icon={<Trash2 className="w-4 h-4" />} label="Delete" onClick={() => onDelete(memory)} variant="bordered" dark />
         </div>
       </div>
 
@@ -191,7 +192,7 @@ export default function MemoryViewer({
       )}
 
       {/* Content */}
-      <div className="flex-1 flex flex-col items-center justify-center p-4 pt-20 pb-8 overflow-auto">
+      <div className="flex-1 flex flex-col items-center justify-center p-4 overflow-auto">
         {/* Photo */}
         {memory.type === 'photo' && memory.url && (
           <div className="flex flex-col items-center max-w-3xl w-full">
