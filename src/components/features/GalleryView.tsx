@@ -264,12 +264,7 @@ export default function GalleryView({ journey, onClose, onMemoryDeleted }: Galle
         <div className="flex-1 min-w-0 mx-4">
           <h1 className="text-xl font-medium truncate">{journey.name}</h1>
           <p className="text-xs text-zinc-500">
-            {photoCount > 0 && <span>{photoCount} {photoCount === 1 ? 'photo' : 'photos'}</span>}
-            {photoCount > 0 && (noteCount > 0 || audioCount > 0) && <span> • </span>}
-            {audioCount > 0 && <span>{audioCount} {audioCount === 1 ? 'voice' : 'voices'}</span>}
-            {audioCount > 0 && noteCount > 0 && <span> • </span>}
-            {noteCount > 0 && <span>{noteCount} {noteCount === 1 ? 'note' : 'notes'}</span>}
-            {photoCount === 0 && noteCount === 0 && audioCount === 0 && <span>No memories</span>}
+            {(journey.memory_count ?? 0) === 0 ? 'No memories' : `${journey.memory_count} ${journey.memory_count === 1 ? 'memory' : 'memories'}`}
           </p>
         </div>
         
