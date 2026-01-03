@@ -545,21 +545,21 @@ export default function Dashboard({ activeJourneys: initialActiveJourneys = [], 
                         setActionSheetJourney(journey);
                       }
                     }}
-                    className="relative w-full glass rounded-[28px] p-6 overflow-hidden border border-white/10 cursor-pointer card-glow active:scale-[0.98] transition-all duration-300"
+                    className="relative w-full glass rounded-[28px] p-6 overflow-hidden border border-[var(--border-base)] cursor-pointer card-glow active:scale-[0.98] transition-all duration-300"
                     style={{ animationDelay: `${index * 100}ms` }}
                   >
                     {/* Dynamic gradient background */}
                     <div className="absolute inset-0 pointer-events-none" style={{ background: getJourneyGradient(journey.name).gradient }} />
-                    <div className="absolute inset-0 pointer-events-none bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
-                    <div className="absolute inset-0 pointer-events-none opacity-20" style={{
-                      backgroundImage: `radial-gradient(circle at 25% 25%, rgba(255,255,255,0.1) 0%, transparent 50%),
-                                        radial-gradient(circle at 75% 75%, rgba(255,255,255,0.08) 0%, transparent 50%)`
+                    <div className="absolute inset-0 pointer-events-none bg-gradient-to-t from-[var(--bg-base)]/90 via-[var(--bg-base)]/50 to-transparent" />
+                    <div className="absolute inset-0 pointer-events-none opacity-10" style={{
+                      backgroundImage: `radial-gradient(circle at 25% 25%, var(--fg-base) 0%, transparent 50%),
+                                        radial-gradient(circle at 75% 75%, var(--fg-base) 0%, transparent 50%)`
                     }} />
                     
                     <div className="relative z-10 flex justify-between items-start mb-4">
                       <div>
                         <div className="flex items-center gap-2">
-                          <p className="text-zinc-500 text-xs font-medium uppercase tracking-wider">
+                          <p className="text-[var(--fg-muted)] text-xs font-medium uppercase tracking-wider">
                             Unlocks in {getTimeUntilUnlock(journey.unlock_date)}
                           </p>
                           {!isOwner(journey) && (
@@ -614,7 +614,7 @@ export default function Dashboard({ activeJourneys: initialActiveJourneys = [], 
                     </div>
 
                     <div className="relative z-10">
-                      <h2 className="text-3xl font-light tracking-tight mb-4 break-words">
+                      <h2 className="text-3xl font-light tracking-tight mb-4 break-words text-[var(--fg-base)]">
                         {journey.emoji && <span className="mr-2">{journey.emoji}</span>}
                         {journey.name}
                       </h2>
@@ -622,21 +622,21 @@ export default function Dashboard({ activeJourneys: initialActiveJourneys = [], 
                       <div className="flex gap-2">
                         <button 
                           onClick={(e) => { e.stopPropagation(); onCapture?.(journey, 'photo'); }}
-                          className="flex-1 h-10 bg-white/15 backdrop-blur-sm border border-white/20 rounded-full font-medium text-sm text-white flex items-center justify-center gap-1.5 hover:bg-white/25 active:scale-[0.98] transition-all"
+                          className="flex-1 h-10 bg-[var(--fg-base)]/15 backdrop-blur-sm border border-[var(--fg-base)]/20 rounded-full font-medium text-sm text-[var(--fg-base)] flex items-center justify-center gap-1.5 hover:bg-[var(--fg-base)]/25 active:scale-[0.98] transition-all"
                         >
                           <Camera className="w-4 h-4" />
                           Photo
                         </button>
                         <button 
                           onClick={(e) => { e.stopPropagation(); onCapture?.(journey, 'audio'); }}
-                          className="flex-1 h-10 bg-white/15 backdrop-blur-sm border border-white/20 rounded-full font-medium text-sm text-white flex items-center justify-center gap-1.5 hover:bg-white/25 active:scale-[0.98] transition-all"
+                          className="flex-1 h-10 bg-[var(--fg-base)]/15 backdrop-blur-sm border border-[var(--fg-base)]/20 rounded-full font-medium text-sm text-[var(--fg-base)] flex items-center justify-center gap-1.5 hover:bg-[var(--fg-base)]/25 active:scale-[0.98] transition-all"
                         >
                           <Mic className="w-4 h-4" />
                           Voice
                         </button>
                         <button 
                           onClick={(e) => { e.stopPropagation(); onCapture?.(journey, 'text'); }}
-                          className="flex-1 h-10 bg-white/15 backdrop-blur-sm border border-white/20 rounded-full font-medium text-sm text-white flex items-center justify-center gap-1.5 hover:bg-white/25 active:scale-[0.98] transition-all"
+                          className="flex-1 h-10 bg-[var(--fg-base)]/15 backdrop-blur-sm border border-[var(--fg-base)]/20 rounded-full font-medium text-sm text-[var(--fg-base)] flex items-center justify-center gap-1.5 hover:bg-[var(--fg-base)]/25 active:scale-[0.98] transition-all"
                         >
                           <FileText className="w-4 h-4" />
                           Note
