@@ -145,7 +145,7 @@ export default function MemoryViewer({
 
   return (
     <div
-      className="fixed inset-0 z-50 bg-black flex flex-col safe-top safe-bottom overflow-hidden"
+      className="fixed inset-0 z-50 bg-[var(--bg-base)] flex flex-col safe-top safe-bottom overflow-hidden"
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
@@ -177,7 +177,7 @@ export default function MemoryViewer({
       {hasPrev && (
         <button
           onClick={goToPrev}
-          className="absolute left-4 top-1/2 -translate-y-1/2 z-10 w-12 h-12 rounded-full bg-white/10 backdrop-blur-md items-center justify-center hover:bg-white/20 transition-colors hidden md:flex"
+          className="absolute left-4 top-1/2 -translate-y-1/2 z-10 w-12 h-12 rounded-full bg-[var(--bg-hover)] backdrop-blur-md items-center justify-center hover:bg-[var(--bg-surface)] transition-colors hidden md:flex text-[var(--fg-base)]"
         >
           <ChevronLeft className="w-6 h-6" />
         </button>
@@ -185,7 +185,7 @@ export default function MemoryViewer({
       {hasNext && (
         <button
           onClick={goToNext}
-          className="absolute right-4 top-1/2 -translate-y-1/2 z-10 w-12 h-12 rounded-full bg-white/10 backdrop-blur-md items-center justify-center hover:bg-white/20 transition-colors hidden md:flex"
+          className="absolute right-4 top-1/2 -translate-y-1/2 z-10 w-12 h-12 rounded-full bg-[var(--bg-hover)] backdrop-blur-md items-center justify-center hover:bg-[var(--bg-surface)] transition-colors hidden md:flex text-[var(--fg-base)]"
         >
           <ChevronRight className="w-6 h-6" />
         </button>
@@ -234,7 +234,7 @@ export default function MemoryViewer({
               <div className="w-20 h-20 rounded-2xl bg-orange-500/20 flex items-center justify-center mx-auto mb-4">
                 <Mic className="w-10 h-10 text-orange-400" />
               </div>
-              <h3 className="text-lg font-medium text-white mb-1">Voice</h3>
+              <h3 className="text-lg font-medium text-[var(--fg-base)] mb-1">Voice</h3>
               {memory.duration && (
                 <p className="text-sm text-orange-400/60">
                   {Math.floor(memory.duration / 60)}:{(memory.duration % 60).toString().padStart(2, '0')}
@@ -277,7 +277,7 @@ export default function MemoryViewer({
                   <Quote className="w-5 h-5 text-blue-400" />
                 </div>
               </div>
-              <p className="text-lg text-zinc-100 leading-relaxed">{memory.note}</p>
+              <p className="text-lg text-[var(--fg-base)] leading-relaxed">{memory.note}</p>
             </div>
             {/* Note metadata */}
             <div className="mt-4 flex flex-wrap items-center justify-center gap-3">
