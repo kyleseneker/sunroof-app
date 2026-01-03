@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { api, getJourneyGradient } from '@/lib';
 import { deleteJourney, deleteMemory, fetchMemoriesForJourney } from '@/services';
-import { X, Trash2, Camera, ArrowUpDown, Sparkles, Mic, MapPin, Quote, Play } from 'lucide-react';
+import { X, Trash2, Camera, ArrowUpDown, Sparkles, Mic, MapPin, Quote, Play, ChevronDown } from 'lucide-react';
 import { useToast, ConfirmDialog, IconButton } from '@/components/ui';
 import { AudioPlayer, MemoryViewer, AIRecapSheet } from '@/components/features';
 import type { Journey, Memory } from '@/types';
@@ -22,6 +22,7 @@ export default function GalleryView({ journey, onClose, onMemoryDeleted }: Galle
   const [memoryToDelete, setMemoryToDelete] = useState<Memory | null>(null);
   const [showDeleteJourneyConfirm, setShowDeleteJourneyConfirm] = useState(false);
   const [sortNewestFirst, setSortNewestFirst] = useState(false);
+  const [collapsedDays, setCollapsedDays] = useState<Set<string>>(new Set());
   const [showCelebration, setShowCelebration] = useState(false);
   const [confetti, setConfetti] = useState<Array<{ id: number; left: number; color: string; delay: number }>>([]);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -83,6 +84,19 @@ export default function GalleryView({ journey, onClose, onMemoryDeleted }: Galle
   // Get ordered day keys and calculate day numbers
   const dayKeys = Object.keys(memoriesByDay);
   const firstDayDate = dayKeys.length > 0 ? new Date(dayKeys[sortNewestFirst ? dayKeys.length - 1 : 0]) : null;
+
+  // Toggle day collapse
+  const toggleDayCollapse = (dayKey: string) => {
+    setCollapsedDays(prev => {
+      const next = new Set(prev);
+      if (next.has(dayKey)) {
+        next.delete(dayKey);
+      } else {
+        next.add(dayKey);
+      }
+      return next;
+    });
+  };
 
   // Stats
   const photoCount = memories.filter((m) => m.type === 'photo').length;
@@ -351,17 +365,25 @@ export default function GalleryView({ journey, onClose, onMemoryDeleted }: Galle
                   className="animate-enter"
                   style={{ animationDelay: `${dayIndex * 100}ms`, opacity: 0 }}
                 >
-                  {/* Day Header */}
-                  <div className="sticky top-0 z-10 px-6 py-4 bg-gradient-to-b from-black via-black/95 to-transparent backdrop-blur-sm">
+                  {/* Day Header - Clickable to collapse */}
+                  <button
+                    onClick={() => toggleDayCollapse(dayKey)}
+                    className="sticky top-0 z-10 w-full px-6 py-4 bg-gradient-to-b from-black via-black/95 to-transparent backdrop-blur-sm text-left"
+                  >
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 rounded-full bg-gradient-to-br from-orange-500 to-pink-500 flex items-center justify-center text-sm font-bold">
                         {dayNumber}
                       </div>
                       <div className="flex-1">
                         <h3 className="text-lg font-medium text-white">Day {dayNumber}</h3>
-                        <p className="text-xs text-zinc-500">{formattedDate}</p>
+                        <p className="text-xs text-zinc-500">
+                          {formattedDate}
+                          {collapsedDays.has(dayKey) && (
+                            <span className="text-zinc-600"> • {dayMemories.length} {dayMemories.length === 1 ? 'memory' : 'memories'}</span>
+                          )}
+                        </p>
                       </div>
-                      {(dayLocation || dayWeather) && (
+                      {(dayLocation || dayWeather) && !collapsedDays.has(dayKey) && (
                         <div className="flex items-center gap-2 text-xs text-zinc-400">
                           {dayLocation && (
                             <span className="flex items-center gap-1">
@@ -374,11 +396,20 @@ export default function GalleryView({ journey, onClose, onMemoryDeleted }: Galle
                           )}
                         </div>
                       )}
+                      <ChevronDown 
+                        className={`w-5 h-5 text-zinc-500 transition-transform duration-200 ${
+                          collapsedDays.has(dayKey) ? '-rotate-90' : ''
+                        }`} 
+                      />
                     </div>
-                  </div>
+                  </button>
                   
-                  {/* Day Memories */}
-                  <div className="px-6 py-4 space-y-4">
+                  {/* Day Memories - Collapsible */}
+                  <div 
+                    className={`px-6 space-y-4 overflow-hidden transition-all duration-300 ${
+                      collapsedDays.has(dayKey) ? 'max-h-0 py-0' : 'max-h-[9999px] py-4'
+                    }`}
+                  >
                     {dayMemories.map((memory, memoryIndex) => {
                       const memoryTime = new Date(memory.created_at).toLocaleTimeString('en-US', { 
                         hour: 'numeric', 
