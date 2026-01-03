@@ -559,9 +559,10 @@ export default function Dashboard({ activeJourneys: initialActiveJourneys = [], 
                     <div className="relative z-10 flex justify-between items-start mb-4">
                       <div>
                         <div className="flex items-center gap-2">
-                          <p className="text-[var(--fg-muted)] text-xs font-medium uppercase tracking-wider">
-                            Unlocks in {getTimeUntilUnlock(journey.unlock_date)}
-                          </p>
+                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[var(--bg-base)]/70 backdrop-blur-sm text-[var(--fg-base)] text-xs font-medium">
+                            <Timer className="w-3 h-3" />
+                            {getTimeUntilUnlock(journey.unlock_date)}
+                          </span>
                           {!isOwner(journey) && (
                             <Badge variant="info">Shared</Badge>
                           )}
