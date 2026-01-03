@@ -3,7 +3,7 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import { compressImage, getCompressionStats, getTimeOfDay, NOTE_PROMPTS, PHOTO_FILTERS, type PhotoFilterKey, MAX_FILE_SIZE_BYTES, MAX_NOTE_LENGTH, ALLOWED_IMAGE_TYPES, IMAGE_COMPRESSION, getLocationContext, getWeather } from '@/lib';
 import type { MemoryLocation, MemoryWeather } from '@/types';
 import { getCurrentUser, uploadMemoryPhoto, uploadMemoryAudio, createMemory } from '@/services';
-import { X, Camera, FileText, Send, Check, Loader2, Upload, Sparkles, Mic, SwitchCamera, ImageIcon, MapPin } from 'lucide-react';
+import { X, Camera, FileText, Send, Check, Loader2, Upload, Sparkles, Mic, SwitchCamera, ImageIcon, MapPin, Palette } from 'lucide-react';
 import { AudioRecorder, FilterSelector } from '@/components/features';
 import { IconButton } from '@/components/ui';
 import type { TimeOfDay } from '@/types';
@@ -28,6 +28,7 @@ export default function CameraView({
   const [note, setNote] = useState('');
   const [userId, setUserId] = useState<string | null>(null);
   const [showPrompts, setShowPrompts] = useState(false);
+  const [showFilters, setShowFilters] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   
   // Get contextual prompts - use useState to avoid calling Math.random during render
@@ -919,7 +920,7 @@ const handleAudioError = (message: string) => {
             
             {/* Zoom controls */}
             {cameraActive && cameraReady && supportsZoom && maxZoom > 1 && (
-              <div className="absolute bottom-64 left-1/2 -translate-x-1/2 z-20 flex items-center gap-2">
+              <div className="absolute bottom-52 left-1/2 -translate-x-1/2 z-20 flex items-center gap-2">
                 {/* Zoom level indicator */}
                 <div className="flex items-center gap-1 px-3 py-1.5 rounded-full bg-black/40 backdrop-blur-md border border-white/10">
                   <button
@@ -1018,21 +1019,32 @@ const handleAudioError = (message: string) => {
         )}
       </div>
 
+      {/* Filter Panel - slides up when showFilters is true */}
+      {mode === 'photo' && cameraActive && cameraReady && showFilters && (
+        <div className="absolute bottom-0 left-0 right-0 z-40 safe-bottom animate-enter">
+          <div className="p-6 pb-8 bg-black/95 backdrop-blur-xl border-t border-white/10">
+            <div className="flex justify-between items-center mb-4">
+              <span className="text-sm font-medium text-white">Filters</span>
+              <button
+                onClick={() => setShowFilters(false)}
+                className="text-xs text-zinc-400 hover:text-white transition-colors"
+              >
+                Done
+              </button>
+            </div>
+            <FilterSelector
+              imageUrl=""
+              selectedFilter={selectedFilter}
+              onSelectFilter={setSelectedFilter}
+              livePreview
+            />
+          </div>
+        </div>
+      )}
+
       {/* Bottom Controls */}
       <div className="absolute bottom-0 left-0 right-0 z-30 safe-bottom">
         <div className="p-6 pt-8 bg-gradient-to-t from-black via-black/90 to-transparent">
-          
-          {/* Live Filter Selector - show when camera is active in photo mode */}
-          {mode === 'photo' && cameraActive && cameraReady && (
-            <div className="mb-4">
-              <FilterSelector
-                imageUrl=""
-                selectedFilter={selectedFilter}
-                onSelectFilter={setSelectedFilter}
-                livePreview
-              />
-            </div>
-          )}
           
           {/* Mode Switcher */}
           <div className="flex justify-center gap-6 mb-6">
@@ -1065,18 +1077,40 @@ const handleAudioError = (message: string) => {
             </button>
           </div>
 
-          {/* Action Button */}
-          <div className="flex justify-center">
+          {/* Action Row - Filter button, Capture, Placeholder */}
+          <div className="flex justify-center items-center gap-8">
+            {/* Left side - Filter button (photo mode only) */}
+            {mode === 'photo' && cameraActive && cameraReady ? (
+              <button
+                onClick={() => setShowFilters(true)}
+                className={`flex flex-col items-center gap-1 transition-all ${
+                  selectedFilter !== 'none' ? 'text-white' : 'text-zinc-500'
+                }`}
+              >
+                <div className={`w-12 h-12 rounded-full flex items-center justify-center transition-colors ${
+                  selectedFilter !== 'none' 
+                    ? 'bg-white/20 border border-white/40' 
+                    : 'bg-white/10 border border-white/20'
+                }`}>
+                  <Palette className="w-5 h-5" />
+                </div>
+                <span className="text-[10px] font-medium">
+                  {selectedFilter !== 'none' ? PHOTO_FILTERS[selectedFilter].name : 'Filters'}
+                </span>
+              </button>
+            ) : (
+              <div className="w-12" /> 
+            )}
+
+            {/* Center - Main action button */}
             {loading ? (
               <div className="w-20 h-20 rounded-full bg-zinc-800 flex items-center justify-center">
                 <Loader2 className="w-8 h-8 animate-spin text-white/60" />
               </div>
             ) : mode === 'audio' ? (
-              // Audio mode has its own controls in the AudioRecorder component
               <div className="h-20" />
             ) : mode === 'photo' ? (
               <>
-                {/* Hidden file input for gallery uploads */}
                 <input 
                   type="file" 
                   accept="image/*" 
@@ -1085,7 +1119,6 @@ const handleAudioError = (message: string) => {
                   onChange={handleCapture} 
                 />
                 
-                {/* Show capture button when camera is ready, or error fallback */}
                 {cameraActive && cameraReady ? (
                   <button 
                     onClick={capturePhoto}
@@ -1094,10 +1127,8 @@ const handleAudioError = (message: string) => {
                     <div className="w-16 h-16 bg-white rounded-full group-active:bg-zinc-200 transition-colors" />
                   </button>
                 ) : cameraError ? (
-                  // Error state - buttons are in viewfinder, just placeholder here
                   <div className="h-20" />
                 ) : (
-                  // Loading state
                   <div className="w-20 h-20 rounded-full border-[3px] border-zinc-700 flex items-center justify-center">
                     <div className="w-16 h-16 bg-zinc-800 rounded-full" />
                   </div>
@@ -1112,6 +1143,13 @@ const handleAudioError = (message: string) => {
                 Save Note
                 <Send className="w-4 h-4" />
               </button>
+            )}
+
+            {/* Right side - Placeholder for symmetry */}
+            {mode === 'photo' && cameraActive && cameraReady ? (
+              <div className="w-12" />
+            ) : (
+              <div className="w-12" />
             )}
           </div>
         </div>
