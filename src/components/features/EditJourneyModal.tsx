@@ -52,13 +52,15 @@ export default function EditJourneyModal({
     
     setIsSaving(true);
     
+    // Only process unlock date if journey is still locked (unlock_date in future)
+    const isLocked = new Date(journey.unlock_date) > new Date();
     let unlockDateStr: string | undefined;
-    if (editDate) {
+    
+    if (isLocked && editDate) {
       const newDate = new Date(editDate);
       newDate.setHours(23, 59, 59, 999);
       
-      // Only validate future date for active journeys
-      if (journey.status === 'active' && newDate <= new Date()) {
+      if (newDate <= new Date()) {
         showToast('Unlock date must be in the future', 'error');
         setIsSaving(false);
         return;
