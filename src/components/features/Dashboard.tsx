@@ -4,10 +4,11 @@ import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { 
   deleteJourney, 
   fetchPastJourneys as fetchPastJourneysService,
+  getMemoryStreak,
 } from '@/services';
 import { useAuth } from '@/providers';
 import { hapticSuccess, getJourneyGradient, formatDate, getTimeUntilUnlock, isJourneyUnlocked, getGreeting, MAX_ACTIVE_JOURNEYS } from '@/lib';
-import { Plus, ArrowRight, X, Lock, ChevronRight, Sparkles, Trash2, HelpCircle, Camera, ImageIcon, Pencil, Timer, Archive, Search, RefreshCw, EllipsisVertical, UserPlus, Mic, FileText } from 'lucide-react';
+import { Plus, ArrowRight, X, Lock, ChevronRight, Sparkles, Trash2, HelpCircle, Camera, ImageIcon, Pencil, Timer, Archive, Search, RefreshCw, EllipsisVertical, UserPlus, Mic, FileText, Flame } from 'lucide-react';
 import { useToast, Avatar, ConfirmDialog, IconButton, Badge } from '@/components/ui';
 import { 
   GalleryView, 
@@ -57,6 +58,7 @@ export default function Dashboard({ activeJourneys: initialActiveJourneys = [], 
   const [pastJourneys, setPastJourneys] = useState<Journey[]>([]);
   const [pastJourneysLoading, setPastJourneysLoading] = useState(true);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [streak, setStreak] = useState<number>(0);
   
   // Search/filter state
   const [searchQuery, setSearchQuery] = useState('');
@@ -90,7 +92,7 @@ export default function Dashboard({ activeJourneys: initialActiveJourneys = [], 
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  // Fetch past/completed journeys
+  // Fetch past/completed journeys and streak
   const fetchPastJourneys = useCallback(async () => {
     if (!user) return;
     const { data, error } = await fetchPastJourneysService(user.id);
@@ -101,6 +103,10 @@ export default function Dashboard({ activeJourneys: initialActiveJourneys = [], 
     }
     setPastJourneys(data || []);
     setPastJourneysLoading(false);
+
+    // Fetch streak in background
+    const { data: streakData } = await getMemoryStreak(user.id);
+    if (streakData !== null) setStreak(streakData);
   }, [user]);
 
   useEffect(() => {
@@ -498,35 +504,44 @@ export default function Dashboard({ activeJourneys: initialActiveJourneys = [], 
             
             {/* Stats Cards */}
             {(activeJourneys.length > 0 || pastJourneys.length > 0) && (
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-3 gap-3">
+                {/* Current Streak */}
+                <div className="p-3 rounded-2xl bg-gradient-to-br from-orange-500/10 to-red-500/10 border border-orange-500/20">
+                  <div className="flex items-center gap-1.5 mb-0.5">
+                    <Flame className={`w-4 h-4 ${streak > 0 ? 'text-orange-400' : 'text-[var(--fg-muted)]'}`} />
+                    <span className="text-xl font-light text-[var(--fg-base)]">{streak}</span>
+                  </div>
+                  <span className="text-[10px] text-[var(--fg-muted)]">day streak</span>
+                </div>
+
                 {/* Total Memories */}
-                <div className="p-4 rounded-2xl bg-gradient-to-br from-pink-500/10 to-purple-500/10 border border-pink-500/20">
-                  <div className="flex items-center gap-2 mb-1">
+                <div className="p-3 rounded-2xl bg-gradient-to-br from-pink-500/10 to-purple-500/10 border border-pink-500/20">
+                  <div className="flex items-center gap-1.5 mb-0.5">
                     <ImageIcon className="w-4 h-4 text-pink-400" />
-                    <span className="text-2xl font-light text-[var(--fg-base)]">
+                    <span className="text-xl font-light text-[var(--fg-base)]">
                       {activeJourneys.reduce((sum, j) => sum + (j.memory_count || 0), 0) + 
                        pastJourneys.reduce((sum, j) => sum + (j.memory_count || 0), 0)}
                     </span>
                   </div>
-                  <span className="text-xs text-[var(--fg-muted)]">memories captured</span>
+                  <span className="text-[10px] text-[var(--fg-muted)]">memories</span>
                 </div>
 
                 {/* Unlocked Journeys or Next Unlock */}
                 {pastJourneys.filter(j => isJourneyUnlocked(j)).length > 0 ? (
-                  <div className="p-4 rounded-2xl bg-gradient-to-br from-emerald-500/10 to-teal-500/10 border border-emerald-500/20">
-                    <div className="flex items-center gap-2 mb-1">
+                  <div className="p-3 rounded-2xl bg-gradient-to-br from-emerald-500/10 to-teal-500/10 border border-emerald-500/20">
+                    <div className="flex items-center gap-1.5 mb-0.5">
                       <Sparkles className="w-4 h-4 text-emerald-400" />
-                      <span className="text-2xl font-light text-[var(--fg-base)]">
+                      <span className="text-xl font-light text-[var(--fg-base)]">
                         {pastJourneys.filter(j => isJourneyUnlocked(j)).length}
                       </span>
                     </div>
-                    <span className="text-xs text-[var(--fg-muted)]">ready to explore</span>
+                    <span className="text-[10px] text-[var(--fg-muted)]">to explore</span>
                   </div>
                 ) : activeJourneys.length > 0 ? (
-                  <div className="p-4 rounded-2xl bg-gradient-to-br from-amber-500/10 to-orange-500/10 border border-amber-500/20">
-                    <div className="flex items-center gap-2 mb-1">
+                  <div className="p-3 rounded-2xl bg-gradient-to-br from-amber-500/10 to-yellow-500/10 border border-amber-500/20">
+                    <div className="flex items-center gap-1.5 mb-0.5">
                       <Timer className="w-4 h-4 text-amber-400" />
-                      <span className="text-xl font-light text-[var(--fg-base)]">
+                      <span className="text-lg font-light text-[var(--fg-base)]">
                         {getTimeUntilUnlock(
                           [...activeJourneys].sort((a, b) => 
                             new Date(a.unlock_date).getTime() - new Date(b.unlock_date).getTime()
@@ -534,17 +549,17 @@ export default function Dashboard({ activeJourneys: initialActiveJourneys = [], 
                         )}
                       </span>
                     </div>
-                    <span className="text-xs text-[var(--fg-muted)]">until next unlock</span>
+                    <span className="text-[10px] text-[var(--fg-muted)]">next unlock</span>
                   </div>
                 ) : (
-                  <div className="p-4 rounded-2xl bg-gradient-to-br from-blue-500/10 to-indigo-500/10 border border-blue-500/20">
-                    <div className="flex items-center gap-2 mb-1">
+                  <div className="p-3 rounded-2xl bg-gradient-to-br from-blue-500/10 to-indigo-500/10 border border-blue-500/20">
+                    <div className="flex items-center gap-1.5 mb-0.5">
                       <Archive className="w-4 h-4 text-blue-400" />
-                      <span className="text-2xl font-light text-[var(--fg-base)]">
+                      <span className="text-xl font-light text-[var(--fg-base)]">
                         {pastJourneys.length}
                       </span>
                     </div>
-                    <span className="text-xs text-[var(--fg-muted)]">journeys completed</span>
+                    <span className="text-[10px] text-[var(--fg-muted)]">completed</span>
                   </div>
                 )}
               </div>
