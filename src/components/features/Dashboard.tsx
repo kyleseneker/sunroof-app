@@ -502,64 +502,47 @@ export default function Dashboard({ activeJourneys: initialActiveJourneys = [], 
               }
             </p>
             
-            {/* Stats Cards */}
+            {/* Stats Pills */}
             {(activeJourneys.length > 0 || pastJourneys.length > 0) && (
-              <div className="grid grid-cols-3 gap-3">
-                {/* Current Streak */}
-                <div className="p-3 rounded-2xl bg-gradient-to-br from-orange-500/10 to-red-500/10 border border-orange-500/20">
-                  <div className="flex items-center gap-1.5 mb-0.5">
-                    <Flame className={`w-4 h-4 ${streak > 0 ? 'text-orange-400' : 'text-[var(--fg-muted)]'}`} />
-                    <span className="text-xl font-light text-[var(--fg-base)]">{streak}</span>
+              <div className="flex flex-wrap gap-2">
+                {/* Streak */}
+                {streak > 0 && (
+                  <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-orange-500/10 border border-orange-500/20">
+                    <Flame className="w-3.5 h-3.5 text-orange-400" />
+                    <span className="text-xs font-medium text-[var(--fg-base)]">{streak} day streak</span>
                   </div>
-                  <span className="text-[10px] text-[var(--fg-muted)]">day streak</span>
+                )}
+
+                {/* Memories */}
+                <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-pink-500/10 border border-pink-500/20">
+                  <ImageIcon className="w-3.5 h-3.5 text-pink-400" />
+                  <span className="text-xs font-medium text-[var(--fg-base)]">
+                    {activeJourneys.reduce((sum, j) => sum + (j.memory_count || 0), 0) + 
+                     pastJourneys.reduce((sum, j) => sum + (j.memory_count || 0), 0)} memories
+                  </span>
                 </div>
 
-                {/* Total Memories */}
-                <div className="p-3 rounded-2xl bg-gradient-to-br from-pink-500/10 to-purple-500/10 border border-pink-500/20">
-                  <div className="flex items-center gap-1.5 mb-0.5">
-                    <ImageIcon className="w-4 h-4 text-pink-400" />
-                    <span className="text-xl font-light text-[var(--fg-base)]">
-                      {activeJourneys.reduce((sum, j) => sum + (j.memory_count || 0), 0) + 
-                       pastJourneys.reduce((sum, j) => sum + (j.memory_count || 0), 0)}
+                {/* Next unlock - show if there are active journeys */}
+                {activeJourneys.length > 0 && (
+                  <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/20">
+                    <Timer className="w-3.5 h-3.5 text-amber-400" />
+                    <span className="text-xs font-medium text-[var(--fg-base)]">
+                      {getTimeUntilUnlock(
+                        [...activeJourneys].sort((a, b) => 
+                          new Date(a.unlock_date).getTime() - new Date(b.unlock_date).getTime()
+                        )[0].unlock_date
+                      )} until unlock
                     </span>
                   </div>
-                  <span className="text-[10px] text-[var(--fg-muted)]">memories</span>
-                </div>
+                )}
 
-                {/* Unlocked Journeys or Next Unlock */}
-                {pastJourneys.filter(j => isJourneyUnlocked(j)).length > 0 ? (
-                  <div className="p-3 rounded-2xl bg-gradient-to-br from-emerald-500/10 to-teal-500/10 border border-emerald-500/20">
-                    <div className="flex items-center gap-1.5 mb-0.5">
-                      <Sparkles className="w-4 h-4 text-emerald-400" />
-                      <span className="text-xl font-light text-[var(--fg-base)]">
-                        {pastJourneys.filter(j => isJourneyUnlocked(j)).length}
-                      </span>
-                    </div>
-                    <span className="text-[10px] text-[var(--fg-muted)]">to explore</span>
-                  </div>
-                ) : activeJourneys.length > 0 ? (
-                  <div className="p-3 rounded-2xl bg-gradient-to-br from-amber-500/10 to-yellow-500/10 border border-amber-500/20">
-                    <div className="flex items-center gap-1.5 mb-0.5">
-                      <Timer className="w-4 h-4 text-amber-400" />
-                      <span className="text-lg font-light text-[var(--fg-base)]">
-                        {getTimeUntilUnlock(
-                          [...activeJourneys].sort((a, b) => 
-                            new Date(a.unlock_date).getTime() - new Date(b.unlock_date).getTime()
-                          )[0].unlock_date
-                        )}
-                      </span>
-                    </div>
-                    <span className="text-[10px] text-[var(--fg-muted)]">next unlock</span>
-                  </div>
-                ) : (
-                  <div className="p-3 rounded-2xl bg-gradient-to-br from-blue-500/10 to-indigo-500/10 border border-blue-500/20">
-                    <div className="flex items-center gap-1.5 mb-0.5">
-                      <Archive className="w-4 h-4 text-blue-400" />
-                      <span className="text-xl font-light text-[var(--fg-base)]">
-                        {pastJourneys.length}
-                      </span>
-                    </div>
-                    <span className="text-[10px] text-[var(--fg-muted)]">completed</span>
+                {/* Ready to explore - show if there are unlocked journeys */}
+                {pastJourneys.filter(j => isJourneyUnlocked(j)).length > 0 && (
+                  <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20">
+                    <Sparkles className="w-3.5 h-3.5 text-emerald-400" />
+                    <span className="text-xs font-medium text-[var(--fg-base)]">
+                      {pastJourneys.filter(j => isJourneyUnlocked(j)).length} ready to explore
+                    </span>
                   </div>
                 )}
               </div>
