@@ -8,8 +8,12 @@ import { searchLocationPhoto } from '@/lib/unsplash';
 import { features } from '@/lib/env';
 
 export async function POST(request: NextRequest) {
+  console.log('[API/cover-image] Request received');
+  console.log('[API/cover-image] UNSPLASH_ACCESS_KEY exists:', !!process.env.UNSPLASH_ACCESS_KEY);
+  
   // Check if Unsplash is configured
   if (!features.unsplashEnabled) {
+    console.log('[API/cover-image] Unsplash not enabled');
     return NextResponse.json(
       { error: 'Unsplash not configured' },
       { status: 503 }

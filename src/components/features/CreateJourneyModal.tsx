@@ -97,23 +97,26 @@ export default function CreateJourneyModal({
       let coverImageUrl: string | undefined;
       let coverImageAttribution: string | undefined;
       try {
+        console.log('[CreateJourney] Fetching cover image for:', cleanName);
         const coverResponse = await fetch('/api/cover-image', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ query: cleanName }),
         });
-        if (coverResponse.ok) {
-          const { photo } = await coverResponse.json();
-          if (photo) {
-            coverImageUrl = photo.url;
-            coverImageAttribution = photo.attribution;
-          }
+        console.log('[CreateJourney] Cover response status:', coverResponse.status);
+        const responseData = await coverResponse.json();
+        console.log('[CreateJourney] Cover response data:', responseData);
+        if (coverResponse.ok && responseData.photo) {
+          coverImageUrl = responseData.photo.url;
+          coverImageAttribution = responseData.photo.attribution;
+          console.log('[CreateJourney] Got cover image:', coverImageUrl);
         }
-      } catch {
+      } catch (err) {
         // Cover image is optional, continue without it
-        console.log('[CreateJourney] Cover image fetch failed, using gradient fallback');
+        console.log('[CreateJourney] Cover image fetch failed:', err);
       }
 
+      console.log('[CreateJourney] Creating journey with cover:', { coverImageUrl, coverImageAttribution });
       const { error } = await createJourney({
         userId,
         name: cleanName,
