@@ -496,29 +496,59 @@ export default function Dashboard({ activeJourneys: initialActiveJourneys = [], 
               }
             </p>
             
-            {/* Quick Stats Row */}
-            <div className="flex gap-3">
-              <div className="flex items-center gap-2 px-3 py-2 rounded-full bg-[var(--bg-hover)] border border-[var(--border-base)]">
-                <ImageIcon className="w-3.5 h-3.5 text-pink-400" />
-                <span className="text-xs text-[var(--fg-muted)]">
-                  {activeJourneys.reduce((sum, j) => sum + (j.memory_count || 0), 0) + 
-                   pastJourneys.reduce((sum, j) => sum + (j.memory_count || 0), 0)} memories
-                </span>
-              </div>
-              
-              {activeJourneys.length > 0 && (
-                <div className="flex items-center gap-2 px-3 py-2 rounded-full bg-[var(--bg-hover)] border border-[var(--border-base)]">
-                  <Timer className="w-3.5 h-3.5 text-amber-400" />
-                  <span className="text-xs text-[var(--fg-muted)]">
-                    Next unlock: {getTimeUntilUnlock(
-                      [...activeJourneys].sort((a, b) => 
-                        new Date(a.unlock_date).getTime() - new Date(b.unlock_date).getTime()
-                      )[0].unlock_date
-                    )}
-                  </span>
+            {/* Stats Cards */}
+            {(activeJourneys.length > 0 || pastJourneys.length > 0) && (
+              <div className="grid grid-cols-2 gap-3">
+                {/* Total Memories */}
+                <div className="p-4 rounded-2xl bg-gradient-to-br from-pink-500/10 to-purple-500/10 border border-pink-500/20">
+                  <div className="flex items-center gap-2 mb-1">
+                    <ImageIcon className="w-4 h-4 text-pink-400" />
+                    <span className="text-2xl font-light text-[var(--fg-base)]">
+                      {activeJourneys.reduce((sum, j) => sum + (j.memory_count || 0), 0) + 
+                       pastJourneys.reduce((sum, j) => sum + (j.memory_count || 0), 0)}
+                    </span>
+                  </div>
+                  <span className="text-xs text-[var(--fg-muted)]">memories captured</span>
                 </div>
-              )}
-            </div>
+
+                {/* Unlocked Journeys or Next Unlock */}
+                {pastJourneys.filter(j => isJourneyUnlocked(j)).length > 0 ? (
+                  <div className="p-4 rounded-2xl bg-gradient-to-br from-emerald-500/10 to-teal-500/10 border border-emerald-500/20">
+                    <div className="flex items-center gap-2 mb-1">
+                      <Sparkles className="w-4 h-4 text-emerald-400" />
+                      <span className="text-2xl font-light text-[var(--fg-base)]">
+                        {pastJourneys.filter(j => isJourneyUnlocked(j)).length}
+                      </span>
+                    </div>
+                    <span className="text-xs text-[var(--fg-muted)]">ready to explore</span>
+                  </div>
+                ) : activeJourneys.length > 0 ? (
+                  <div className="p-4 rounded-2xl bg-gradient-to-br from-amber-500/10 to-orange-500/10 border border-amber-500/20">
+                    <div className="flex items-center gap-2 mb-1">
+                      <Timer className="w-4 h-4 text-amber-400" />
+                      <span className="text-xl font-light text-[var(--fg-base)]">
+                        {getTimeUntilUnlock(
+                          [...activeJourneys].sort((a, b) => 
+                            new Date(a.unlock_date).getTime() - new Date(b.unlock_date).getTime()
+                          )[0].unlock_date
+                        )}
+                      </span>
+                    </div>
+                    <span className="text-xs text-[var(--fg-muted)]">until next unlock</span>
+                  </div>
+                ) : (
+                  <div className="p-4 rounded-2xl bg-gradient-to-br from-blue-500/10 to-indigo-500/10 border border-blue-500/20">
+                    <div className="flex items-center gap-2 mb-1">
+                      <Archive className="w-4 h-4 text-blue-400" />
+                      <span className="text-2xl font-light text-[var(--fg-base)]">
+                        {pastJourneys.length}
+                      </span>
+                    </div>
+                    <span className="text-xs text-[var(--fg-muted)]">journeys completed</span>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         )}
         
