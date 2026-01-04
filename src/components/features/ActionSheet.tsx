@@ -19,9 +19,11 @@ interface ActionSheetProps {
   options: ActionSheetOption[];
 }
 
+const SWIPE_THRESHOLD = 100; // pixels to swipe before closing
+
 /**
  * Mobile-friendly action sheet / bottom sheet component.
- * Slides up from bottom on mobile, appears as a context menu on desktop.
+ * Slides up from bottom on mobile, supports swipe-to-dismiss.
  */
 export default function ActionSheet({ 
   isOpen, 
@@ -31,14 +33,45 @@ export default function ActionSheet({
 }: ActionSheetProps) {
   const sheetRef = useRef<HTMLDivElement>(null);
   const [isClosing, setIsClosing] = useState(false);
+  const [dragOffset, setDragOffset] = useState(0);
+  const [isDragging, setIsDragging] = useState(false);
+  const dragStartY = useRef(0);
 
   const handleClose = useCallback(() => {
     setIsClosing(true);
+    setDragOffset(0);
     setTimeout(() => {
       setIsClosing(false);
       onClose();
     }, 200);
   }, [onClose]);
+
+  // Swipe-to-dismiss handlers
+  const handleTouchStart = useCallback((e: React.TouchEvent) => {
+    dragStartY.current = e.touches[0].clientY;
+    setIsDragging(true);
+  }, []);
+
+  const handleTouchMove = useCallback((e: React.TouchEvent) => {
+    if (!isDragging) return;
+    const currentY = e.touches[0].clientY;
+    const diff = currentY - dragStartY.current;
+    // Only allow dragging down (positive diff)
+    if (diff > 0) {
+      setDragOffset(diff);
+    }
+  }, [isDragging]);
+
+  const handleTouchEnd = useCallback(() => {
+    setIsDragging(false);
+    if (dragOffset > SWIPE_THRESHOLD) {
+      hapticClick();
+      handleClose();
+    } else {
+      // Snap back
+      setDragOffset(0);
+    }
+  }, [dragOffset, handleClose]);
 
   // Close on escape
   useEffect(() => {
@@ -65,6 +98,14 @@ export default function ActionSheet({
     }
   }, [isOpen]);
 
+  // Reset drag offset when closed
+  useEffect(() => {
+    if (!isOpen) {
+      setDragOffset(0);
+      setIsDragging(false);
+    }
+  }, [isOpen]);
+
   if (!isOpen) return null;
 
   const handleOptionClick = (option: ActionSheetOption) => {
@@ -74,13 +115,19 @@ export default function ActionSheet({
     handleClose();
   };
 
+  // Calculate backdrop opacity based on drag
+  const backdropOpacity = Math.max(0.6 - (dragOffset / 400), 0.2);
+
   return (
     <div 
       className={`fixed inset-0 z-50 ${isClosing ? 'animate-fade-out' : 'animate-fade-in'}`}
       onClick={handleClose}
     >
       {/* Backdrop */}
-      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
+      <div 
+        className="absolute inset-0 bg-black backdrop-blur-sm transition-opacity"
+        style={{ opacity: backdropOpacity }}
+      />
       
       {/* Sheet */}
       <div 
@@ -90,12 +137,17 @@ export default function ActionSheet({
           bg-[var(--bg-surface)] border-t border-[var(--border-base)]
           rounded-t-3xl
           safe-bottom
-          ${isClosing ? 'animate-slide-down' : 'animate-slide-up'}
+          ${isClosing ? 'animate-slide-down' : isDragging ? '' : 'animate-slide-up'}
+          ${isDragging ? '' : 'transition-transform duration-200'}
         `}
+        style={{ transform: `translateY(${dragOffset}px)` }}
         onClick={(e) => e.stopPropagation()}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
       >
-        {/* Handle */}
-        <div className="flex justify-center pt-3 pb-2">
+        {/* Handle - visual affordance for swipe */}
+        <div className="flex justify-center pt-3 pb-2 cursor-grab active:cursor-grabbing">
           <div className="w-10 h-1 bg-[var(--border-base)] rounded-full" />
         </div>
 
