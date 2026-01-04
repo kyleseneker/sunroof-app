@@ -564,13 +564,25 @@ export default function Dashboard({ activeJourneys: initialActiveJourneys = [], 
                     className="relative w-full glass rounded-[28px] p-6 overflow-hidden border border-[var(--border-base)] cursor-pointer card-glow active:scale-[0.98] transition-all duration-300"
                     style={{ animationDelay: `${index * 100}ms` }}
                   >
-                    {/* Dynamic gradient background */}
-                    <div className="absolute inset-0 pointer-events-none" style={{ background: getJourneyGradient(journey.name).gradient }} />
-                    <div className="absolute inset-0 pointer-events-none bg-gradient-to-t from-[var(--bg-base)]/90 via-[var(--bg-base)]/50 to-transparent" />
-                    <div className="absolute inset-0 pointer-events-none opacity-10" style={{
-                      backgroundImage: `radial-gradient(circle at 25% 25%, var(--fg-base) 0%, transparent 50%),
-                                        radial-gradient(circle at 75% 75%, var(--fg-base) 0%, transparent 50%)`
-                    }} />
+                    {/* Cover image or gradient background */}
+                    {journey.cover_image_url ? (
+                      <>
+                        <div 
+                          className="absolute inset-0 pointer-events-none bg-cover bg-center"
+                          style={{ backgroundImage: `url(${journey.cover_image_url})` }}
+                        />
+                        <div className="absolute inset-0 pointer-events-none bg-gradient-to-t from-[var(--bg-base)] via-[var(--bg-base)]/70 to-[var(--bg-base)]/30" />
+                      </>
+                    ) : (
+                      <>
+                        <div className="absolute inset-0 pointer-events-none" style={{ background: getJourneyGradient(journey.name).gradient }} />
+                        <div className="absolute inset-0 pointer-events-none bg-gradient-to-t from-[var(--bg-base)]/90 via-[var(--bg-base)]/50 to-transparent" />
+                        <div className="absolute inset-0 pointer-events-none opacity-10" style={{
+                          backgroundImage: `radial-gradient(circle at 25% 25%, var(--fg-base) 0%, transparent 50%),
+                                            radial-gradient(circle at 75% 75%, var(--fg-base) 0%, transparent 50%)`
+                        }} />
+                      </>
+                    )}
                     
                     <div className="relative z-10 flex justify-between items-start mb-4">
                       <div>

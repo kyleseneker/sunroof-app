@@ -236,12 +236,24 @@ export default function GalleryView({ journey: initialJourney, onClose, onMemory
         />
       )}
 
-      {/* Gradient header accent */}
-      <div
-        className="absolute top-0 left-0 right-0 h-32 opacity-40"
-        style={{ background: getJourneyGradient(journey.name).gradient }}
-      />
-      <div className="absolute top-0 left-0 right-0 h-32 bg-gradient-to-b from-transparent to-[var(--bg-base)]" />
+      {/* Cover image or gradient header accent */}
+      {journey.cover_image_url ? (
+        <>
+          <div
+            className="absolute top-0 left-0 right-0 h-48 bg-cover bg-center"
+            style={{ backgroundImage: `url(${journey.cover_image_url})` }}
+          />
+          <div className="absolute top-0 left-0 right-0 h-48 bg-gradient-to-b from-transparent via-[var(--bg-base)]/60 to-[var(--bg-base)]" />
+        </>
+      ) : (
+        <>
+          <div
+            className="absolute top-0 left-0 right-0 h-32 opacity-40"
+            style={{ background: getJourneyGradient(journey.name).gradient }}
+          />
+          <div className="absolute top-0 left-0 right-0 h-32 bg-gradient-to-b from-transparent to-[var(--bg-base)]" />
+        </>
+      )}
 
       {/* Celebration Confetti */}
       {showCelebration && (

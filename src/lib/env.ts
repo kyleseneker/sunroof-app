@@ -9,6 +9,7 @@ interface EnvConfig {
   NEXT_PUBLIC_VAPID_PUBLIC_KEY?: string;
   UPSTASH_REDIS_REST_URL?: string;
   UPSTASH_REDIS_REST_TOKEN?: string;
+  UNSPLASH_ACCESS_KEY?: string;
 }
 
 interface ValidationError {
@@ -76,6 +77,7 @@ export function getEnv(): EnvConfig {
     NEXT_PUBLIC_VAPID_PUBLIC_KEY: process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY,
     UPSTASH_REDIS_REST_URL: process.env.UPSTASH_REDIS_REST_URL,
     UPSTASH_REDIS_REST_TOKEN: process.env.UPSTASH_REDIS_REST_TOKEN,
+    UNSPLASH_ACCESS_KEY: process.env.UNSPLASH_ACCESS_KEY,
   };
 }
 
@@ -91,6 +93,10 @@ export const features = {
   get redisEnabled(): boolean {
     return !!(process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN);
   },
+  
+  get unsplashEnabled(): boolean {
+    return !!process.env.UNSPLASH_ACCESS_KEY;
+  },
 };
 
 export function logEnvStatus(): void {
@@ -99,4 +105,5 @@ export function logEnvStatus(): void {
   console.log(`  - AI (OpenAI): ${features.aiEnabled ? '✓' : '○ (optional)'}`);
   console.log(`  - Push Notifications: ${features.pushEnabled ? '✓' : '○ (optional)'}`);
   console.log(`  - Redis Rate Limiting: ${features.redisEnabled ? '✓' : '○ (using in-memory)'}`);
+  console.log(`  - Unsplash Cover Images: ${features.unsplashEnabled ? '✓' : '○ (using gradients)'}`);
 }

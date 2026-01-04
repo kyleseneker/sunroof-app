@@ -13,6 +13,8 @@ export interface CreateJourneyInput {
   unlockDate: string;
   sharedWith?: string[];
   emoji?: string;
+  coverImageUrl?: string;
+  coverImageAttribution?: string;
 }
 
 export interface UpdateJourneyInput {
@@ -40,6 +42,8 @@ export async function createJourney(input: CreateJourneyInput): Promise<ServiceR
         status: 'active',
         shared_with: input.sharedWith?.length ? input.sharedWith : null,
         emoji: input.emoji || null,
+        cover_image_url: input.coverImageUrl || null,
+        cover_image_attribution: input.coverImageAttribution || null,
       }])
       .select()
       .single();

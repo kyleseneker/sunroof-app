@@ -93,12 +93,35 @@ export default function CreateJourneyModal({
         }
       }
 
+      // Fetch cover image from Unsplash (non-blocking, graceful fallback)
+      let coverImageUrl: string | undefined;
+      let coverImageAttribution: string | undefined;
+      try {
+        const coverResponse = await fetch('/api/cover-image', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ query: cleanName }),
+        });
+        if (coverResponse.ok) {
+          const { photo } = await coverResponse.json();
+          if (photo) {
+            coverImageUrl = photo.url;
+            coverImageAttribution = photo.attribution;
+          }
+        }
+      } catch {
+        // Cover image is optional, continue without it
+        console.log('[CreateJourney] Cover image fetch failed, using gradient fallback');
+      }
+
       const { error } = await createJourney({
         userId,
         name: cleanName,
         unlockDate: unlockDate.toISOString(),
         sharedWith: sharedWithIds.length > 0 ? sharedWithIds : undefined,
         emoji: emoji || undefined,
+        coverImageUrl,
+        coverImageAttribution,
       });
 
       if (error) {

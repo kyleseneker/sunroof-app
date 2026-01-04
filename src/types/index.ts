@@ -28,6 +28,8 @@ export interface Journey {
   status: JourneyStatus;
   shared_with?: string[] | null;
   emoji?: string | null;
+  cover_image_url?: string | null;
+  cover_image_attribution?: string | null;
   deleted_at?: string | null;
   created_at: string;
   memory_count?: number;

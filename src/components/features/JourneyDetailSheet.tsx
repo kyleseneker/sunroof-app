@@ -158,14 +158,26 @@ export default function JourneyDetailSheet({
         loading={unlocking}
       />
       
-      {/* Dynamic gradient background */}
-      <div 
-        className="absolute inset-0"
-        style={{ background: getJourneyGradient(journey.name).gradient }}
-      />
-      <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-black/20" />
-      {/* Subtle pattern overlay */}
-      <div className="absolute inset-0 opacity-15 pattern-overlay" />
+      {/* Cover image or gradient background */}
+      {journey.cover_image_url ? (
+        <>
+          <div 
+            className="absolute inset-0 bg-cover bg-center"
+            style={{ backgroundImage: `url(${journey.cover_image_url})` }}
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-black/30" />
+        </>
+      ) : (
+        <>
+          <div 
+            className="absolute inset-0"
+            style={{ background: getJourneyGradient(journey.name).gradient }}
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-black/20" />
+          {/* Subtle pattern overlay */}
+          <div className="absolute inset-0 opacity-15 pattern-overlay" />
+        </>
+      )}
       
       
       {/* Top Bar */}

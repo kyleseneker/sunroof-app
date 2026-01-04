@@ -82,3 +82,10 @@ export {
   formatWeatherFull,
 } from './weather';
 
+// Unsplash cover images
+export {
+  searchLocationPhoto,
+  trackPhotoDownload,
+  type UnsplashPhoto,
+} from './unsplash';
+
