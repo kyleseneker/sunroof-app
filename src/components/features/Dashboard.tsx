@@ -7,7 +7,7 @@ import {
   getMemoryStreak,
 } from '@/services';
 import { useAuth } from '@/providers';
-import { hapticSuccess, getJourneyGradient, formatDate, getTimeUntilUnlock, isJourneyUnlocked, getGreeting, MAX_ACTIVE_JOURNEYS } from '@/lib';
+import { hapticSuccess, getJourneyGradient, formatDate, getTimeUntilUnlock, isJourneyUnlocked, getGreeting, MAX_ACTIVE_JOURNEYS, ErrorMessages, SuccessMessages } from '@/lib';
 import { Plus, ArrowRight, X, Lock, ChevronRight, Sparkles, Trash2, HelpCircle, Camera, ImageIcon, Pencil, Timer, Archive, Search, RefreshCw, EllipsisVertical, UserPlus, Mic, FileText, Flame } from 'lucide-react';
 import { useToast, Avatar, ConfirmDialog, IconButton, Badge } from '@/components/ui';
 import { 
@@ -26,8 +26,7 @@ import {
 import Image from 'next/image';
 import Link from 'next/link';
 import type { Journey } from '@/types';
-
-type CaptureMode = 'photo' | 'text' | 'audio';
+import type { CaptureMode } from './CameraView';
 
 interface DashboardProps {
   activeJourneys?: Journey[];
@@ -219,17 +218,17 @@ export default function Dashboard({ activeJourneys: initialActiveJourneys = [], 
     try {
       const { error } = await deleteJourney(journeyId);
       if (error) {
-        showToast('Failed to delete journey', 'error');
+        showToast(ErrorMessages.DELETE_FAILED('journey'), 'error');
         setIsDeleting(false);
         return;
       }
       hapticSuccess();
-      showToast('Journey deleted', 'success');
+      showToast(SuccessMessages.DELETED('Journey'), 'success');
       setDeleteConfirm(null);
       window.location.reload();
     } catch (err) {
       console.error('Delete journey error:', err);
-      showToast('Something went wrong', 'error');
+      showToast(ErrorMessages.GENERIC, 'error');
       setIsDeleting(false);
     }
   };
@@ -476,10 +475,10 @@ export default function Dashboard({ activeJourneys: initialActiveJourneys = [], 
       >
         <div className={`flex items-center gap-2 ${isRefreshing ? 'animate-pulse' : ''}`}>
           <RefreshCw 
-            className={`w-5 h-5 text-zinc-500 transition-transform ${isRefreshing ? 'animate-spin' : ''}`} 
+            className={`w-5 h-5 text-[var(--fg-muted)] transition-transform ${isRefreshing ? 'animate-spin' : ''}`} 
             style={{ transform: isRefreshing ? undefined : `rotate(${(pullDistance / PULL_THRESHOLD) * 360}deg)` }}
           />
-          <span className="text-sm text-zinc-500">
+          <span className="text-sm text-[var(--fg-muted)]">
             {isRefreshing ? 'Refreshing...' : pullDistance >= PULL_THRESHOLD ? 'Release to refresh' : 'Pull to refresh'}
           </span>
         </div>
@@ -668,48 +667,48 @@ export default function Dashboard({ activeJourneys: initialActiveJourneys = [], 
           ) : pastJourneysLoading ? (
             /* Loading state while fetching past journeys */
             <div className="text-center py-8 animate-enter">
-              <div className="w-8 h-8 mx-auto mb-4 rounded-full border-2 border-zinc-700 border-t-zinc-400 animate-spin" />
-              <p className="text-zinc-500 text-sm">Loading your journeys...</p>
+              <div className="w-8 h-8 mx-auto mb-4 rounded-full border-2 border-[var(--border-base)] border-t-[var(--fg-muted)] animate-spin" />
+              <p className="text-[var(--fg-muted)] text-sm">Loading your journeys...</p>
             </div>
           ) : pastJourneys.length === 0 ? (
             /* Empty state - first time user */
             <div className="text-center py-12 animate-enter">
               <div className="relative w-40 h-40 mx-auto mb-8 empty-illustration">
-                <div className="absolute inset-0 rounded-full bg-gradient-to-br from-orange-500/20 via-pink-500/10 to-purple-500/20 animate-breathe" />
-                <div className="absolute inset-4 rounded-full bg-gradient-to-br from-zinc-900 to-zinc-950 border border-zinc-800 flex items-center justify-center shadow-2xl">
+                <div className="absolute inset-0 rounded-full bg-gradient-to-br from-[var(--color-accent)]/20 via-[var(--color-gradient-mid)]/10 to-[var(--color-gradient-end)]/20 animate-breathe" />
+                <div className="absolute inset-4 rounded-full bg-gradient-to-br from-[var(--bg-surface)] to-[var(--bg-base)] border border-[var(--border-base)] flex items-center justify-center shadow-2xl">
                   <div className="relative">
-                    <Camera className="w-10 h-10 text-zinc-500" />
-                    <Sparkles className="absolute -top-2 -right-2 w-4 h-4 text-orange-400 animate-pulse" />
+                    <Camera className="w-10 h-10 text-[var(--fg-muted)]" />
+                    <Sparkles className="absolute -top-2 -right-2 w-4 h-4 text-[var(--color-accent)] animate-pulse" />
                   </div>
                 </div>
-                <div className="absolute top-2 right-6 w-3 h-3 rounded-full bg-gradient-to-br from-orange-400 to-orange-500 animate-float" style={{ animationDelay: '0s' }} />
-                <div className="absolute bottom-4 left-4 w-2 h-2 rounded-full bg-gradient-to-br from-pink-400 to-pink-500 animate-float" style={{ animationDelay: '0.5s' }} />
-                <div className="absolute top-1/2 -right-2 w-2 h-2 rounded-full bg-gradient-to-br from-purple-400 to-purple-500 animate-float" style={{ animationDelay: '1s' }} />
+                <div className="absolute top-2 right-6 w-3 h-3 rounded-full bg-gradient-to-br from-[var(--color-accent)] to-[var(--color-gradient-mid)] animate-float" style={{ animationDelay: '0s' }} />
+                <div className="absolute bottom-4 left-4 w-2 h-2 rounded-full bg-gradient-to-br from-[var(--color-gradient-mid)] to-[var(--color-gradient-end)] animate-float" style={{ animationDelay: '0.5s' }} />
+                <div className="absolute top-1/2 -right-2 w-2 h-2 rounded-full bg-gradient-to-br from-[var(--color-gradient-end)] to-[var(--color-accent)] animate-float" style={{ animationDelay: '1s' }} />
               </div>
               
-              <h2 className="text-3xl font-light text-white mb-3">Ready for an adventure?</h2>
-              <p className="text-base text-zinc-500 mb-10 max-w-[280px] mx-auto leading-relaxed">
+              <h2 className="text-3xl font-light text-[var(--fg-base)] mb-3">Ready for an adventure?</h2>
+              <p className="text-base text-[var(--fg-muted)] mb-10 max-w-[280px] mx-auto leading-relaxed">
                 Start a journey to capture photos and notes that unlock later. Like developing film.
               </p>
               
               <button 
                 onClick={() => setIsCreating(true)}
-                className="group relative inline-flex items-center gap-3 px-10 py-5 bg-gradient-to-r from-orange-500 via-orange-400 to-pink-500 rounded-full text-base font-semibold text-white hover:shadow-lg hover:shadow-orange-500/30 active:scale-[0.98] transition-all btn-shine cursor-pointer"
+                className="group relative inline-flex items-center gap-3 px-10 py-5 bg-gradient-to-r from-[var(--color-accent)] via-[var(--color-gradient-mid)] to-[var(--color-gradient-end)] rounded-full text-base font-semibold text-white hover:shadow-lg hover:shadow-[var(--color-accent)]/30 active:scale-[0.98] transition-all btn-shine cursor-pointer"
               >
                 <Plus className="w-5 h-5" />
                 <span>Start Your First Journey</span>
                 <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
               </button>
               
-              <p className="mt-6 text-xs text-zinc-600">Takes 30 seconds • No credit card needed</p>
+              <p className="mt-6 text-xs text-[var(--fg-subtle)]">Takes 30 seconds • No credit card needed</p>
             </div>
           ) : (
             /* No active journeys but has past journeys - show compact prompt */
             <div className="text-center py-8 animate-enter">
-              <p className="text-zinc-500 mb-4">No active journeys right now</p>
+              <p className="text-[var(--fg-muted)] mb-4">No active journeys right now</p>
               <button 
                 onClick={() => setIsCreating(true)}
-                className="inline-flex items-center gap-2 px-6 py-3 bg-white text-black rounded-full font-medium hover:bg-zinc-200 active:scale-[0.98] transition-all"
+                className="inline-flex items-center gap-2 px-6 py-3 bg-[var(--fg-base)] text-[var(--fg-inverse)] rounded-full font-medium hover:opacity-90 active:scale-[0.98] transition-all"
               >
                 <Plus className="w-4 h-4" />
                 <span>Start New Journey</span>

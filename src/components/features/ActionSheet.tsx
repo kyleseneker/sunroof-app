@@ -87,7 +87,7 @@ export default function ActionSheet({
         ref={sheetRef}
         className={`
           absolute bottom-0 left-0 right-0
-          bg-zinc-900 border-t border-zinc-800
+          bg-[var(--bg-surface)] border-t border-[var(--border-base)]
           rounded-t-3xl
           safe-bottom
           ${isClosing ? 'animate-slide-down' : 'animate-slide-up'}
@@ -96,13 +96,13 @@ export default function ActionSheet({
       >
         {/* Handle */}
         <div className="flex justify-center pt-3 pb-2">
-          <div className="w-10 h-1 bg-zinc-700 rounded-full" />
+          <div className="w-10 h-1 bg-[var(--border-base)] rounded-full" />
         </div>
 
         {/* Title */}
         {title && (
-          <div className="px-6 py-3 border-b border-zinc-800">
-            <h3 className="text-sm font-medium text-zinc-400 text-center">{title}</h3>
+          <div className="px-6 py-3 border-b border-[var(--border-base)]">
+            <h3 className="text-sm font-medium text-[var(--fg-muted)] text-center">{title}</h3>
           </div>
         )}
 
@@ -119,11 +119,11 @@ export default function ActionSheet({
                 transition-colors
                 ${option.disabled 
                   ? 'opacity-40 cursor-not-allowed' 
-                  : 'active:bg-zinc-800'
+                  : 'active:bg-[var(--bg-active)]'
                 }
                 ${option.variant === 'danger' 
-                  ? 'text-red-400' 
-                  : 'text-white'
+                  ? 'text-[var(--color-error)]' 
+                  : 'text-[var(--fg-base)]'
                 }
               `}
             >
@@ -131,8 +131,8 @@ export default function ActionSheet({
                 <span className={`
                   w-10 h-10 rounded-full flex items-center justify-center
                   ${option.variant === 'danger' 
-                    ? 'bg-red-500/10' 
-                    : 'bg-zinc-800'
+                    ? 'bg-[var(--color-error-subtle)]' 
+                    : 'bg-[var(--bg-muted)]'
                   }
                 `}>
                   {option.icon}
@@ -147,7 +147,7 @@ export default function ActionSheet({
         <div className="p-2 pt-0">
           <button
             onClick={handleClose}
-            className="w-full flex items-center justify-center gap-2 px-4 py-4 rounded-xl bg-zinc-800 text-zinc-300 font-medium active:bg-zinc-700 transition-colors"
+            className="w-full flex items-center justify-center gap-2 px-4 py-4 rounded-xl bg-[var(--bg-muted)] text-[var(--fg-muted)] font-medium active:bg-[var(--bg-active)] transition-colors"
           >
             <X className="w-4 h-4" />
             Cancel

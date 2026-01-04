@@ -5,7 +5,7 @@ import { X, MapPin, Timer, UserPlus, Plane } from 'lucide-react';
 import { useToast, Button } from '@/components/ui';
 import { EmojiPicker } from '@/components/features';
 import { createJourney, getUserIdByEmail } from '@/services';
-import { hapticSuccess, DESTINATION_SUGGESTIONS } from '@/lib';
+import { hapticSuccess, DESTINATION_SUGGESTIONS, ErrorMessages, MAX_JOURNEY_NAME_LENGTH } from '@/lib';
 
 interface CreateJourneyModalProps {
   isOpen: boolean;
@@ -52,15 +52,15 @@ export default function CreateJourneyModal({
     
     const cleanName = tripName.trim();
     if (!cleanName) {
-      showToast('Please enter a destination', 'error');
+      showToast(ErrorMessages.REQUIRED_FIELD('a destination'), 'error');
       return;
     }
-    if (cleanName.length > 50) {
-      showToast('Destination name is too long (max 50 characters)', 'error');
+    if (cleanName.length > MAX_JOURNEY_NAME_LENGTH) {
+      showToast(ErrorMessages.TOO_LONG('Destination name', MAX_JOURNEY_NAME_LENGTH), 'error');
       return;
     }
     if (!unlockDays && !customDate) {
-      showToast('Please select an unlock date', 'error');
+      showToast(ErrorMessages.INVALID_DATE, 'error');
       return;
     }
     
@@ -76,7 +76,7 @@ export default function CreateJourneyModal({
     }
 
     if (unlockDate <= new Date()) {
-      showToast('Unlock date must be in the future', 'error');
+      showToast(ErrorMessages.DATE_MUST_BE_FUTURE, 'error');
       setLoading(false);
       return;
     }
@@ -103,7 +103,7 @@ export default function CreateJourneyModal({
 
       if (error) {
         console.error('Create journey error:', error);
-        showToast('Couldn\'t create journey. Check your connection and try again.', 'error');
+        showToast(ErrorMessages.CREATE_FAILED('journey'), 'error');
         setLoading(false);
       } else {
         const shareMsg = sharedWithIds.length > 0 
@@ -121,7 +121,7 @@ export default function CreateJourneyModal({
       }
     } catch (err) {
       console.error('Create journey exception:', err);
-      showToast('Something went wrong. Please try again.', 'error');
+      showToast(ErrorMessages.GENERIC, 'error');
       setLoading(false);
     }
   };

@@ -5,10 +5,9 @@ import { X, Lock, Pencil, Trash2, UserPlus, Users, Clock, Camera, Unlock, Mic, F
 import { getEmailByUserId, updateJourney, fetchMemoriesForJourney } from '@/services';
 import { useToast, IconButton, ConfirmDialog } from '@/components/ui';
 import { MemoryPreviewCard, MemoryStatBadge, CountdownTimer } from '@/components/features';
-import { getJourneyGradient, hapticSuccess, formatRelativeDate } from '@/lib';
+import { getJourneyGradient, hapticSuccess, formatRelativeDate, ErrorMessages, SuccessMessages } from '@/lib';
 import type { Journey, Memory } from '@/types';
-
-type CaptureMode = 'photo' | 'text' | 'audio';
+import type { CaptureMode } from './CameraView';
 
 interface JourneyDetailSheetProps {
   journey: Journey | null;
@@ -93,12 +92,12 @@ export default function JourneyDetailSheet({
     });
     
     if (error) {
-      showToast('Failed to remove collaborator', 'error');
+      showToast(ErrorMessages.DELETE_FAILED('collaborator'), 'error');
       return;
     }
     
     hapticSuccess();
-    showToast('Collaborator removed', 'success');
+    showToast(SuccessMessages.DELETED('Collaborator'), 'success');
     
     onJourneyUpdated?.({
       ...journey,
@@ -118,7 +117,7 @@ export default function JourneyDetailSheet({
     });
     
     if (error) {
-      showToast('Failed to unlock journey', 'error');
+      showToast(ErrorMessages.UPDATE_FAILED('journey'), 'error');
       setUnlocking(false);
       return;
     }

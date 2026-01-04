@@ -33,12 +33,12 @@ describe('Button Component', () => {
 
   it('renders with primary variant by default', () => {
     render(<Button>Primary</Button>);
-    expect(screen.getByRole('button')).toHaveClass('bg-white', 'text-black');
+    expect(screen.getByRole('button')).toHaveClass('bg-[var(--fg-base)]', 'text-[var(--fg-inverse)]');
   });
 
   it('renders with secondary variant', () => {
     render(<Button variant="secondary">Secondary</Button>);
-    expect(screen.getByRole('button')).toHaveClass('bg-zinc-900', 'text-white');
+    expect(screen.getByRole('button')).toHaveClass('bg-[var(--bg-surface)]', 'text-[var(--fg-base)]');
   });
 
   it('renders with ghost variant', () => {
@@ -48,7 +48,7 @@ describe('Button Component', () => {
 
   it('renders with danger variant', () => {
     render(<Button variant="danger">Danger</Button>);
-    expect(screen.getByRole('button')).toHaveClass('text-red-400');
+    expect(screen.getByRole('button')).toHaveClass('text-[var(--color-error)]');
   });
 
   it('renders with different sizes', () => {

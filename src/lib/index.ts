@@ -63,6 +63,7 @@ export { supabase } from './supabase';
 
 // Constants
 export * from './constants';
+export type { TimeOfDay } from './constants';
 
 // Location services
 export {

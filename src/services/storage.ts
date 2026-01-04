@@ -192,11 +192,3 @@ export async function uploadMemoryAudio(
   }
 }
 
-/**
- * Get public URL for a storage path
- */
-export function getPublicUrl(bucket: 'memories' | 'avatars', path: string): string {
-  const { data } = supabase.storage.from(bucket).getPublicUrl(path);
-  return data.publicUrl;
-}
-

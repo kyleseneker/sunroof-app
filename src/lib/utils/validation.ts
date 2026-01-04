@@ -20,7 +20,7 @@ export function validateEmail(email: string): ValidationResult {
   return { valid: true };
 }
 
-export function validateJourneyName(name: string): ValidationResult {
+export function validateJourneyName(name: string, maxLength: number = 50): ValidationResult {
   if (!name) {
     return { valid: false, error: 'Journey name is required' };
   }
@@ -29,8 +29,8 @@ export function validateJourneyName(name: string): ValidationResult {
     return { valid: false, error: 'Journey name must be at least 2 characters' };
   }
 
-  if (name.length > 100) {
-    return { valid: false, error: 'Journey name must be less than 100 characters' };
+  if (name.length > maxLength) {
+    return { valid: false, error: `Journey name must be less than ${maxLength} characters` };
   }
 
   return { valid: true };

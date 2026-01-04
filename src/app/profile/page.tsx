@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useToast, Avatar, PageHeader, Section, SectionRow, Toggle, StatCard, IconButton } from '@/components/ui';
 import { NotificationSettings } from '@/components/features';
 import { useTheme } from '@/providers';
-import { formatDate } from '@/lib';
+import { formatDate, ErrorMessages, SuccessMessages } from '@/lib';
 import { 
   getCurrentUser, 
   getProfileStats, 
@@ -105,9 +105,9 @@ export default function ProfilePage() {
     const { error } = await updateProfile({ displayName: displayName.trim() });
     
     if (error) {
-      showToast('Failed to update name', 'error');
+      showToast(ErrorMessages.UPDATE_FAILED('name'), 'error');
     } else {
-      showToast('Name updated!', 'success');
+      showToast(SuccessMessages.UPDATED('Name'), 'success');
       setIsEditingName(false);
     }
     setSavingName(false);
@@ -119,11 +119,11 @@ export default function ProfilePage() {
 
     // Validate file
     if (!file.type.startsWith('image/')) {
-      showToast('Please select an image file', 'error');
+      showToast(ErrorMessages.INVALID_FILE_TYPE, 'error');
       return;
     }
     if (file.size > 5 * 1024 * 1024) {
-      showToast('Image must be under 5MB', 'error');
+      showToast(ErrorMessages.FILE_TOO_LARGE(5), 'error');
       return;
     }
 
@@ -135,7 +135,7 @@ export default function ProfilePage() {
 
       if (uploadError || !uploadData) {
         console.error('Upload error:', uploadError);
-        showToast('Failed to upload image', 'error');
+        showToast(ErrorMessages.UPLOAD_FAILED, 'error');
         setUploadingAvatar(false);
         return;
       }
@@ -144,14 +144,14 @@ export default function ProfilePage() {
       const { error: updateError } = await updateProfile({ avatarUrl: uploadData.publicUrl });
 
       if (updateError) {
-        showToast('Failed to save avatar', 'error');
+        showToast(ErrorMessages.SAVE_FAILED, 'error');
       } else {
         setAvatarUrl(uploadData.publicUrl);
-        showToast('Avatar updated!', 'success');
+        showToast(SuccessMessages.UPDATED('Avatar'), 'success');
       }
     } catch (err) {
       console.error('Avatar upload error:', err);
-      showToast('Failed to upload avatar', 'error');
+      showToast(ErrorMessages.UPLOAD_FAILED, 'error');
     }
 
     setUploadingAvatar(false);
@@ -172,14 +172,14 @@ export default function ProfilePage() {
       const { error } = await updateProfile({ avatarUrl: null });
 
       if (error) {
-        showToast('Failed to remove avatar', 'error');
+        showToast(ErrorMessages.DELETE_FAILED('avatar'), 'error');
       } else {
         setAvatarUrl(null);
-        showToast('Avatar removed', 'success');
+        showToast(SuccessMessages.DELETED('Avatar'), 'success');
       }
     } catch (err) {
       console.error('Remove avatar error:', err);
-      showToast('Failed to remove avatar', 'error');
+      showToast(ErrorMessages.GENERIC, 'error');
     }
     
     setUploadingAvatar(false);
@@ -187,7 +187,7 @@ export default function ProfilePage() {
 
   const handleSignOut = async () => {
     await serviceSignOut();
-    showToast('Signed out', 'success');
+    showToast(SuccessMessages.SIGNED_OUT, 'success');
     router.push('/login');
   };
 
@@ -203,11 +203,11 @@ export default function ProfilePage() {
       
       // Sign out
       await serviceSignOut();
-      showToast('Your account has been deleted', 'success');
+      showToast(SuccessMessages.DELETED('Your account'), 'success');
       router.push('/login');
     } catch (err) {
       console.error('Delete account error:', err);
-      showToast('Failed to delete account. Please try again.', 'error');
+      showToast(ErrorMessages.GENERIC, 'error');
     }
   };
 
@@ -237,10 +237,10 @@ export default function ProfilePage() {
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
 
-      showToast('Data exported successfully', 'success');
+      showToast(SuccessMessages.EXPORTED, 'success');
     } catch (err) {
       console.error('Export error:', err);
-      showToast('Failed to export data', 'error');
+      showToast(ErrorMessages.EXPORT_FAILED, 'error');
     }
     
     setIsExporting(false);

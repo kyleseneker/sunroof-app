@@ -71,22 +71,11 @@ export interface PushSubscription {
   updated_at?: string;
 }
 
-export type ToastType = 'success' | 'error' | 'info';
-
-export interface Toast {
-  id: string;
-  message: string;
-  type: ToastType;
-  duration: number;
-}
-
 export interface AIRecapResponse {
   recap: string | null;
   highlights: string[];
   error?: string;
 }
-
-export type TimeOfDay = 'morning' | 'afternoon' | 'evening' | 'night';
 
 export interface HapticPattern {
   light: number;

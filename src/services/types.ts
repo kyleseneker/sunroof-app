@@ -11,17 +11,3 @@ export interface ServiceResult<T> {
   error: string | null;
 }
 
-/**
- * Helper to create a success result
- */
-export function success<T>(data: T): ServiceResult<T> {
-  return { data, error: null };
-}
-
-/**
- * Helper to create an error result
- */
-export function failure<T = never>(error: string): ServiceResult<T> {
-  return { data: null, error };
-}
-

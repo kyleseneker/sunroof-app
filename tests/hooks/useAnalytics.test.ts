@@ -3,7 +3,6 @@ import { renderHook } from '@testing-library/react';
 import { useAnalytics, AnalyticsEvents } from '@/hooks';
 
 describe('useAnalytics', () => {
-  const originalNodeEnv = process.env.NODE_ENV;
   let consoleSpy: ReturnType<typeof vi.spyOn>;
 
   beforeEach(() => {
@@ -11,13 +10,13 @@ describe('useAnalytics', () => {
   });
 
   afterEach(() => {
-    process.env.NODE_ENV = originalNodeEnv;
     consoleSpy.mockRestore();
+    vi.unstubAllEnvs();
   });
 
   describe('trackEvent', () => {
     it('logs event in development', () => {
-      process.env.NODE_ENV = 'development';
+      vi.stubEnv('NODE_ENV', 'development');
       const { result } = renderHook(() => useAnalytics());
       
       result.current.trackEvent('test_event', { value: 123 });
@@ -26,7 +25,7 @@ describe('useAnalytics', () => {
     });
 
     it('does not log in production', () => {
-      process.env.NODE_ENV = 'production';
+      vi.stubEnv('NODE_ENV', 'production');
       const { result } = renderHook(() => useAnalytics());
       
       result.current.trackEvent('test_event');
@@ -35,7 +34,7 @@ describe('useAnalytics', () => {
     });
 
     it('handles event without properties', () => {
-      process.env.NODE_ENV = 'development';
+      vi.stubEnv('NODE_ENV', 'development');
       const { result } = renderHook(() => useAnalytics());
       
       result.current.trackEvent('simple_event');
@@ -46,7 +45,7 @@ describe('useAnalytics', () => {
 
   describe('trackPageView', () => {
     it('logs page view in development', () => {
-      process.env.NODE_ENV = 'development';
+      vi.stubEnv('NODE_ENV', 'development');
       const { result } = renderHook(() => useAnalytics());
       
       result.current.trackPageView('/test-page');
@@ -55,7 +54,7 @@ describe('useAnalytics', () => {
     });
 
     it('uses window.location.pathname when no path provided', () => {
-      process.env.NODE_ENV = 'development';
+      vi.stubEnv('NODE_ENV', 'development');
       const { result } = renderHook(() => useAnalytics());
       
       result.current.trackPageView();
@@ -66,7 +65,7 @@ describe('useAnalytics', () => {
 
   describe('identify', () => {
     it('logs identify in development', () => {
-      process.env.NODE_ENV = 'development';
+      vi.stubEnv('NODE_ENV', 'development');
       const { result } = renderHook(() => useAnalytics());
       
       result.current.identify('user-123', { plan: 'pro' });
@@ -75,7 +74,7 @@ describe('useAnalytics', () => {
     });
 
     it('does not log in production', () => {
-      process.env.NODE_ENV = 'production';
+      vi.stubEnv('NODE_ENV', 'production');
       const { result } = renderHook(() => useAnalytics());
       
       result.current.identify('user-123');

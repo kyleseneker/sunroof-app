@@ -36,9 +36,14 @@ describe('Validation Utilities', () => {
       expect(validateJourneyName('A')).toEqual({ valid: false, error: 'Journey name must be at least 2 characters' });
     });
 
-    it('returns error for name too long', () => {
+    it('returns error for name too long (default)', () => {
+      const longName = 'A'.repeat(51);
+      expect(validateJourneyName(longName)).toEqual({ valid: false, error: 'Journey name must be less than 50 characters' });
+    });
+
+    it('returns error for name too long (custom max)', () => {
       const longName = 'A'.repeat(101);
-      expect(validateJourneyName(longName)).toEqual({ valid: false, error: 'Journey name must be less than 100 characters' });
+      expect(validateJourneyName(longName, 100)).toEqual({ valid: false, error: 'Journey name must be less than 100 characters' });
     });
 
     it('returns valid for correct name', () => {

@@ -20,7 +20,7 @@ describe('Card Component', () => {
 
   it('renders with elevated variant', () => {
     const { container } = render(<Card variant="elevated">Elevated</Card>);
-    expect(container.firstChild).toHaveClass('shadow-xl');
+    expect(container.firstChild).toHaveClass('shadow-[var(--shadow-xl)]');
   });
 
   it('handles click events on interactive cards', () => {

@@ -1,12 +1,11 @@
 'use client';
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { compressImage, getCompressionStats, getTimeOfDay, NOTE_PROMPTS, PHOTO_FILTERS, type PhotoFilterKey, MAX_FILE_SIZE_BYTES, MAX_NOTE_LENGTH, ALLOWED_IMAGE_TYPES, IMAGE_COMPRESSION, getLocationContext, getWeather } from '@/lib';
+import { compressImage, getCompressionStats, getTimeOfDay, NOTE_PROMPTS, PHOTO_FILTERS, type PhotoFilterKey, type TimeOfDay, MAX_FILE_SIZE_BYTES, MAX_NOTE_LENGTH, ALLOWED_IMAGE_TYPES, IMAGE_COMPRESSION, getLocationContext, getWeather } from '@/lib';
 import type { MemoryLocation, MemoryWeather } from '@/types';
 import { getCurrentUser, uploadMemoryPhoto, uploadMemoryAudio, createMemory } from '@/services';
 import { X, Camera, FileText, Send, Check, Loader2, Upload, Sparkles, Mic, SwitchCamera, ImageIcon, Palette } from 'lucide-react';
 import { AudioRecorder, FilterSelector } from '@/components/features';
 import { IconButton } from '@/components/ui';
-import type { TimeOfDay } from '@/types';
 
 export type CaptureMode = 'photo' | 'text' | 'audio';
 

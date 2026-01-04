@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { api, getJourneyGradient } from '@/lib';
+import { api, getJourneyGradient, ErrorMessages } from '@/lib';
 import { deleteJourney, deleteMemory, fetchMemoriesForJourney } from '@/services';
 import { X, Trash2, Camera, Sparkles, MapPin, Play, ChevronDown, Quote, Pencil, MoreVertical } from 'lucide-react';
 import { useToast, ConfirmDialog, IconButton } from '@/components/ui';
@@ -129,7 +129,7 @@ export default function GalleryView({ journey: initialJourney, onClose, onMemory
       }
     } catch (err) {
       console.error('Recap fetch error:', err);
-      showToast('Failed to generate recap', 'error');
+      showToast(ErrorMessages.GENERIC, 'error');
     } finally {
       setRecapLoading(false);
     }
@@ -144,14 +144,14 @@ export default function GalleryView({ journey: initialJourney, onClose, onMemory
       const { error } = await deleteJourney(journey.id);
       if (error) {
         console.error('Delete journey error:', error);
-        showToast('Failed to delete journey', 'error');
+        showToast(ErrorMessages.DELETE_FAILED('journey'), 'error');
         setIsDeleting(false);
         return;
       }
       window.location.reload();
     } catch (err) {
       console.error('Delete journey exception:', err);
-      showToast('Something went wrong', 'error');
+      showToast(ErrorMessages.GENERIC, 'error');
       setIsDeleting(false);
     }
   };
@@ -164,7 +164,7 @@ export default function GalleryView({ journey: initialJourney, onClose, onMemory
       const { error } = await deleteMemory(memoryToDelete.id);
       if (error) {
         console.error('Delete memory error:', error);
-        showToast('Failed to delete memory', 'error');
+        showToast(ErrorMessages.DELETE_FAILED('memory'), 'error');
         setIsDeleting(false);
         return;
       }
@@ -175,7 +175,7 @@ export default function GalleryView({ journey: initialJourney, onClose, onMemory
       onMemoryDeleted?.();
     } catch (err) {
       console.error('Delete memory exception:', err);
-      showToast('Something went wrong', 'error');
+      showToast(ErrorMessages.GENERIC, 'error');
     } finally {
       setIsDeleting(false);
     }

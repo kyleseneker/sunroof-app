@@ -115,7 +115,7 @@ describe('ActionSheet', () => {
         <ActionSheet isOpen={true} onClose={mockOnClose} options={defaultOptions} />
       );
       const dangerButton = screen.getByText('Option 2').closest('button');
-      expect(dangerButton).toHaveClass('text-red-400');
+      expect(dangerButton).toHaveClass('text-[var(--color-error)]');
     });
 
     it('applies disabled styling', () => {

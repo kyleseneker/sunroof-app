@@ -121,7 +121,7 @@ describe('ConfirmDialog Component', () => {
       />
     );
     // The confirm button should have danger styling
-    expect(screen.getByText('Confirm').closest('button')).toHaveClass('text-red-400');
+    expect(screen.getByText('Confirm').closest('button')).toHaveClass('text-[var(--color-error)]');
   });
 
   it('renders with warning variant', () => {

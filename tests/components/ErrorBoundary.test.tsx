@@ -20,6 +20,7 @@ describe('ErrorBoundary Component', () => {
 
   afterEach(() => {
     consoleErrorSpy.mockRestore();
+    vi.unstubAllEnvs();
   });
 
   it('renders children when no error', () => {
@@ -95,8 +96,7 @@ describe('ErrorBoundary Component', () => {
   });
 
   it('shows error details in development', () => {
-    const originalEnv = process.env.NODE_ENV;
-    process.env.NODE_ENV = 'development';
+    vi.stubEnv('NODE_ENV', 'development');
     
     render(
       <ErrorBoundary>
@@ -106,8 +106,6 @@ describe('ErrorBoundary Component', () => {
     
     // Error message should be visible in dev
     expect(screen.getByText('Test error')).toBeInTheDocument();
-    
-    process.env.NODE_ENV = originalEnv;
   });
 });
 

@@ -182,7 +182,7 @@ describe('Toast Component', () => {
     });
     
     const toast = screen.getByText('Success message').closest('div');
-    expect(toast?.className).toContain('bg-green-500/10');
+    expect(toast?.className).toContain('bg-[var(--color-success-subtle)]');
   });
 
   it('applies correct styling for error toast', async () => {
@@ -197,7 +197,7 @@ describe('Toast Component', () => {
     });
     
     const toast = screen.getByText('Error message').closest('div');
-    expect(toast?.className).toContain('bg-red-500/10');
+    expect(toast?.className).toContain('bg-[var(--color-error-subtle)]');
   });
 
   it('applies correct styling for info toast', async () => {
@@ -212,7 +212,7 @@ describe('Toast Component', () => {
     });
     
     const toast = screen.getByText('Info message').closest('div');
-    expect(toast?.className).toContain('bg-blue-500/10');
+    expect(toast?.className).toContain('bg-[var(--color-info-subtle)]');
   });
 });
 
