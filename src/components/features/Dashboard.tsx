@@ -1,11 +1,7 @@
 'use client';
 
 import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
-import { 
-  deleteJourney, 
-  fetchPastJourneys as fetchPastJourneysService,
-  getMemoryStreak,
-} from '@/services';
+import { deleteJourney } from '@/services';
 import { useAuth } from '@/providers';
 import { hapticSuccess, getJourneyGradient, formatDate, getTimeUntilUnlock, isJourneyUnlocked, getGreeting, MAX_ACTIVE_JOURNEYS, ErrorMessages, SuccessMessages } from '@/lib';
 import { Plus, ArrowRight, X, Lock, ChevronRight, Sparkles, Trash2, HelpCircle, Camera, ImageIcon, Pencil, Timer, Archive, Search, RefreshCw, EllipsisVertical, UserPlus, Mic, FileText, Flame } from 'lucide-react';
@@ -30,18 +26,39 @@ import type { CaptureMode } from './CameraView';
 
 interface DashboardProps {
   activeJourneys?: Journey[];
+  pastJourneys?: Journey[];
+  streak?: number;
+  isLoading?: boolean;
+  onRefresh?: () => void;
   onCapture?: (journey: Journey, mode?: CaptureMode) => void;
 }
 
-export default function Dashboard({ activeJourneys: initialActiveJourneys = [], onCapture }: DashboardProps) {
+export default function Dashboard({ 
+  activeJourneys: initialActiveJourneys = [], 
+  pastJourneys: initialPastJourneys = [],
+  streak: initialStreak = 0,
+  isLoading: externalLoading = false,
+  onRefresh,
+  onCapture,
+}: DashboardProps) {
   const { showToast } = useToast();
   const { user } = useAuth();
   const [activeJourneys, setActiveJourneys] = useState<Journey[]>(initialActiveJourneys);
+  const [pastJourneys, setPastJourneys] = useState<Journey[]>(initialPastJourneys);
+  const [streak, setStreak] = useState<number>(initialStreak);
   
   // Sync with prop updates
   useEffect(() => {
     setActiveJourneys(initialActiveJourneys);
   }, [initialActiveJourneys]);
+  
+  useEffect(() => {
+    setPastJourneys(initialPastJourneys);
+  }, [initialPastJourneys]);
+  
+  useEffect(() => {
+    setStreak(initialStreak);
+  }, [initialStreak]);
   
   // Modal/sheet states
   const [isCreating, setIsCreating] = useState(false);
@@ -54,10 +71,7 @@ export default function Dashboard({ activeJourneys: initialActiveJourneys = [], 
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
   
   // Data states
-  const [pastJourneys, setPastJourneys] = useState<Journey[]>([]);
-  const [pastJourneysLoading, setPastJourneysLoading] = useState(true);
   const [isDeleting, setIsDeleting] = useState(false);
-  const [streak, setStreak] = useState<number>(0);
   
   // Search/filter state
   const [searchQuery, setSearchQuery] = useState('');
@@ -91,26 +105,6 @@ export default function Dashboard({ activeJourneys: initialActiveJourneys = [], 
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  // Fetch past/completed journeys and streak
-  const fetchPastJourneys = useCallback(async () => {
-    if (!user) return;
-    const { data, error } = await fetchPastJourneysService(user.id);
-    if (error) {
-      console.error('Error fetching past journeys:', error);
-      setPastJourneysLoading(false);
-      return;
-    }
-    setPastJourneys(data || []);
-    setPastJourneysLoading(false);
-
-    // Fetch streak in background
-    const { data: streakData } = await getMemoryStreak(user.id);
-    if (streakData !== null) setStreak(streakData);
-  }, [user]);
-
-  useEffect(() => {
-    fetchPastJourneys();
-  }, [fetchPastJourneys]);
 
   // Check if current user owns this journey
   const isOwner = (journey: Journey) => journey.user_id === user?.id;
@@ -155,9 +149,9 @@ export default function Dashboard({ activeJourneys: initialActiveJourneys = [], 
   // Pull to refresh handlers
   const handleRefresh = useCallback(async () => {
     setIsRefreshing(true);
-    await fetchPastJourneys();
+    onRefresh?.();
     setTimeout(() => setIsRefreshing(false), 800);
-  }, [fetchPastJourneys]);
+  }, [onRefresh]);
 
   // Pull-to-refresh touch handlers
   useEffect(() => {
@@ -567,9 +561,13 @@ export default function Dashboard({ activeJourneys: initialActiveJourneys = [], 
                     {/* Cover image or gradient background */}
                     {journey.cover_image_url ? (
                       <>
-                        <div 
-                          className="absolute inset-0 pointer-events-none bg-cover bg-center"
-                          style={{ backgroundImage: `url(${journey.cover_image_url})` }}
+                        <Image
+                          src={journey.cover_image_url}
+                          alt=""
+                          fill
+                          sizes="(max-width: 768px) 100vw, 600px"
+                          className="object-cover pointer-events-none"
+                          priority={index === 0}
                         />
                         <div className="absolute inset-0 pointer-events-none bg-gradient-to-t from-[var(--bg-base)] via-[var(--bg-base)]/70 to-[var(--bg-base)]/30" />
                       </>
@@ -676,8 +674,8 @@ export default function Dashboard({ activeJourneys: initialActiveJourneys = [], 
                 ))}
               </div>
             </div>
-          ) : pastJourneysLoading ? (
-            /* Loading state while fetching past journeys */
+          ) : externalLoading ? (
+            /* Loading state while fetching journeys */
             <div className="text-center py-8 animate-enter">
               <div className="w-8 h-8 mx-auto mb-4 rounded-full border-2 border-[var(--border-base)] border-t-[var(--fg-muted)] animate-spin" />
               <p className="text-[var(--fg-muted)] text-sm">Loading your journeys...</p>

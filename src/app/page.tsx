@@ -2,7 +2,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/providers';
-import { fetchActiveJourneys } from '@/services';
+import { useJourneys } from '@/hooks';
 import { CameraView, Dashboard, Intro, type CaptureMode } from '@/components/features';
 import type { Journey } from '@/types';
 
@@ -11,95 +11,61 @@ export default function Home() {
   const router = useRouter();
   
   const [hasSeenIntro, setHasSeenIntro] = useState(false);
-  const [activeJourneys, setActiveJourneys] = useState<Journey[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [fetchError, setFetchError] = useState(false);
+  const [introChecked, setIntroChecked] = useState(false);
   const [viewMode, setViewMode] = useState<'capture' | 'dashboard'>('dashboard');
   const [selectedJourney, setSelectedJourney] = useState<Journey | null>(null);
   const [captureMode, setCaptureMode] = useState<CaptureMode>('photo');
 
+  // Use cached journey data - shows instantly on return visits
+  const { 
+    activeJourneys, 
+    pastJourneys, 
+    streak,
+    isLoading, 
+    error,
+    refresh,
+  } = useJourneys(user?.id);
+
   // Redirect to login if not authenticated
-  // Auth session is managed by Supabase's built-in storage (via lib/auth.tsx)
   useEffect(() => {
     if (!authLoading && !user) {
       router.push('/login');
     }
   }, [user, authLoading, router]);
 
-  // Fetch active journeys with memory counts
-  const loadActiveJourneys = useCallback(async () => {
-    if (!user) return;
-    
-    setFetchError(false);
-    
-    try {
-      const { data, error } = await fetchActiveJourneys(user.id);
-      
-      if (error) {
-        console.error('Error fetching journeys:', error);
-        setFetchError(true);
-        return;
-      }
-      
-      setActiveJourneys(data || []);
-    } catch (err) {
-      console.error('Fetch journeys exception:', err);
-      setFetchError(true);
-    }
-  }, [user]);
-
   // Safe localStorage access (handles incognito/restricted modes)
-  const safeGetItem = (key: string): string | null => {
+  const safeGetItem = useCallback((key: string): string | null => {
     try {
       return localStorage.getItem(key);
     } catch {
       return null;
     }
-  };
+  }, []);
   
-  const safeSetItem = (key: string, value: string): void => {
+  const safeSetItem = useCallback((key: string, value: string): void => {
     try {
       localStorage.setItem(key, value);
     } catch {
-      // Storage not available (incognito mode, storage full, etc.)
       console.warn('localStorage not available');
     }
-  };
+  }, []);
 
+  // Check intro status
   useEffect(() => {
-    async function checkSession() {
-      if (!user) return;
-      
+    if (user) {
       const introSeen = safeGetItem('sunroof_intro');
       if (introSeen) setHasSeenIntro(true);
-
-      await loadActiveJourneys();
-      setLoading(false);
+      setIntroChecked(true);
     }
-    checkSession();
-  }, [loadActiveJourneys, user]);
-
-  // Refetch data when user returns to the app (visibility change)
-  useEffect(() => {
-    const handleVisibilityChange = () => {
-      if (document.visibilityState === 'visible' && hasSeenIntro) {
-        loadActiveJourneys();
-      }
-    };
-    
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-    return () => {
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
-    };
-  }, [loadActiveJourneys, hasSeenIntro]);
+  }, [user, safeGetItem]);
 
   const handleIntroComplete = () => {
     safeSetItem('sunroof_intro', 'true');
     setHasSeenIntro(true);
   };
 
-  // Show loading skeleton while checking auth or fetching data
-  if (authLoading || loading || !user) {
+  // Show loading skeleton while checking auth
+  if (authLoading || !user || !introChecked) {
     return (
       <div className="min-h-screen bg-[var(--bg-base)] safe-top safe-bottom">
         {/* Skeleton Header */}
@@ -117,16 +83,11 @@ export default function Home() {
         
         {/* Skeleton Content */}
         <div className="px-6">
-          {/* Greeting skeleton */}
           <div className="w-32 h-4 rounded bg-[var(--bg-muted)] shimmer-bg mb-6" />
-          
-          {/* Section label skeleton */}
           <div className="flex items-center gap-2 mb-4">
             <div className="w-2 h-2 rounded-full bg-[var(--bg-muted)]" />
             <div className="w-24 h-3 rounded bg-[var(--bg-muted)] shimmer-bg" />
           </div>
-          
-          {/* Journey card skeleton */}
           <div className="rounded-[28px] bg-[var(--bg-surface)] border border-[var(--border-base)] p-6 h-48 shimmer-bg" />
         </div>
       </div>
@@ -134,7 +95,7 @@ export default function Home() {
   }
 
   // Show error screen with retry button
-  if (fetchError && activeJourneys.length === 0) {
+  if (error && activeJourneys.length === 0 && pastJourneys.length === 0) {
     return (
       <div className="min-h-screen bg-[var(--bg-base)] flex flex-col items-center justify-center p-6 text-center">
         <div className="w-16 h-16 rounded-full bg-[var(--color-error-subtle)] flex items-center justify-center mb-4">
@@ -145,10 +106,7 @@ export default function Home() {
         <h2 className="text-xl font-semibold mb-2 text-[var(--fg-base)]">Connection Error</h2>
         <p className="text-[var(--fg-muted)] mb-6 max-w-xs">Unable to load your journeys. Please check your internet connection and try again.</p>
         <button 
-          onClick={() => {
-            setLoading(true);
-            loadActiveJourneys().finally(() => setLoading(false));
-          }}
+          onClick={() => refresh()}
           className="px-6 py-3 bg-[var(--fg-base)] text-[var(--fg-inverse)] rounded-full font-medium hover:opacity-90 active:scale-95 transition-all"
         >
           Try Again
@@ -172,17 +130,21 @@ export default function Home() {
           setViewMode('dashboard');
           setSelectedJourney(null);
           setCaptureMode('photo');
-          // Refetch journeys to get updated memory counts
-          await loadActiveJourneys();
+          // Refresh journey data to get updated memory counts
+          refresh();
         }} 
       />
     );
   }
 
-  // Show dashboard with all active journeys
+  // Show dashboard with all journey data (already cached)
   return (
     <Dashboard 
-      activeJourneys={activeJourneys} 
+      activeJourneys={activeJourneys}
+      pastJourneys={pastJourneys}
+      streak={streak}
+      isLoading={isLoading}
+      onRefresh={refresh}
       onCapture={(journey, mode = 'photo') => {
         setSelectedJourney(journey);
         setCaptureMode(mode);

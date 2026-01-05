@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Image from 'next/image';
 import { api, getJourneyGradient, ErrorMessages } from '@/lib';
 import { deleteJourney, deleteMemory, fetchMemoriesForJourney } from '@/services';
 import { X, Trash2, Camera, Sparkles, MapPin, Play, ChevronDown, Quote, Pencil, MoreVertical } from 'lucide-react';
@@ -239,10 +240,16 @@ export default function GalleryView({ journey: initialJourney, onClose, onMemory
       {/* Cover image or gradient header accent */}
       {journey.cover_image_url ? (
         <>
-          <div
-            className="absolute top-0 left-0 right-0 h-48 bg-cover bg-center"
-            style={{ backgroundImage: `url(${journey.cover_image_url})` }}
-          />
+          <div className="absolute top-0 left-0 right-0 h-48">
+            <Image
+              src={journey.cover_image_url}
+              alt=""
+              fill
+              sizes="100vw"
+              className="object-cover"
+              priority
+            />
+          </div>
           <div className="absolute top-0 left-0 right-0 h-48 bg-gradient-to-b from-transparent via-[var(--bg-base)]/60 to-[var(--bg-base)]" />
         </>
       ) : (

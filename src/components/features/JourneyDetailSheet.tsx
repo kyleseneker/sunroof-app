@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Image from 'next/image';
 import { X, Lock, Pencil, Trash2, UserPlus, Users, Clock, Camera, Unlock, Mic, FileText } from 'lucide-react';
 import { getEmailByUserId, updateJourney, fetchMemoriesForJourney } from '@/services';
 import { useToast, IconButton, ConfirmDialog } from '@/components/ui';
@@ -161,9 +162,13 @@ export default function JourneyDetailSheet({
       {/* Cover image or gradient background */}
       {journey.cover_image_url ? (
         <>
-          <div 
-            className="absolute inset-0 bg-cover bg-center"
-            style={{ backgroundImage: `url(${journey.cover_image_url})` }}
+          <Image
+            src={journey.cover_image_url}
+            alt=""
+            fill
+            sizes="100vw"
+            className="object-cover"
+            priority
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-black/30" />
         </>
