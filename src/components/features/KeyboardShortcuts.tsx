@@ -37,7 +37,7 @@ interface KeyboardShortcutsHelpProps {
  */
 function Key({ children }: { children: React.ReactNode }) {
   return (
-    <kbd className="inline-flex items-center justify-center min-w-[28px] h-7 px-2 bg-zinc-800 border border-zinc-700 rounded-lg text-xs font-mono text-zinc-300 shadow-[0_2px_0_0_rgba(0,0,0,0.3)]">
+    <kbd className="inline-flex items-center justify-center min-w-[28px] h-7 px-2 bg-white/10 border border-white/20 rounded-lg text-xs font-mono text-white shadow-[0_2px_0_0_rgba(0,0,0,0.3)]">
       {children}
     </kbd>
   );
@@ -75,22 +75,22 @@ export function KeyboardShortcutsHelp({ isOpen, onClose }: KeyboardShortcutsHelp
 
   return (
     <div 
-      className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 animate-enter"
+      className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 animate-enter"
       onClick={onClose}
     >
       <div 
-        className="w-full max-w-md bg-zinc-900 border border-zinc-800 rounded-2xl shadow-2xl overflow-hidden"
+        className="w-full max-w-md bg-gradient-to-br from-amber-950 via-orange-950 to-slate-950 border border-white/10 rounded-3xl shadow-2xl overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-zinc-800">
+        <div className="flex items-center justify-between p-5 border-b border-white/10">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-zinc-800 flex items-center justify-center">
-              <Keyboard className="w-5 h-5 text-zinc-400" />
+            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-amber-500/20 to-orange-500/20 border border-amber-500/20 flex items-center justify-center">
+              <Keyboard className="w-5 h-5 text-amber-400" />
             </div>
             <div>
-              <h2 className="font-semibold text-white">Keyboard Shortcuts</h2>
-              <p className="text-xs text-zinc-500">Press any key to get started</p>
+              <h2 className="font-medium text-white">Keyboard Shortcuts</h2>
+              <p className="text-xs text-white/40">Press any key to get started</p>
             </div>
           </div>
           <IconButton 
@@ -104,23 +104,23 @@ export function KeyboardShortcutsHelp({ isOpen, onClose }: KeyboardShortcutsHelp
         </div>
 
         {/* Shortcuts List */}
-        <div className="p-4 max-h-[60vh] overflow-y-auto space-y-6">
+        <div className="p-5 max-h-[60vh] overflow-y-auto space-y-6">
           {Object.entries(grouped).map(([category, shortcuts]) => (
             <div key={category}>
-              <h3 className="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-3">
+              <h3 className="text-xs font-medium text-amber-400/80 uppercase tracking-wider mb-3">
                 {category}
               </h3>
               <div className="space-y-2">
                 {shortcuts.map((shortcut, i) => (
                   <div
                     key={i}
-                    className="flex items-center justify-between py-2"
+                    className="flex items-center justify-between py-2 px-3 rounded-xl bg-white/5"
                   >
-                    <span className="text-sm text-zinc-300">{shortcut.description}</span>
+                    <span className="text-sm text-white/70">{shortcut.description}</span>
                     <div className="flex items-center gap-1">
                       {shortcut.keys.map((key, j) => (
                         <span key={j} className="flex items-center gap-1">
-                          {j > 0 && <span className="text-zinc-600 text-xs">+</span>}
+                          {j > 0 && <span className="text-white/30 text-xs">+</span>}
                           <Key>{key === '⌘' ? <Command className="w-3 h-3" /> : key}</Key>
                         </span>
                       ))}
@@ -133,8 +133,8 @@ export function KeyboardShortcutsHelp({ isOpen, onClose }: KeyboardShortcutsHelp
         </div>
 
         {/* Footer */}
-        <div className="p-4 border-t border-zinc-800 bg-zinc-900/50">
-          <p className="text-xs text-zinc-600 text-center">
+        <div className="p-4 border-t border-white/10">
+          <p className="text-xs text-white/40 text-center">
             Press <Key>?</Key> anytime to show this help
           </p>
         </div>

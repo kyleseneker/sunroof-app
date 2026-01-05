@@ -118,25 +118,26 @@ export default function ActionSheet({
   };
 
   // Calculate backdrop opacity based on drag
-  const backdropOpacity = Math.max(0.6 - (dragOffset / 400), 0.2);
+  const backdropOpacity = Math.max(0.7 - (dragOffset / 400), 0.3);
 
   return (
     <div 
       className={`fixed inset-0 z-50 ${isClosing ? 'animate-fade-out' : 'animate-fade-in'}`}
       onClick={handleClose}
     >
-      {/* Backdrop */}
+      {/* Backdrop with blur */}
       <div 
-        className="absolute inset-0 bg-black backdrop-blur-sm transition-opacity"
+        className="absolute inset-0 bg-black/60 backdrop-blur-md transition-opacity"
         style={{ opacity: backdropOpacity }}
       />
       
-      {/* Sheet */}
+      {/* Sheet - glassmorphism style */}
       <div 
         ref={sheetRef}
         className={`
           absolute bottom-0 left-0 right-0
-          bg-[var(--bg-surface)] border-t border-[var(--border-base)]
+          bg-gradient-to-br from-amber-950/98 via-orange-950/98 to-slate-950/98 backdrop-blur-xl
+          border-t border-white/10
           rounded-t-3xl
           safe-bottom
           ${isClosing ? 'animate-slide-down' : isDragging ? '' : 'animate-slide-up'}
@@ -148,23 +149,23 @@ export default function ActionSheet({
         {/* Handle - swipe zone for dismiss */}
         <div 
           ref={handleRef}
-          className="flex justify-center pt-3 pb-2 cursor-grab active:cursor-grabbing touch-none"
+          className="flex justify-center pt-4 pb-3 cursor-grab active:cursor-grabbing touch-none"
           onTouchStart={handleTouchStart}
           onTouchMove={handleTouchMove}
           onTouchEnd={handleTouchEnd}
         >
-          <div className="w-10 h-1 bg-[var(--border-base)] rounded-full" />
+          <div className="w-10 h-1 bg-white/30 rounded-full" />
         </div>
 
         {/* Title */}
         {title && (
-          <div className="px-6 py-3 border-b border-[var(--border-base)]">
-            <h3 className="text-sm font-medium text-[var(--fg-muted)] text-center">{title}</h3>
+          <div className="px-6 py-3 border-b border-white/10">
+            <h3 className="text-sm font-medium text-white/60 text-center">{title}</h3>
           </div>
         )}
 
         {/* Options */}
-        <div className="p-2">
+        <div className="p-3">
           {options.map((option, i) => (
             <button
               key={i}
@@ -172,24 +173,24 @@ export default function ActionSheet({
               disabled={option.disabled}
               className={`
                 w-full flex items-center gap-4 px-4 py-4
-                rounded-xl text-left
-                transition-colors
+                rounded-2xl text-left
+                transition-all
                 ${option.disabled 
                   ? 'opacity-40 cursor-not-allowed' 
-                  : 'active:bg-[var(--bg-active)]'
+                  : 'active:bg-white/10 hover:bg-white/5'
                 }
                 ${option.variant === 'danger' 
-                  ? 'text-[var(--color-error)]' 
-                  : 'text-[var(--fg-base)]'
+                  ? 'text-red-400' 
+                  : 'text-white'
                 }
               `}
             >
               {option.icon && (
                 <span className={`
-                  w-10 h-10 rounded-full flex items-center justify-center
+                  w-11 h-11 rounded-xl flex items-center justify-center backdrop-blur-sm
                   ${option.variant === 'danger' 
-                    ? 'bg-[var(--color-error-subtle)]' 
-                    : 'bg-[var(--bg-muted)]'
+                    ? 'bg-red-500/20 border border-red-500/20' 
+                    : 'bg-white/10 border border-white/10'
                   }
                 `}>
                   {option.icon}
@@ -201,10 +202,10 @@ export default function ActionSheet({
         </div>
 
         {/* Cancel Button */}
-        <div className="p-2 pt-0">
+        <div className="p-3 pt-0">
           <button
             onClick={handleClose}
-            className="w-full flex items-center justify-center gap-2 px-4 py-4 rounded-xl bg-[var(--bg-muted)] text-[var(--fg-muted)] font-medium active:bg-[var(--bg-active)] transition-colors"
+            className="w-full flex items-center justify-center gap-2 px-4 py-4 rounded-2xl bg-white/10 backdrop-blur-sm border border-white/10 text-white/60 font-medium hover:bg-white/15 active:bg-white/20 transition-all"
           >
             <X className="w-4 h-4" />
             Cancel

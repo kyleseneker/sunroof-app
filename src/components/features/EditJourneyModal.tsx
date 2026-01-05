@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { X, Pencil, MapPin, Timer } from 'lucide-react';
-import { useToast, Button } from '@/components/ui';
+import { useToast, Button, IconButton } from '@/components/ui';
 import { EmojiPicker } from '@/components/features';
 import { updateJourney } from '@/services';
 import { hapticSuccess } from '@/lib';
@@ -98,28 +98,42 @@ export default function EditJourneyModal({
   if (!journey) return null;
 
   return (
-    <div className="fixed inset-0 z-[60] bg-[var(--bg-base)] flex flex-col safe-top safe-bottom overflow-y-auto">
-      <div className="flex-1 flex flex-col p-6 animate-enter">
-        <button 
+    <div className="fixed inset-0 z-[60] flex flex-col safe-top safe-bottom overflow-y-auto">
+      {/* Warm gradient background */}
+      <div className="absolute inset-0 bg-gradient-to-br from-amber-950 via-orange-950 to-slate-950" />
+      
+      {/* Ambient background effects */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute -top-32 -right-32 w-96 h-96 bg-amber-500/10 rounded-full blur-3xl" />
+        <div className="absolute -bottom-32 -left-32 w-96 h-96 bg-orange-500/10 rounded-full blur-3xl" />
+      </div>
+      
+      {/* Header */}
+      <header className="relative z-10 flex items-center p-6">
+        <IconButton 
+          icon={<X className="w-5 h-5" />}
+          label="Close"
           onClick={handleClose}
-          className="self-end w-10 h-10 flex items-center justify-center rounded-full bg-[var(--bg-hover)] mb-8 flex-shrink-0"
-        >
-          <X className="w-5 h-5 text-[var(--fg-muted)]" />
-        </button>
+          variant="ghost"
+          dark
+        />
+      </header>
+
+      <div className="flex-1 flex flex-col px-6 pb-6 animate-enter relative z-10">
         
         <div className="flex-1 flex flex-col justify-center max-w-sm mx-auto w-full">
           <div className="flex items-center gap-3 mb-2">
-            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-500/20 to-purple-500/20 flex items-center justify-center">
-              <Pencil className="w-6 h-6 text-blue-400" />
+            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-amber-500/30 to-orange-500/20 backdrop-blur-md border border-white/10 flex items-center justify-center">
+              <Pencil className="w-6 h-6 text-amber-400" />
             </div>
-            <h2 className="text-3xl font-light tracking-tight text-[var(--fg-base)]">Edit Journey</h2>
+            <h2 className="text-3xl font-light tracking-tight text-white">Edit Journey</h2>
           </div>
-          <p className="text-[var(--fg-muted)] text-sm mb-10 ml-[60px]">Update your journey details</p>
+          <p className="text-white/50 text-sm mb-10 ml-[60px]">Update your journey details</p>
           
           <div className="space-y-8">
             {/* Name */}
             <div>
-              <label className="flex items-center gap-2 text-[11px] uppercase tracking-[0.2em] text-[var(--fg-muted)] font-medium mb-3">
+              <label className="flex items-center gap-2 text-[11px] uppercase tracking-[0.2em] text-white/50 font-medium mb-3">
                 <MapPin className="w-3 h-3" />
                 Name
               </label>
@@ -128,7 +142,7 @@ export default function EditJourneyModal({
                 value={editName}
                 onChange={(e) => setEditName(e.target.value)}
                 maxLength={50}
-                className="w-full bg-[var(--bg-surface)]/50 border border-[var(--border-base)] focus:border-blue-400 rounded-2xl px-5 py-4 text-2xl font-light text-[var(--fg-base)] placeholder:text-[var(--fg-subtle)] focus:outline-none focus:bg-[var(--bg-base)]/50 transition-all input-premium"
+                className="w-full bg-white/5 backdrop-blur-md border border-white/20 focus:border-amber-400/50 rounded-2xl px-5 py-4 text-2xl font-light text-white placeholder:text-white/30 focus:outline-none focus:bg-white/10 transition-all"
               />
             </div>
             
@@ -138,7 +152,7 @@ export default function EditJourneyModal({
             {/* Unlock Date - only show for locked journeys (unlock date in future) */}
             {new Date(journey.unlock_date) > new Date() && (
               <div>
-                <label className="flex items-center gap-2 text-[11px] uppercase tracking-[0.2em] text-[var(--fg-muted)] font-medium mb-3">
+                <label className="flex items-center gap-2 text-[11px] uppercase tracking-[0.2em] text-white/50 font-medium mb-3">
                   <Timer className="w-3 h-3" />
                   Unlock Date
                 </label>
@@ -147,7 +161,7 @@ export default function EditJourneyModal({
                   value={editDate}
                   onChange={(e) => setEditDate(e.target.value)}
                   min={new Date().toISOString().split('T')[0]}
-                  className="w-full bg-[var(--bg-surface)]/50 border border-[var(--border-base)] focus:border-blue-400 rounded-2xl px-5 py-4 text-lg text-[var(--fg-base)] focus:outline-none focus:bg-[var(--bg-base)]/50 transition-all appearance-none"
+                  className="w-full bg-white/5 backdrop-blur-md border border-white/20 focus:border-amber-400/50 rounded-2xl px-5 py-4 text-lg text-white focus:outline-none focus:bg-white/10 transition-all appearance-none [color-scheme:dark]"
                   style={{ minWidth: 0 }}
                 />
               </div>
@@ -159,7 +173,7 @@ export default function EditJourneyModal({
               loading={isSaving}
               fullWidth 
               size="lg" 
-              className="mt-4"
+              className="mt-4 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-white border-0"
             >
               {isSaving ? 'Saving...' : 'Save Changes'}
             </Button>

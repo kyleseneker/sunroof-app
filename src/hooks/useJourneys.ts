@@ -4,27 +4,24 @@
  */
 
 import useSWR from 'swr';
-import { fetchActiveJourneys, fetchPastJourneys, getMemoryStreak } from '@/services';
+import { fetchActiveJourneys, fetchPastJourneys } from '@/services';
 import type { Journey } from '@/types';
 
 interface JourneyData {
   activeJourneys: Journey[];
   pastJourneys: Journey[];
-  streak: number;
 }
 
 async function fetchAllJourneyData(userId: string): Promise<JourneyData> {
   // Fetch everything in parallel
-  const [activeResult, pastResult, streakResult] = await Promise.all([
+  const [activeResult, pastResult] = await Promise.all([
     fetchActiveJourneys(userId),
     fetchPastJourneys(userId),
-    getMemoryStreak(userId),
   ]);
 
   return {
     activeJourneys: activeResult.data || [],
     pastJourneys: pastResult.data || [],
-    streak: streakResult.data ?? 0,
   };
 }
 
@@ -48,11 +45,9 @@ export function useJourneys(userId: string | undefined) {
   return {
     activeJourneys: data?.activeJourneys || [],
     pastJourneys: data?.pastJourneys || [],
-    streak: data?.streak || 0,
     isLoading: isLoading && !data,
     isRefreshing: isValidating,
     error: error?.message || null,
     refresh: () => mutate(),
   };
 }
-

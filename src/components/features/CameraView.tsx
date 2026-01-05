@@ -687,35 +687,45 @@ const handleAudioError = (message: string) => {
   // Photo preview mode with filter selection
   if (previewUrl) {
     return (
-      <div className="fixed inset-0 bg-black text-white z-50 flex flex-col safe-top safe-bottom">
+      <div className="fixed inset-0 text-white z-50 flex flex-col safe-top safe-bottom overflow-hidden">
+        {/* Immersive background */}
+        <div className="absolute inset-0 bg-gradient-to-br from-amber-950 via-orange-950 to-slate-950">
+          <div className="absolute top-20 right-10 w-80 h-80 bg-amber-500/20 rounded-full blur-3xl" />
+          <div className="absolute bottom-40 left-10 w-96 h-96 bg-orange-500/20 rounded-full blur-3xl" />
+        </div>
+        
         {/* Top Bar */}
-        <div className="absolute top-0 left-0 right-0 z-30 safe-top">
-          <div className="flex justify-between items-center p-6 bg-gradient-to-b from-black/80 via-black/40 to-transparent">
+        <div className="relative z-30 safe-top">
+          <div className="flex justify-between items-center p-6">
             <IconButton 
               icon={<X className="w-5 h-5" />}
               label="Cancel"
               onClick={cancelPreview}
-              variant="bordered"
+              variant="ghost"
               dark
             />
-            <span className="text-sm font-medium opacity-60">Choose a filter</span>
+            <div className="px-4 py-1.5 bg-white/10 backdrop-blur-sm rounded-full border border-white/10">
+              <span className="text-sm font-medium text-white/70">Choose a filter</span>
+            </div>
             <div className="w-10" /> {/* Spacer */}
           </div>
         </div>
 
         {/* Photo Preview */}
-        <div className="flex-1 flex items-center justify-center p-4 pt-24 pb-48">
-          <img
-            src={previewUrl}
-            alt="Preview"
-            className="max-w-full max-h-full object-contain rounded-2xl"
-            style={{ filter: PHOTO_FILTERS[selectedFilter].filter }}
-          />
+        <div className="relative z-10 flex-1 flex items-center justify-center p-4 pb-48">
+          <div className="relative rounded-2xl overflow-hidden shadow-2xl">
+            <img
+              src={previewUrl}
+              alt="Preview"
+              className="max-w-full max-h-[60vh] object-contain"
+              style={{ filter: PHOTO_FILTERS[selectedFilter].filter }}
+            />
+          </div>
         </div>
 
         {/* Bottom Controls */}
         <div className="absolute bottom-0 left-0 right-0 z-30 safe-bottom">
-          <div className="p-6 pt-8 bg-gradient-to-t from-black via-black/90 to-transparent">
+          <div className="p-6 pt-8 bg-gradient-to-t from-black/80 via-black/60 to-transparent backdrop-blur-sm">
             {/* Filter Selector */}
             <div className="mb-6">
               <FilterSelector
@@ -729,7 +739,7 @@ const handleAudioError = (message: string) => {
             <button
               onClick={savePhotoWithFilter}
               disabled={loading}
-              className="w-full py-4 rounded-2xl bg-white text-black font-semibold flex items-center justify-center gap-2 active:scale-[0.98] transition-transform disabled:opacity-50"
+              className="w-full py-4 rounded-full bg-white text-gray-900 font-semibold flex items-center justify-center gap-2 active:scale-[0.98] transition-transform disabled:opacity-50 shadow-2xl"
             >
               {loading ? (
                 <>
@@ -749,7 +759,7 @@ const handleAudioError = (message: string) => {
         {/* Error message */}
         {error && (
           <div className="absolute top-24 left-6 right-6 z-40">
-            <div className="bg-red-500/90 backdrop-blur-sm text-white px-4 py-3 rounded-xl text-center text-sm">
+            <div className="bg-red-500/20 backdrop-blur-sm text-red-300 px-4 py-3 rounded-xl text-center text-sm border border-red-500/30">
               {error}
             </div>
           </div>
@@ -759,7 +769,15 @@ const handleAudioError = (message: string) => {
   }
 
   return (
-    <div className="fixed inset-0 bg-black text-white z-50 flex flex-col safe-top safe-bottom">
+    <div className="fixed inset-0 text-white z-50 flex flex-col safe-top safe-bottom overflow-hidden">
+      {/* Immersive background for non-photo modes */}
+      {mode !== 'photo' && (
+        <div className="absolute inset-0 bg-gradient-to-br from-amber-950 via-orange-950 to-slate-950">
+          <div className="absolute top-20 right-10 w-80 h-80 bg-amber-500/20 rounded-full blur-3xl" />
+          <div className="absolute bottom-40 left-10 w-96 h-96 bg-orange-500/20 rounded-full blur-3xl" />
+        </div>
+      )}
+      {mode === 'photo' && <div className="absolute inset-0 bg-black" />}
       
       {/* Top Bar */}
       <div className="absolute top-0 left-0 right-0 z-30 safe-top">
@@ -768,12 +786,12 @@ const handleAudioError = (message: string) => {
             icon={<X className="w-5 h-5" />}
             label="Close camera"
             onClick={onClose}
-            variant="bordered"
+            variant="ghost"
             dark
           />
           
-          <div className="px-4 py-2 rounded-full bg-black/40 backdrop-blur-md border border-white/10">
-            <span className="text-[11px] font-semibold tracking-[0.15em] uppercase">{journeyName}</span>
+          <div className="px-4 py-2 rounded-full bg-white/10 backdrop-blur-md border border-white/10">
+            <span className="text-[11px] font-semibold tracking-[0.15em] uppercase text-white/80">{journeyName}</span>
           </div>
           
           <div className="w-10" />
@@ -802,7 +820,7 @@ const handleAudioError = (message: string) => {
       )}
 
       {/* Viewfinder Area */}
-      <div className="flex-1 relative bg-zinc-950">
+      <div className="flex-1 relative">
         {mode === 'audio' ? (
           <div className="absolute inset-0 flex items-center justify-center pt-20">
             <AudioRecorder
@@ -846,26 +864,34 @@ const handleAudioError = (message: string) => {
             
             {/* Camera error state */}
             {cameraError && (
-              <div className="absolute inset-0 flex flex-col items-center justify-center z-20 bg-zinc-950 px-8">
-                <div className="w-16 h-16 rounded-full bg-red-500/10 flex items-center justify-center mb-4">
-                  <Camera className="w-8 h-8 text-red-400" />
+              <div className="absolute inset-0 flex flex-col items-center justify-center z-20 px-8">
+                {/* Warm gradient background for error state */}
+                <div className="absolute inset-0 bg-gradient-to-br from-amber-950 via-orange-950 to-slate-950">
+                  <div className="absolute top-20 right-10 w-80 h-80 bg-amber-500/20 rounded-full blur-3xl" />
+                  <div className="absolute bottom-40 left-10 w-96 h-96 bg-orange-500/20 rounded-full blur-3xl" />
                 </div>
-                <p className="text-zinc-400 text-sm mb-6 text-center">{cameraError}</p>
-                <div className="flex gap-3">
-                  <button
-                    onClick={() => startCamera()}
-                    className="px-6 py-3 bg-white text-black rounded-full font-medium text-sm flex items-center gap-2"
-                  >
-                    <Camera className="w-4 h-4" />
-                    Try Again
-                  </button>
-                  <button
-                    onClick={() => fileInputRef.current?.click()}
-                    className="px-6 py-3 bg-zinc-800 text-white rounded-full font-medium text-sm flex items-center gap-2"
-                  >
-                    <Upload className="w-4 h-4" />
-                    Upload
-                  </button>
+                
+                <div className="relative z-10 flex flex-col items-center">
+                  <div className="w-20 h-20 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center mb-6 border border-white/20">
+                    <Camera className="w-10 h-10 text-white/60" />
+                  </div>
+                  <p className="text-white/60 text-sm mb-8 text-center max-w-xs">{cameraError}</p>
+                  <div className="flex gap-3">
+                    <button
+                      onClick={() => startCamera()}
+                      className="px-6 py-3 bg-white text-gray-900 rounded-full font-semibold text-sm flex items-center gap-2 shadow-2xl active:scale-[0.98] transition-transform"
+                    >
+                      <Camera className="w-4 h-4" />
+                      Try Again
+                    </button>
+                    <button
+                      onClick={() => fileInputRef.current?.click()}
+                      className="px-6 py-3 bg-white/10 backdrop-blur-sm text-white rounded-full font-medium text-sm flex items-center gap-2 border border-white/20 active:scale-[0.98] transition-transform"
+                    >
+                      <Upload className="w-4 h-4" />
+                      Upload
+                    </button>
+                  </div>
                 </div>
               </div>
             )}
@@ -922,13 +948,8 @@ const handleAudioError = (message: string) => {
             )}
           </div>
         ) : (
-          <div className="absolute inset-0 pt-24 pb-48 px-6 flex flex-col">
-            {/* Note icon header */}
-            <div className="flex items-center gap-3 opacity-50 mb-4">
-              <FileText className="w-5 h-5" />
-              <span className="text-sm uppercase tracking-wider">Write a memory</span>
-            </div>
-            
+          <div className="absolute inset-0 pt-24 pb-52 px-6 flex flex-col overflow-y-auto">
+            {/* Full-screen writing area */}
             <textarea 
               autoFocus
               placeholder="What do you want to remember?"
@@ -938,60 +959,35 @@ const handleAudioError = (message: string) => {
                 if (e.target.value) setShowPrompts(false);
               }}
               maxLength={10000}
-              className="min-h-[120px] max-h-[40vh] w-full bg-transparent text-xl font-light text-white placeholder:text-zinc-600 focus:outline-none resize-none leading-relaxed"
+              className="flex-1 min-h-[200px] w-full bg-transparent text-2xl font-light text-white placeholder:text-white/30 focus:outline-none resize-none leading-relaxed"
             />
             
-            {/* Character hint */}
-            {note.length > 500 && (
-              <div className="text-xs text-zinc-600 text-right mb-2">
-                {note.length.toLocaleString()} characters
-              </div>
-            )}
-            
-            {/* Smart prompts - collapsed toggle when empty */}
-            {!note && prompts.length > 0 && (
-              <div className="pt-2">
-                {!showPrompts ? (
-                  <button
-                    onClick={() => setShowPrompts(true)}
-                    className="flex items-center gap-2 text-xs text-purple-400 hover:text-purple-300 transition-colors py-2"
-                  >
+            {/* Bottom section - prompts or character count */}
+            <div className="pt-4 pb-safe shrink-0">
+              {note.length > 0 ? (
+                <div className="text-xs text-white/30">
+                  {note.length.toLocaleString()} characters
+                </div>
+              ) : prompts.length > 0 ? (
+                <div>
+                  <div className="flex items-center gap-2 text-xs text-amber-400 mb-3">
                     <Sparkles className="w-3 h-3" />
-                    <span>Need inspiration?</span>
-                  </button>
-                ) : (
-                  <div className="animate-enter">
-                    <div className="flex items-center justify-between mb-3">
-                      <div className="flex items-center gap-2 text-xs text-purple-400">
-                        <Sparkles className="w-3 h-3" />
-                        <span>Try one of these:</span>
-                      </div>
-                      <button
-                        onClick={() => setShowPrompts(false)}
-                        className="text-xs text-zinc-600 hover:text-zinc-400 transition-colors"
-                      >
-                        Hide
-                      </button>
-                    </div>
-                    <div className="space-y-2">
-                      {prompts.map((prompt, i) => (
-                        <button
-                          key={i}
-                          onClick={() => {
-                            setNote(prompt + '\n\n');
-                            setShowPrompts(false);
-                          }}
-                          className="w-full text-left p-3 rounded-xl bg-white/5 border border-white/10 text-zinc-400 hover:bg-white/10 hover:text-white hover:border-white/20 transition-all text-sm"
-                          style={{ animationDelay: `${i * 50}ms` }}
-                        >
-                          {prompt}
-                        </button>
-                      ))}
-                    </div>
+                    <span>Try a prompt</span>
                   </div>
-                )}
-              </div>
-            )}
+                  <div className="flex flex-wrap gap-2">
+                    {prompts.slice(0, 3).map((prompt, i) => (
+                      <button
+                        key={i}
+                        onClick={() => setNote(prompt + '\n\n')}
+                        className="px-4 py-2.5 rounded-full bg-white/10 backdrop-blur-sm border border-white/10 text-white/70 hover:bg-white/20 hover:text-white transition-all text-sm"
+                      >
+                        {prompt}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              ) : null}
+            </div>
           </div>
         )}
       </div>
@@ -999,18 +995,33 @@ const handleAudioError = (message: string) => {
       {/* Filter Panel - slides up when showFilters is true */}
       {mode === 'photo' && cameraActive && cameraReady && showFilters && (
         <div className="absolute bottom-0 left-0 right-0 z-40 safe-bottom animate-enter">
-          <div className="p-4 pt-4 pb-6 bg-black/95 backdrop-blur-xl border-t border-white/10">
-            <div className="flex justify-between items-center mb-2">
-              <span className="text-xs font-medium text-white">Filters</span>
+          {/* Glassmorphism container */}
+          <div className="mx-4 mb-4 p-4 pb-6 bg-gradient-to-br from-amber-950/95 via-orange-950/95 to-slate-950/95 backdrop-blur-xl border border-white/20 rounded-3xl shadow-2xl">
+            {/* Handle bar */}
+            <div className="flex justify-center mb-3">
+              <div className="w-12 h-1 rounded-full bg-white/30" />
+            </div>
+            
+            {/* Header */}
+            <div className="flex justify-between items-center mb-4 px-2">
+              <div className="flex items-center gap-2">
+                <span className="text-sm font-semibold text-white">Filters</span>
+                {selectedFilter !== 'none' && (
+                  <span className="px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-400 text-xs font-medium border border-amber-500/30">
+                    {PHOTO_FILTERS[selectedFilter].name}
+                  </span>
+                )}
+              </div>
               <button
                 onClick={() => setShowFilters(false)}
-                className="text-xs text-zinc-400 hover:text-white transition-colors"
+                className="px-4 py-1.5 rounded-full bg-white/10 border border-white/20 text-sm font-medium text-white hover:bg-white/20 transition-all"
               >
                 Done
               </button>
             </div>
+            
+            {/* Filter selector */}
             <FilterSelector
-              imageUrl=""
               selectedFilter={selectedFilter}
               onSelectFilter={setSelectedFilter}
               livePreview
@@ -1021,14 +1032,14 @@ const handleAudioError = (message: string) => {
 
       {/* Bottom Controls */}
       <div className="absolute bottom-0 left-0 right-0 z-30 safe-bottom">
-        <div className="p-6 pt-8 bg-gradient-to-t from-black via-black/90 to-transparent">
+        <div className={`p-6 pt-8 ${mode === 'photo' ? 'bg-gradient-to-t from-black via-black/90 to-transparent' : 'bg-gradient-to-t from-black/60 via-black/40 to-transparent backdrop-blur-sm'}`}>
           
           {/* Mode Switcher */}
-          <div className="flex justify-center gap-6 mb-6">
+          <div className="flex justify-center gap-2 mb-6">
             <button 
               onClick={() => setMode('photo')}
-              className={`flex items-center gap-2 text-xs font-semibold uppercase tracking-wider transition-colors ${
-                mode === 'photo' ? 'text-white' : 'text-zinc-500'
+              className={`flex items-center gap-2 px-4 py-2 rounded-full text-xs font-semibold uppercase tracking-wider transition-all ${
+                mode === 'photo' ? 'bg-white/20 text-white border border-white/20' : 'text-white/50 hover:text-white/70'
               }`}
             >
               <Camera className="w-4 h-4" />
@@ -1036,17 +1047,17 @@ const handleAudioError = (message: string) => {
             </button>
             <button 
               onClick={() => setMode('audio')}
-              className={`flex items-center gap-2 text-xs font-semibold uppercase tracking-wider transition-colors ${
-                mode === 'audio' ? 'text-white' : 'text-zinc-500'
+              className={`flex items-center gap-2 px-4 py-2 rounded-full text-xs font-semibold uppercase tracking-wider transition-all ${
+                mode === 'audio' ? 'bg-white/20 text-white border border-white/20' : 'text-white/50 hover:text-white/70'
               }`}
             >
               <Mic className="w-4 h-4" />
-              Voice
+              Audio
             </button>
             <button 
               onClick={() => setMode('text')}
-              className={`flex items-center gap-2 text-xs font-semibold uppercase tracking-wider transition-colors ${
-                mode === 'text' ? 'text-white' : 'text-zinc-500'
+              className={`flex items-center gap-2 px-4 py-2 rounded-full text-xs font-semibold uppercase tracking-wider transition-all ${
+                mode === 'text' ? 'bg-white/20 text-white border border-white/20' : 'text-white/50 hover:text-white/70'
               }`}
             >
               <FileText className="w-4 h-4" />
@@ -1061,7 +1072,7 @@ const handleAudioError = (message: string) => {
               <button
                 onClick={() => setShowFilters(true)}
                 className={`flex flex-col items-center gap-1 transition-all ${
-                  selectedFilter !== 'none' ? 'text-white' : 'text-zinc-500'
+                  selectedFilter !== 'none' ? 'text-white' : 'text-white/50'
                 }`}
               >
                 <div className={`w-12 h-12 rounded-full flex items-center justify-center transition-colors ${
@@ -1081,7 +1092,7 @@ const handleAudioError = (message: string) => {
 
             {/* Center - Main action button */}
             {loading ? (
-              <div className="w-20 h-20 rounded-full bg-zinc-800 flex items-center justify-center">
+              <div className="w-20 h-20 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center border border-white/20">
                 <Loader2 className="w-8 h-8 animate-spin text-white/60" />
               </div>
             ) : mode === 'audio' ? (
@@ -1099,15 +1110,15 @@ const handleAudioError = (message: string) => {
                 {cameraActive && cameraReady ? (
                   <button 
                     onClick={capturePhoto}
-                    className="w-20 h-20 rounded-full border-[3px] border-white flex items-center justify-center active:scale-95 transition-transform group"
+                    className="w-20 h-20 rounded-full border-[3px] border-white flex items-center justify-center active:scale-95 transition-transform group shadow-2xl"
                   >
-                    <div className="w-16 h-16 bg-white rounded-full group-active:bg-zinc-200 transition-colors" />
+                    <div className="w-16 h-16 bg-white rounded-full group-active:bg-white/80 transition-colors" />
                   </button>
                 ) : cameraError ? (
                   <div className="h-20" />
                 ) : (
-                  <div className="w-20 h-20 rounded-full border-[3px] border-zinc-700 flex items-center justify-center">
-                    <div className="w-16 h-16 bg-zinc-800 rounded-full" />
+                  <div className="w-20 h-20 rounded-full border-[3px] border-white/30 flex items-center justify-center">
+                    <div className="w-16 h-16 bg-white/20 rounded-full" />
                   </div>
                 )}
               </>
@@ -1115,7 +1126,7 @@ const handleAudioError = (message: string) => {
               <button 
                 onClick={handleNote}
                 disabled={!note.trim()}
-                className="h-14 px-8 bg-white text-black rounded-full font-semibold text-sm flex items-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed active:scale-95 transition-all"
+                className="h-14 px-8 bg-white text-gray-900 rounded-full font-semibold text-sm flex items-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed active:scale-95 transition-all shadow-2xl"
               >
                 Save Note
                 <Send className="w-4 h-4" />

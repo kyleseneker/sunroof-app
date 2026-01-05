@@ -113,26 +113,26 @@ $$ LANGUAGE sql SECURITY DEFINER;
     >
       <div className="text-center">
         {/* Icon */}
-        <div className="w-12 h-12 rounded-full bg-[var(--color-info-subtle)] flex items-center justify-center mx-auto mb-4">
-          <UserPlus className="w-6 h-6 text-[var(--color-info)]" />
+        <div className="w-12 h-12 rounded-full bg-amber-500/20 backdrop-blur-md border border-amber-500/30 flex items-center justify-center mx-auto mb-4">
+          <UserPlus className="w-6 h-6 text-amber-400" />
         </div>
 
         {/* Title */}
-        <h3 className="text-lg font-medium text-[var(--fg-base)] mb-2">Share Journey</h3>
+        <h3 className="text-lg font-medium text-white mb-2">Share Journey</h3>
 
         {/* Description */}
-        <p className="text-sm text-[var(--fg-muted)] mb-4">
-          Invite someone to contribute to <span className="text-[var(--fg-base)]">{journey.name}</span>. 
+        <p className="text-sm text-white/60 mb-4">
+          Invite someone to contribute to <span className="text-white">{journey.name}</span>. 
           They&apos;ll be able to add memories and see the journey unlock.
         </p>
         
         {/* Current collaborators */}
         {(journey.shared_with?.length || 0) > 0 && (
-          <div className="mb-4 p-3 rounded-xl bg-[var(--bg-muted)] text-left">
-            <p className="text-xs text-[var(--fg-muted)] mb-2">Already shared with:</p>
+          <div className="mb-4 p-3 rounded-xl bg-white/5 backdrop-blur-md border border-white/10 text-left">
+            <p className="text-xs text-white/50 mb-2">Already shared with:</p>
             <div className="flex flex-wrap gap-2">
               {journey.shared_with?.map((userId, i) => (
-                <div key={i} className="px-3 py-1 rounded-full bg-[var(--color-info-subtle)] text-[var(--color-info)] text-xs">
+                <div key={i} className="px-3 py-1 rounded-full bg-amber-500/20 text-amber-400 text-xs border border-amber-500/30">
                   Collaborator {i + 1}
                 </div>
               ))}
@@ -146,7 +146,7 @@ $$ LANGUAGE sql SECURITY DEFINER;
             placeholder="Enter their email address"
             value={inviteEmail}
             onChange={(e) => setInviteEmail(e.target.value)}
-            className="w-full h-12 px-4 bg-[var(--bg-surface)]/50 border border-[var(--border-base)] rounded-xl text-[var(--fg-base)] placeholder:text-[var(--fg-subtle)] focus:outline-none focus:border-[var(--color-info)] mb-4"
+            className="w-full h-12 px-4 bg-white/5 backdrop-blur-md border border-white/20 rounded-xl text-white placeholder:text-white/40 focus:outline-none focus:border-amber-400/50 focus:bg-white/10 transition-all mb-4"
             autoFocus
           />
           
@@ -156,6 +156,7 @@ $$ LANGUAGE sql SECURITY DEFINER;
               variant="secondary"
               onClick={handleClose}
               fullWidth
+              className="bg-white/10 border-white/20 text-white hover:bg-white/20"
             >
               Cancel
             </Button>
@@ -165,6 +166,7 @@ $$ LANGUAGE sql SECURITY DEFINER;
               disabled={!inviteEmail.trim()}
               loading={inviteLoading}
               fullWidth
+              className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 border-0"
             >
               Invite
             </Button>

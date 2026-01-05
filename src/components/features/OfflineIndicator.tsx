@@ -24,10 +24,10 @@ export default function OfflineIndicator() {
   if (!isOffline) return null;
 
   return (
-    <div className="fixed top-0 left-0 right-0 z-[150] offline-banner safe-top">
-      <div className="flex items-center justify-center gap-2 py-2 px-4">
-        <WifiOff className="w-4 h-4 text-white" />
-        <span className="text-sm font-medium text-white">You're offline</span>
+    <div className="fixed top-4 left-1/2 -translate-x-1/2 z-[150] safe-top animate-enter">
+      <div className="flex items-center gap-2 py-2 px-4 rounded-full bg-black/80 backdrop-blur-xl border border-white/10 shadow-2xl">
+        <div className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
+        <span className="text-sm font-medium text-white/90">Offline</span>
       </div>
     </div>
   );

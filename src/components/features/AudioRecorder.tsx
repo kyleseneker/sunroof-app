@@ -192,16 +192,16 @@ export default function AudioRecorder({
   if (permissionDenied) {
     return (
       <div className="flex flex-col items-center justify-center py-12 px-6 text-center">
-        <div className="w-16 h-16 rounded-full bg-red-500/10 flex items-center justify-center mb-4">
-          <AlertCircle className="w-8 h-8 text-red-400" />
+        <div className="w-20 h-20 rounded-full bg-red-500/10 backdrop-blur-sm flex items-center justify-center mb-6 border border-red-500/20">
+          <AlertCircle className="w-10 h-10 text-red-400" />
         </div>
-        <h3 className="text-lg font-medium mb-2">Microphone Access Denied</h3>
-        <p className="text-zinc-500 text-sm mb-6 max-w-xs">
+        <h3 className="text-xl font-light text-white mb-3">Microphone Access Denied</h3>
+        <p className="text-white/50 text-sm mb-8 max-w-xs">
           Please enable microphone access in your browser settings to record voice notes.
         </p>
         <button
           onClick={() => setPermissionDenied(false)}
-          className="px-6 py-3 bg-white text-black rounded-full font-medium text-sm"
+          className="px-8 py-3 bg-white text-gray-900 rounded-full font-semibold text-sm shadow-2xl active:scale-[0.98] transition-transform"
         >
           Try Again
         </button>
@@ -212,28 +212,28 @@ export default function AudioRecorder({
   return (
     <div className="flex flex-col items-center justify-center py-8 px-6">
       {/* Waveform Visualization */}
-      <div className="w-full max-w-xs h-24 flex items-center justify-center gap-[2px] mb-8">
+      <div className="w-full max-w-xs h-28 flex items-center justify-center gap-[3px] mb-8">
         {waveformData.map((value, index) => (
           <div
             key={index}
             className="w-1.5 rounded-full transition-all duration-75"
             style={{
-              height: `${Math.max(8, value * 80)}px`,
+              height: `${Math.max(8, value * 100)}px`,
               backgroundColor: isRecording 
-                ? `rgba(239, 68, 68, ${0.4 + value * 0.6})` // Red when recording
-                : 'rgba(161, 161, 170, 0.3)', // Zinc when idle
+                ? `rgba(251, 146, 60, ${0.4 + value * 0.6})` // Orange when recording
+                : 'rgba(255, 255, 255, 0.2)', // White/transparent when idle
             }}
           />
         ))}
       </div>
 
       {/* Duration Display */}
-      <div className="mb-8">
-        <span className={`text-4xl font-light tabular-nums ${isRecording ? 'text-red-400' : 'text-zinc-500'}`}>
+      <div className="mb-8 text-center">
+        <span className={`text-5xl font-light tabular-nums ${isRecording ? 'text-orange-400' : 'text-white/50'}`}>
           {formatDuration(duration)}
         </span>
         {isRecording && (
-          <p className="text-xs text-zinc-600 text-center mt-2">
+          <p className="text-xs text-white/40 text-center mt-3">
             Max {MAX_AUDIO_DURATION_SECONDS}s
           </p>
         )}
@@ -244,7 +244,7 @@ export default function AudioRecorder({
         {/* Pulsing ring when recording */}
         {isRecording && (
           <div 
-            className="absolute inset-0 rounded-full bg-red-500/20 animate-ping"
+            className="absolute inset-0 rounded-full bg-orange-500/20 animate-ping"
             style={{ animationDuration: '1.5s' }}
           />
         )}
@@ -252,24 +252,24 @@ export default function AudioRecorder({
         <button
           onClick={isRecording ? stopRecording : startRecording}
           disabled={disabled || isPreparing}
-          className={`relative w-20 h-20 rounded-full flex items-center justify-center transition-all active:scale-95 ${
+          className={`relative w-20 h-20 rounded-full flex items-center justify-center transition-all active:scale-95 shadow-2xl ${
             isRecording 
-              ? 'bg-red-500 hover:bg-red-600' 
-              : 'bg-white hover:bg-zinc-100'
+              ? 'bg-gradient-to-br from-orange-500 to-amber-500' 
+              : 'bg-white'
           } ${disabled || isPreparing ? 'opacity-50 cursor-not-allowed' : ''}`}
         >
           {isPreparing ? (
-            <Loader2 className="w-8 h-8 text-black animate-spin" />
+            <Loader2 className="w-8 h-8 text-gray-900 animate-spin" />
           ) : isRecording ? (
             <Square className="w-8 h-8 text-white" fill="white" />
           ) : (
-            <Mic className="w-8 h-8 text-black" />
+            <Mic className="w-8 h-8 text-gray-900" />
           )}
         </button>
       </div>
 
       {/* Instructions */}
-      <p className="text-sm text-zinc-500 mt-6 text-center">
+      <p className="text-sm text-white/40 mt-8 text-center">
         {isRecording 
           ? 'Tap to stop recording' 
           : 'Tap to start recording'}

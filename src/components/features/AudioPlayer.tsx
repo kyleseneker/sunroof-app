@@ -132,14 +132,14 @@ export default function AudioPlayer({
 
   if (error) {
     return (
-      <div className={`flex items-center justify-center p-6 bg-zinc-900 rounded-2xl ${className}`}>
-        <p className="text-zinc-500 text-sm">Failed to load audio</p>
+      <div className={`flex items-center justify-center p-6 bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl ${className}`}>
+        <p className="text-white/50 text-sm">Failed to load audio</p>
       </div>
     );
   }
 
   return (
-    <div className={`bg-zinc-900 rounded-2xl p-6 ${className}`}>
+    <div className={`bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-6 ${className}`}>
       <audio ref={audioRef} src={src} preload="metadata" />
       
       {/* Waveform Visualization */}
@@ -160,8 +160,8 @@ export default function AudioPlayer({
                 style={{
                   height: `${value * 100}%`,
                   backgroundColor: isPlayed 
-                    ? 'rgb(249, 115, 22)' // Orange for played
-                    : 'rgba(161, 161, 170, 0.3)', // Zinc for unplayed
+                    ? 'rgb(251, 191, 36)' // Amber for played
+                    : 'rgba(255, 255, 255, 0.2)', // White for unplayed
                 }}
               />
             );
@@ -177,16 +177,16 @@ export default function AudioPlayer({
           disabled={isLoading}
           className={`w-12 h-12 rounded-full flex items-center justify-center transition-all active:scale-95 ${
             isPlaying 
-              ? 'bg-orange-500 hover:bg-orange-600' 
-              : 'bg-white hover:bg-zinc-100'
+              ? 'bg-gradient-to-br from-amber-400 to-orange-500 shadow-lg shadow-orange-500/30' 
+              : 'bg-white hover:bg-white/90'
           } ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
         >
           {isLoading ? (
-            <div className="w-5 h-5 border-2 border-zinc-400 border-t-transparent rounded-full animate-spin" />
+            <div className="w-5 h-5 border-2 border-white/40 border-t-white rounded-full animate-spin" />
           ) : isPlaying ? (
             <Pause className="w-5 h-5 text-white" fill="white" />
           ) : (
-            <Play className="w-5 h-5 text-black ml-0.5" fill="black" />
+            <Play className="w-5 h-5 text-gray-900 ml-0.5" fill="currentColor" />
           )}
         </button>
 
@@ -194,7 +194,7 @@ export default function AudioPlayer({
         <div className="flex-1">
           <div className="flex justify-between text-sm tabular-nums">
             <span className="text-white">{formatTime(currentTime)}</span>
-            <span className="text-zinc-500">{formatTime(duration)}</span>
+            <span className="text-white/40">{formatTime(duration)}</span>
           </div>
           
           {/* Simple progress bar (for non-waveform mode) */}
@@ -202,10 +202,10 @@ export default function AudioPlayer({
             <div 
               ref={progressRef}
               onClick={handleProgressClick}
-              className="h-1 bg-zinc-800 rounded-full mt-2 cursor-pointer overflow-hidden"
+              className="h-1 bg-white/10 rounded-full mt-2 cursor-pointer overflow-hidden"
             >
               <div 
-                className="h-full bg-orange-500 rounded-full transition-all duration-100"
+                className="h-full bg-gradient-to-r from-amber-400 to-orange-500 rounded-full transition-all duration-100"
                 style={{ width: `${progress}%` }}
               />
             </div>
@@ -217,10 +217,10 @@ export default function AudioPlayer({
           icon={isMuted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
           label={isMuted ? 'Unmute' : 'Mute'}
           onClick={toggleMute}
+          variant="ghost"
           dark
         />
       </div>
     </div>
   );
 }
-

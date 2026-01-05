@@ -78,9 +78,8 @@ export async function searchLocationPhoto(
 
     const photo = data.results[0];
 
-    // Use smaller size optimized for mobile cards (800px wide max)
-    // Unsplash's dynamic resizing: use raw URL with size params for best caching
-    const optimizedUrl = `${photo.urls.raw}&w=800&q=75&fm=webp&fit=crop&crop=entropy`;
+    // Use the 'regular' size (1080px wide) which is already optimized by Unsplash
+    const optimizedUrl = `${photo.urls.regular}&w=1200&q=80&fm=webp`;
 
     return {
       url: optimizedUrl,

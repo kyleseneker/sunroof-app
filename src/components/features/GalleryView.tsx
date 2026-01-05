@@ -2,9 +2,9 @@
 
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
-import { api, getJourneyGradient, ErrorMessages } from '@/lib';
+import { api, getJourneyGradient, ErrorMessages, formatDate } from '@/lib';
 import { deleteJourney, deleteMemory, fetchMemoriesForJourney } from '@/services';
-import { X, Trash2, Camera, Sparkles, MapPin, Play, ChevronDown, Quote, Pencil, MoreVertical } from 'lucide-react';
+import { X, Trash2, Camera, Sparkles, Play, ChevronDown, Quote, Pencil, MoreVertical } from 'lucide-react';
 import { useToast, ConfirmDialog, IconButton } from '@/components/ui';
 import { AudioPlayer, MemoryViewer, AIRecapSheet, EditJourneyModal, ActionSheet } from '@/components/features';
 import type { Journey, Memory } from '@/types';
@@ -198,14 +198,37 @@ export default function GalleryView({ journey: initialJourney, onClose, onMemory
 
   // --- MAIN GALLERY VIEW ---
   return (
-    <div className="fixed inset-0 z-40 bg-[var(--bg-base)] flex flex-col safe-top safe-bottom overflow-hidden">
+    <div className="fixed inset-0 z-40 safe-top safe-bottom overflow-y-auto">
+      {/* Fixed full-screen immersive background */}
+      <div className="fixed inset-0 -z-10">
+        {journey.cover_image_url ? (
+          <>
+            <Image
+              src={journey.cover_image_url}
+              alt=""
+              fill
+              sizes="100vw"
+              className="object-cover"
+              priority
+            />
+            <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-black" />
+          </>
+        ) : (
+          <div className="absolute inset-0 bg-gradient-to-br from-amber-950 via-orange-950 to-slate-950">
+            {/* Ambient orbs */}
+            <div className="absolute top-20 right-10 w-80 h-80 bg-amber-500/20 rounded-full blur-3xl" />
+            <div className="absolute bottom-40 left-10 w-96 h-96 bg-orange-500/20 rounded-full blur-3xl" />
+          </div>
+        )}
+      </div>
+
       {/* Delete Memory Confirmation */}
       <ConfirmDialog
         isOpen={!!memoryToDelete}
         onClose={() => setMemoryToDelete(null)}
         onConfirm={handleDeleteMemory}
         title="Delete this memory?"
-        description={`This ${memoryToDelete?.type === 'photo' ? 'photo' : memoryToDelete?.type === 'audio' ? 'voice note' : 'note'} will be permanently deleted.`}
+        description={`This ${memoryToDelete?.type === 'photo' ? 'photo' : memoryToDelete?.type === 'audio' ? 'audio' : 'note'} will be permanently deleted.`}
         confirmLabel={isDeleting ? 'Deleting...' : 'Delete'}
         variant="danger"
         loading={isDeleting}
@@ -229,37 +252,11 @@ export default function GalleryView({ journey: initialJourney, onClose, onMemory
           journey={journey}
           onClose={() => setShowEditModal(false)}
           onSuccess={(updatedJourney) => {
-            // Preserve memory_count since updateJourney doesn't return it
             const merged = { ...updatedJourney, memory_count: journey.memory_count };
             setJourney(merged);
             onJourneyUpdated?.(merged);
           }}
         />
-      )}
-
-      {/* Cover image or gradient header accent */}
-      {journey.cover_image_url ? (
-        <>
-          <div className="absolute top-0 left-0 right-0 h-48">
-            <Image
-              src={journey.cover_image_url}
-              alt=""
-              fill
-              sizes="100vw"
-              className="object-cover"
-              priority
-            />
-          </div>
-          <div className="absolute top-0 left-0 right-0 h-48 bg-gradient-to-b from-transparent via-[var(--bg-base)]/60 to-[var(--bg-base)]" />
-        </>
-      ) : (
-        <>
-          <div
-            className="absolute top-0 left-0 right-0 h-32 opacity-40"
-            style={{ background: getJourneyGradient(journey.name).gradient }}
-          />
-          <div className="absolute top-0 left-0 right-0 h-32 bg-gradient-to-b from-transparent to-[var(--bg-base)]" />
-        </>
       )}
 
       {/* Celebration Confetti */}
@@ -280,40 +277,83 @@ export default function GalleryView({ journey: initialJourney, onClose, onMemory
             />
           ))}
           <div className="absolute inset-0 z-50 flex items-center justify-center pointer-events-none">
-            <div className="bg-[var(--bg-base)]/80 backdrop-blur-xl rounded-3xl px-8 py-6 animate-enter text-center border border-[var(--border-base)]">
+            <div className="bg-black/60 backdrop-blur-xl rounded-3xl px-8 py-6 animate-enter text-center border border-white/20">
               <div className="text-4xl mb-2">🎉</div>
-              <h2 className="text-2xl font-bold mb-1 text-[var(--fg-base)]">Journey Unlocked!</h2>
-              <p className="text-[var(--fg-muted)]">Time to relive the memories</p>
+              <h2 className="text-2xl font-bold mb-1 text-white">Journey Unlocked!</h2>
+              <p className="text-white/60">Time to relive the memories</p>
             </div>
           </div>
         </>
       )}
 
-      {/* Header */}
-      <div className="relative z-10 flex justify-between items-center p-6">
-        <IconButton 
-          icon={<X className="w-5 h-5" />} 
-          label="Close" 
-          onClick={onClose}
-          variant="bordered"
-          dark 
-        />
-        <div className="flex-1 min-w-0 mx-4">
-          <h1 className="text-xl font-medium truncate text-[var(--fg-base)]">
-            {journey.emoji && <span className="mr-2">{journey.emoji}</span>}
-            {journey.name}
-          </h1>
-          <p className="text-xs text-[var(--fg-muted)]">
-            {(journey.memory_count ?? 0) === 0 ? 'No memories' : `${journey.memory_count} ${journey.memory_count === 1 ? 'memory' : 'memories'}`}
-          </p>
+      {/* Sticky header - stays at top while scrolling */}
+      <header className="sticky top-0 z-30 safe-top bg-gradient-to-b from-black/60 to-transparent">
+        <div className="flex justify-between items-center p-6">
+          <IconButton 
+            icon={<X className="w-5 h-5" />} 
+            label="Close" 
+            onClick={onClose}
+            variant="ghost"
+            dark 
+          />
+          
+          <IconButton
+            icon={<MoreVertical className="w-5 h-5" />}
+            label="More options"
+            onClick={() => setShowActionSheet(true)}
+            variant="ghost"
+            dark
+          />
         </div>
+      </header>
+
+      {/* Hero section - scrolls naturally with content */}
+      <div className="relative z-10 px-6 pt-4 pb-10 text-center min-h-[40vh] flex flex-col items-center justify-center">
+        <h1 className="text-5xl font-light text-white mb-3 tracking-tight">
+          {journey.emoji && <span className="mr-3 text-4xl">{journey.emoji}</span>}
+          {journey.name}
+        </h1>
         
-        <IconButton
-          icon={<MoreVertical className="w-5 h-5" />}
-          label="More options"
-          onClick={() => setShowActionSheet(true)}
-          variant="bordered"
-        />
+        {/* Date range */}
+        <p className="text-white/50 text-lg mb-6">
+          {formatDate(journey.created_at, { month: 'short', day: 'numeric' })} – {formatDate(journey.unlock_date, { month: 'short', day: 'numeric', year: 'numeric' })}
+        </p>
+        
+        {/* Stats pills */}
+        {memories.length > 0 && (
+          <div className="flex items-center justify-center gap-3 mb-8">
+            {photoCount > 0 && (
+              <div className="flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-sm rounded-full border border-white/10">
+                <Camera className="w-4 h-4 text-white/70" />
+                <span className="text-white font-medium">{photoCount}</span>
+              </div>
+            )}
+            {audioCount > 0 && (
+              <div className="flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-sm rounded-full border border-white/10">
+                <Play className="w-4 h-4 text-white/70" />
+                <span className="text-white font-medium">{audioCount}</span>
+              </div>
+            )}
+            {noteCount > 0 && (
+              <div className="flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-sm rounded-full border border-white/10">
+                <Quote className="w-4 h-4 text-white/70" />
+                <span className="text-white font-medium">{noteCount}</span>
+              </div>
+            )}
+          </div>
+        )}
+        
+        {/* AI Recap button - more prominent */}
+        {memories.length > 0 && (
+          <button
+            onClick={fetchRecap}
+            disabled={recapLoading}
+            className="inline-flex items-center gap-2.5 px-6 py-3 bg-white text-gray-900 rounded-full text-sm font-semibold shadow-2xl hover:bg-white/90 active:scale-[0.98] transition-all disabled:opacity-50"
+          >
+            <Sparkles className={`w-4 h-4 ${recapLoading ? 'animate-pulse' : ''}`} />
+            {recapLoading ? 'Generating...' : recap ? 'View Recap' : 'Generate Recap'}
+          </button>
+        )}
       </div>
 
       {/* AI Recap Sheet */}
@@ -334,10 +374,9 @@ export default function GalleryView({ journey: initialJourney, onClose, onMemory
       <ActionSheet
         isOpen={showActionSheet}
         onClose={() => setShowActionSheet(false)}
-        title={journey.name}
         options={[
           ...((journey.memory_count ?? 0) > 0 ? [{
-            label: recap ? 'View AI Recap' : 'Generate AI Recap',
+            label: recap ? 'View Recap' : 'Generate Recap',
             icon: <Sparkles className="w-5 h-5" />,
             onClick: () => { fetchRecap(); },
           }] : []),
@@ -355,28 +394,22 @@ export default function GalleryView({ journey: initialJourney, onClose, onMemory
         ]}
       />
 
-      {/* Story Timeline */}
-      <div className="flex-1 overflow-y-auto">
+      {/* Story Timeline - flows naturally */}
+      <div className="relative z-10 px-6 pb-8">
         {loading ? (
-          <div className="p-6 pt-0 space-y-6">
-            <div className="h-8 w-32 rounded-lg skeleton" />
-            <div className="aspect-[4/3] rounded-2xl skeleton" />
-            <div className="h-24 rounded-2xl skeleton" />
+          <div className="space-y-6">
+            <div className="h-8 w-32 rounded-lg bg-white/10 animate-pulse" />
+            <div className="aspect-[4/3] rounded-2xl bg-white/10 animate-pulse" />
+            <div className="h-24 rounded-2xl bg-white/10 animate-pulse" />
           </div>
         ) : memories.length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-full text-center py-16 px-6">
-            <div className="relative w-20 h-20 mb-6 empty-illustration">
-              <div className="absolute inset-0 rounded-full bg-gradient-to-br from-[var(--bg-hover)] to-[var(--bg-surface)] border border-[var(--border-base)]" />
-              <div className="absolute inset-0 flex items-center justify-center">
-                <Camera className="w-8 h-8 text-[var(--fg-subtle)]" />
-              </div>
-              <div className="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-orange-500/50 animate-pulse" />
-            </div>
-            <p className="text-lg text-[var(--fg-muted)] mb-2">No memories yet</p>
-            <p className="text-sm text-[var(--fg-subtle)]">Photos and notes will appear here</p>
+          <div className="flex flex-col items-center justify-center h-64 text-center">
+            <Camera className="w-12 h-12 text-white/30 mb-4" />
+            <p className="text-xl text-white/60 mb-2">No memories yet</p>
+            <p className="text-white/40 text-sm">Start capturing your story</p>
           </div>
         ) : (
-          <div className="pb-8 max-w-2xl mx-auto">
+          <div className="space-y-8">
             {dayKeys.map((dayKey, dayIndex) => {
               const dayMemories = memoriesByDay[dayKey];
               const dayDate = new Date(dayKey);
@@ -384,18 +417,10 @@ export default function GalleryView({ journey: initialJourney, onClose, onMemory
                 ? Math.abs(Math.floor((dayDate.getTime() - firstDayDate.getTime()) / (1000 * 60 * 60 * 24))) + 1
                 : dayIndex + 1;
               const formattedDate = dayDate.toLocaleDateString('en-US', { 
-                weekday: 'long',
-                month: 'long', 
+                weekday: 'short',
+                month: 'short', 
                 day: 'numeric' 
               });
-              
-              // Get weather range for the day
-              const temps = dayMemories
-                .filter(m => m.weather?.temp)
-                .map(m => m.weather!.temp);
-              const minTemp = temps.length > 0 ? Math.min(...temps) : null;
-              const maxTemp = temps.length > 0 ? Math.max(...temps) : null;
-              const weatherIcon = dayMemories.find(m => m.weather?.icon)?.weather?.icon;
               
               return (
                 <div 
@@ -403,168 +428,108 @@ export default function GalleryView({ journey: initialJourney, onClose, onMemory
                   className="animate-enter"
                   style={{ animationDelay: `${dayIndex * 100}ms`, opacity: 0 }}
                 >
-                  {/* Day Header - Clickable to collapse */}
+                  {/* Day Header */}
                   <button
                     onClick={() => toggleDayCollapse(dayKey)}
-                    className="sticky top-0 z-10 w-full px-6 py-4 bg-gradient-to-b from-[var(--bg-base)] via-[var(--bg-base)]/95 to-transparent backdrop-blur-sm text-left"
+                    className="w-full flex items-center gap-3 mb-4 px-4 py-3 rounded-xl bg-black/30 backdrop-blur-sm"
                   >
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-orange-500 to-pink-500 flex items-center justify-center text-sm font-bold text-white flex-shrink-0">
-                        {dayNumber}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2">
-                          <h3 className="text-lg font-medium text-[var(--fg-base)]">Day {dayNumber}</h3>
-                          <ChevronDown 
-                            className={`w-4 h-4 text-[var(--fg-muted)] transition-transform duration-200 flex-shrink-0 ${
-                              collapsedDays.has(dayKey) ? '-rotate-90' : ''
-                            }`} 
-                          />
-                        </div>
-                        <p className="text-xs text-[var(--fg-muted)] truncate">
-                          {formattedDate}
-                          {collapsedDays.has(dayKey) && (
-                            <span className="text-[var(--fg-subtle)]"> • {dayMemories.length} {dayMemories.length === 1 ? 'memory' : 'memories'}</span>
-                          )}
-                        </p>
-                      </div>
-                      {minTemp !== null && (
-                        <div className="flex items-center gap-1 text-xs text-[var(--fg-muted)] flex-shrink-0">
-                          {weatherIcon && <span>{weatherIcon}</span>}
-                          <span>
-                            {minTemp === maxTemp ? `${minTemp}°` : `${minTemp}–${maxTemp}°`}
-                          </span>
-                        </div>
-                      )}
+                    <div className="px-3 py-2 rounded-xl bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center shadow-lg shadow-orange-500/20 shrink-0">
+                      <span className="text-sm font-bold text-white">Day {dayNumber}</span>
                     </div>
+                    <div className="text-left flex-1">
+                      <p className="text-white font-medium drop-shadow-md">{formattedDate}</p>
+                      <p className="text-white/70 text-xs">{dayMemories.length} {dayMemories.length === 1 ? 'memory' : 'memories'}</p>
+                    </div>
+                    <ChevronDown 
+                      className={`w-4 h-4 text-white/60 transition-transform duration-300 ${
+                        collapsedDays.has(dayKey) ? '-rotate-90' : ''
+                      }`} 
+                    />
                   </button>
                   
-                  {/* Day Memories - Collapsible */}
+                  {/* Day Memories - grid layout */}
                   {!collapsedDays.has(dayKey) && (
-                  <div className="px-6 py-4 space-y-4">
-                    {dayMemories.map((memory, memoryIndex) => {
-                      const memoryTime = new Date(memory.created_at).toLocaleTimeString('en-US', { 
-                        hour: 'numeric', 
-                        minute: '2-digit' 
-                      });
-                      const isFirstPhoto = memoryIndex === 0 && memory.type === 'photo';
-                      
-                      return (
-                        <div
-                          key={memory.id}
-                          className="animate-enter relative group"
-                          style={{ animationDelay: `${(dayIndex * 100) + (memoryIndex * 50)}ms`, opacity: 0 }}
-                        >
-                          {/* Photo Memory - Pink theme */}
-                          {memory.type === 'photo' && memory.url && (
-                            <button
-                              onClick={() => setSelectedMemory(memory)}
-                              className={`w-full rounded-2xl overflow-hidden bg-[var(--bg-surface)] border border-pink-500/20 hover:border-pink-500/40 transition-colors ${
-                                isFirstPhoto ? 'aspect-[4/3]' : 'aspect-square'
-                              }`}
-                            >
-                              <img
-                                src={memory.url}
-                                alt=""
-                                className="w-full h-full object-cover"
-                                onError={(e) => {
-                                  e.currentTarget.style.display = 'none';
-                                }}
-                              />
-                              <div className="absolute bottom-3 left-3 flex items-center gap-2">
-                                <div className="px-2.5 py-1 rounded-full bg-[var(--bg-base)]/60 backdrop-blur-sm border border-pink-500/20">
-                                  <p className="text-[11px] text-pink-300">{memoryTime}</p>
-                                </div>
-                                {memory.location_name && (
-                                  <div className="px-2.5 py-1 rounded-full bg-[var(--bg-base)]/60 backdrop-blur-sm border border-pink-500/20 flex items-center gap-1">
-                                    <MapPin className="w-2.5 h-2.5 text-pink-400/60" />
-                                    <p className="text-[11px] text-pink-300">{memory.location_name}</p>
-                                  </div>
-                                )}
-                              </div>
-                            </button>
-                          )}
+                    <div className="grid grid-cols-2 gap-3">
+                        {dayMemories.map((memory, memoryIndex) => {
+                          const memoryTime = new Date(memory.created_at).toLocaleTimeString('en-US', { 
+                            hour: 'numeric', 
+                            minute: '2-digit' 
+                          });
                           
-                          {/* Note Memory - Blue theme */}
-                          {memory.type === 'text' && (
-                            <button
-                              onClick={() => setSelectedMemory(memory)}
-                              className="w-full text-left p-4 rounded-2xl bg-gradient-to-br from-blue-500/10 to-blue-500/5 border border-blue-500/20 hover:border-blue-500/40 transition-colors"
+                          return (
+                            <div
+                              key={memory.id}
+                              className="relative group animate-enter"
+                              style={{ animationDelay: `${(dayIndex * 100) + (memoryIndex * 50)}ms`, opacity: 0 }}
                             >
-                              <div className="flex items-start gap-3">
-                                <div className="w-10 h-10 rounded-xl bg-blue-500/20 flex items-center justify-center flex-shrink-0">
-                                  <Quote className="w-4 h-4 text-blue-400" />
-                                </div>
-                                <div className="flex-1 min-w-0">
-                                  <p className="text-sm text-[var(--fg-base)] leading-relaxed line-clamp-3">
-                                    {memory.note}
+                              {/* Photo Memory */}
+                              {memory.type === 'photo' && memory.url && (
+                                <button
+                                  onClick={() => setSelectedMemory(memory)}
+                                  className="relative w-full aspect-square rounded-xl overflow-hidden shadow-lg active:scale-[0.98] transition-transform"
+                                >
+                                  <img
+                                    src={memory.url}
+                                    alt=""
+                                    className="w-full h-full object-cover"
+                                    onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                                  />
+                                  <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
+                                  <p className="absolute bottom-2 left-2 text-xs text-white/80">{memoryTime}</p>
+                                </button>
+                              )}
+                              
+                              {/* Note Memory */}
+                              {memory.type === 'text' && (
+                                <button
+                                  onClick={() => setSelectedMemory(memory)}
+                                  className="w-full aspect-square rounded-xl bg-gradient-to-br from-amber-500/40 to-orange-500/40 border border-amber-500/30 p-3 flex flex-col items-center justify-center active:scale-[0.98] transition-all backdrop-blur-sm"
+                                >
+                                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center mb-2 shadow-lg shadow-orange-500/30">
+                                    <Quote className="w-5 h-5 text-white" />
+                                  </div>
+                                  <p className="text-white/80 text-sm text-center line-clamp-2 px-1">
+                                    {memory.note && memory.note.length > 30 ? `${memory.note.slice(0, 30)}...` : memory.note}
                                   </p>
-                                  <div className="flex items-center gap-2 mt-2 text-xs text-blue-400/60">
-                                    <span>{memoryTime}</span>
-                                    {memory.location_name && (
-                                      <>
-                                        <span>•</span>
-                                        <span className="flex items-center gap-1">
-                                          <MapPin className="w-2.5 h-2.5" />
-                                          {memory.location_name}
-                                        </span>
-                                      </>
-                                    )}
+                                  <p className="text-xs text-white/40 mt-1">{memoryTime}</p>
+                                </button>
+                              )}
+                              
+                              {/* Audio Memory */}
+                              {memory.type === 'audio' && (
+                                <button
+                                  onClick={() => setSelectedMemory(memory)}
+                                  className="w-full aspect-square rounded-xl bg-gradient-to-br from-amber-500/40 to-orange-500/40 border border-amber-500/30 p-3 flex flex-col items-center justify-center active:scale-[0.98] transition-all backdrop-blur-sm"
+                                >
+                                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center mb-2 shadow-lg shadow-orange-500/30">
+                                    <Play className="w-5 h-5 text-white ml-0.5" />
                                   </div>
-                                </div>
-                              </div>
-                            </button>
-                          )}
-                          
-                          {/* Audio Memory - Orange theme */}
-                          {memory.type === 'audio' && (
-                            <button
-                              onClick={() => setSelectedMemory(memory)}
-                              className="w-full p-4 rounded-2xl bg-gradient-to-br from-orange-500/10 to-orange-500/5 border border-orange-500/20 hover:border-orange-500/40 transition-colors"
-                            >
-                              <div className="flex items-center gap-3">
-                                <div className="w-10 h-10 rounded-xl bg-orange-500/20 flex items-center justify-center flex-shrink-0">
-                                  <Play className="w-4 h-4 text-orange-400 ml-0.5" />
-                                </div>
-                                <div className="flex-1 text-left min-w-0">
-                                  <p className="text-sm text-[var(--fg-base)]">Voice</p>
-                                  <p className="text-xs text-orange-400/60">
+                                  <p className="text-white/80 text-sm font-medium">
                                     {memory.duration 
                                       ? `${Math.floor(memory.duration / 60)}:${(memory.duration % 60).toString().padStart(2, '0')}`
-                                      : 'Tap to play'
+                                      : 'Audio'
                                     }
                                   </p>
-                                </div>
-                                <div className="text-right flex-shrink-0">
-                                  <p className="text-xs text-orange-400/60">{memoryTime}</p>
-                                  {memory.location_name && (
-                                    <p className="text-[10px] text-orange-400/40 flex items-center gap-1 justify-end mt-0.5">
-                                      <MapPin className="w-2 h-2" />
-                                      {memory.location_name}
-                                    </p>
-                                  )}
-                                </div>
-                              </div>
-                            </button>
-                          )}
-                          
-                          {/* Delete button */}
-                          <IconButton 
-                            icon={<Trash2 className="w-3 h-3" />}
-                            label="Delete memory"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setMemoryToDelete(memory);
-                            }}
-                            variant="danger"
-                            size="sm"
-                            dark
-                            className="absolute top-3 right-3 opacity-0 group-hover:opacity-70 hover:!opacity-100 transition-opacity"
-                          />
-                        </div>
-                      );
-                    })}
-                  </div>
+                                  <p className="text-xs text-white/40 mt-1">{memoryTime}</p>
+                                </button>
+                              )}
+                              
+                              {/* Delete button - hidden on mobile, visible on hover for desktop */}
+                              <IconButton 
+                                icon={<Trash2 className="w-3 h-3" />}
+                                label="Delete memory"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setMemoryToDelete(memory);
+                                }}
+                                variant="danger"
+                                size="sm"
+                                className="absolute top-2 right-2 opacity-0 group-hover:opacity-70 hover:!opacity-100 transition-opacity hidden md:flex"
+                              />
+                            </div>
+                          );
+                        })}
+                    </div>
                   )}
                 </div>
               );

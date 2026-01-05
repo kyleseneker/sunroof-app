@@ -87,7 +87,7 @@ export default function Modal({
       ref={overlayRef}
       onClick={handleOverlayClick}
       className={cn(
-        "fixed inset-0 z-[70] flex justify-center p-4 bg-[var(--bg-base)]/80 backdrop-blur-sm animate-fade-in",
+        "fixed inset-0 z-[70] flex justify-center p-4 bg-black/60 backdrop-blur-md animate-fade-in",
         mobileTopAlign ? "items-start pt-20 sm:items-center sm:pt-4" : "items-center"
       )}
       role="dialog"
@@ -100,20 +100,20 @@ export default function Modal({
         className={cn(
           sizeStyles[size],
           'w-full',
-          'bg-[var(--bg-surface)] border border-[var(--border-base)] rounded-2xl',
-          'shadow-[var(--shadow-xl)]',
+          'bg-gradient-to-br from-amber-950/98 via-orange-950/98 to-slate-950/98 backdrop-blur-xl border border-white/10 rounded-3xl',
+          'shadow-2xl',
           'animate-scale-in'
         )}
       >
         {(title || showCloseButton) && (
-          <div className="flex items-center justify-between p-6 border-b border-[var(--border-base)]">
+          <div className="flex items-center justify-between p-6 border-b border-white/10">
             {title && (
               <div>
-                <h2 id={titleId} className="text-lg font-medium text-[var(--fg-base)]">
+                <h2 id={titleId} className="text-lg font-medium text-white">
                   {title}
                 </h2>
                 {description && (
-                  <p id={descriptionId} className="text-sm text-[var(--fg-subtle)] mt-1">
+                  <p id={descriptionId} className="text-sm text-white/50 mt-1">
                     {description}
                   </p>
                 )}
@@ -126,7 +126,8 @@ export default function Modal({
                 onClick={onClose}
                 variant="ghost"
                 size="sm"
-                className="ml-auto"
+                className="ml-auto text-white/60 hover:text-white"
+                dark
               />
             )}
           </div>

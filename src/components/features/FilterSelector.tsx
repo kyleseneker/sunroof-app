@@ -3,6 +3,9 @@
 import { useEffect, useRef } from 'react';
 import { PHOTO_FILTERS, type PhotoFilterKey } from '@/lib/constants';
 
+// Colorful sunset photo that shows filter differences clearly
+const SAMPLE_PHOTO = 'https://images.unsplash.com/photo-1495616811223-4d98c6e9c869?w=300&q=90';
+
 interface FilterSelectorProps {
   imageUrl?: string;
   selectedFilter: PhotoFilterKey;
@@ -26,10 +29,13 @@ export default function FilterSelector({
     }
   }, []);
 
+  // Use the provided image, or fallback to sample photo for previews
+  const previewImage = imageUrl || SAMPLE_PHOTO;
+
   return (
     <div className="w-full">
       {/* Horizontal scrollable filter strip */}
-      <div className="flex gap-3 overflow-x-auto py-2 px-1 scrollbar-hide justify-center">
+      <div className="flex gap-5 overflow-x-auto py-3 px-4 scrollbar-hide">
         {filterKeys.map((key) => {
           const filter = PHOTO_FILTERS[key];
           const isSelected = selectedFilter === key;
@@ -39,35 +45,31 @@ export default function FilterSelector({
               key={key}
               ref={isSelected ? selectedRef : null}
               onClick={() => onSelectFilter(key)}
-              className={`flex-shrink-0 flex flex-col items-center gap-1.5 transition-all ${
-                isSelected ? '' : 'opacity-60 hover:opacity-100'
+              className={`flex-shrink-0 flex flex-col items-center gap-2.5 transition-all duration-200 ${
+                isSelected ? 'scale-105' : 'opacity-70 hover:opacity-100'
               }`}
             >
-              {/* Thumbnail - either image or gradient placeholder */}
+              {/* Larger thumbnail with real photo */}
               <div
-                className={`rounded-xl overflow-hidden border-2 transition-colors ${
-                  isSelected ? 'border-white' : 'border-transparent'
-                } ${livePreview ? 'w-12 h-12' : 'w-16 h-16'}`}
+                className={`w-20 h-20 rounded-2xl overflow-hidden transition-all ${
+                  isSelected 
+                    ? 'ring-3 ring-amber-400 shadow-xl shadow-amber-500/40' 
+                    : 'border-2 border-white/30'
+                }`}
               >
-                {livePreview ? (
-                  // Gradient placeholder for live preview mode
-                  <div 
-                    className="w-full h-full bg-gradient-to-br from-orange-400 via-pink-500 to-purple-600"
-                    style={{ filter: filter.filter }}
-                  />
-                ) : imageUrl ? (
-                  <img
-                    src={imageUrl}
-                    alt={filter.name}
-                    className="w-full h-full object-cover"
-                    style={{ filter: filter.filter }}
-                  />
-                ) : null}
+                <img
+                  src={previewImage}
+                  alt={filter.name}
+                  className="w-full h-full object-cover"
+                  style={{ filter: filter.filter }}
+                  loading="eager"
+                />
               </div>
+              
               {/* Filter name */}
               <span
-                className={`text-[10px] font-medium transition-colors ${
-                  isSelected ? 'text-white' : 'text-zinc-400'
+                className={`text-sm font-medium transition-colors ${
+                  isSelected ? 'text-amber-400' : 'text-white/60'
                 }`}
               >
                 {filter.name}

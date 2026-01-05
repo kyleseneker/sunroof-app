@@ -1,11 +1,12 @@
 'use client';
 
-import { useState, useMemo } from 'react';
-import { X, MapPin, Timer, UserPlus, Plane } from 'lucide-react';
-import { useToast, Button } from '@/components/ui';
+import { useState, useMemo, useEffect, useCallback, useRef } from 'react';
+import { X, MapPin, Timer, UserPlus, ChevronRight, ChevronLeft, Sparkles, Check } from 'lucide-react';
+import { useToast, IconButton } from '@/components/ui';
 import { EmojiPicker } from '@/components/features';
 import { createJourney, getUserIdByEmail } from '@/services';
-import { hapticSuccess, DESTINATION_SUGGESTIONS, ErrorMessages, MAX_JOURNEY_NAME_LENGTH } from '@/lib';
+import { hapticSuccess, hapticClick, DESTINATION_SUGGESTIONS, ErrorMessages, MAX_JOURNEY_NAME_LENGTH } from '@/lib';
+import Image from 'next/image';
 
 interface CreateJourneyModalProps {
   isOpen: boolean;
@@ -22,11 +23,22 @@ export default function CreateJourneyModal({
 }: CreateJourneyModalProps) {
   const { showToast } = useToast();
   
+  // Multi-step state
+  const [step, setStep] = useState(1);
+  const totalSteps = 3;
+  
+  // Form state
   const [tripName, setTripName] = useState('');
-  const [unlockDays, setUnlockDays] = useState<number | null>(3);
+  const [unlockDays, setUnlockDays] = useState<number | null>(5);
   const [customDate, setCustomDate] = useState('');
   const [emoji, setEmoji] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  
+  // Preview image state
+  const [previewImage, setPreviewImage] = useState<string | null>(null);
+  const [previewAttribution, setPreviewAttribution] = useState<string | null>(null);
+  const [loadingPreview, setLoadingPreview] = useState(false);
+  const fetchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   
   // Share during creation state
   const [shareEmails, setShareEmails] = useState<string[]>([]);
@@ -37,19 +49,88 @@ export default function CreateJourneyModal({
     return DESTINATION_SUGGESTIONS[Math.floor(Math.random() * DESTINATION_SUGGESTIONS.length)];
   }, [isOpen]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // Fetch preview image when destination changes (debounced)
+  const fetchPreviewImage = useCallback(async (query: string) => {
+    if (!query.trim() || query.length < 2) {
+      setPreviewImage(null);
+      setPreviewAttribution(null);
+      return;
+    }
+    
+    setLoadingPreview(true);
+    try {
+      const response = await fetch('/api/cover-image', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query }),
+      });
+      if (response.ok) {
+        const { photo } = await response.json();
+        if (photo) {
+          setPreviewImage(photo.url);
+          setPreviewAttribution(photo.attribution);
+        }
+      }
+    } catch {
+      // Silently fail
+    } finally {
+      setLoadingPreview(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (fetchTimeoutRef.current) {
+      clearTimeout(fetchTimeoutRef.current);
+    }
+    
+    if (tripName.trim().length >= 2) {
+      fetchTimeoutRef.current = setTimeout(() => {
+        fetchPreviewImage(tripName);
+      }, 800);
+    } else {
+      setPreviewImage(null);
+      setPreviewAttribution(null);
+    }
+    
+    return () => {
+      if (fetchTimeoutRef.current) {
+        clearTimeout(fetchTimeoutRef.current);
+      }
+    };
+  }, [tripName, fetchPreviewImage]);
+
   const handleClose = () => {
+    setStep(1);
     setTripName('');
-    setUnlockDays(3);
+    setUnlockDays(5);
     setCustomDate('');
     setEmoji(null);
     setShareEmails([]);
     setShareEmailInput('');
+    setPreviewImage(null);
+    setPreviewAttribution(null);
     onClose();
   };
 
-  const handleCreate = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
+  const handleNext = () => {
+    if (step === 1 && !tripName.trim()) {
+      showToast(ErrorMessages.REQUIRED_FIELD('a destination'), 'error');
+      return;
+    }
+    if (step < totalSteps) {
+      hapticClick();
+      setStep(step + 1);
+    }
+  };
+
+  const handleBack = () => {
+    if (step > 1) {
+      hapticClick();
+      setStep(step - 1);
+    }
+  };
+
+  const handleCreate = async () => {
     const cleanName = tripName.trim();
     if (!cleanName) {
       showToast(ErrorMessages.REQUIRED_FIELD('a destination'), 'error');
@@ -72,7 +153,7 @@ export default function CreateJourneyModal({
       unlockDate.setHours(23, 59, 59, 999);
     } else {
       unlockDate = new Date();
-      unlockDate.setTime(unlockDate.getTime() + (unlockDays || 3) * 24 * 60 * 60 * 1000);
+      unlockDate.setTime(unlockDate.getTime() + (unlockDays || 5) * 24 * 60 * 60 * 1000);
     }
 
     if (unlockDate <= new Date()) {
@@ -93,34 +174,14 @@ export default function CreateJourneyModal({
         }
       }
 
-      // Fetch cover image from Unsplash (non-blocking, graceful fallback)
-      let coverImageUrl: string | undefined;
-      let coverImageAttribution: string | undefined;
-      try {
-        const coverResponse = await fetch('/api/cover-image', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ query: cleanName }),
-        });
-        if (coverResponse.ok) {
-          const { photo } = await coverResponse.json();
-          if (photo) {
-            coverImageUrl = photo.url;
-            coverImageAttribution = photo.attribution;
-          }
-        }
-      } catch {
-        // Cover image is optional, continue without it
-      }
-
       const { error } = await createJourney({
         userId,
         name: cleanName,
         unlockDate: unlockDate.toISOString(),
         sharedWith: sharedWithIds.length > 0 ? sharedWithIds : undefined,
         emoji: emoji || undefined,
-        coverImageUrl,
-        coverImageAttribution,
+        coverImageUrl: previewImage || undefined,
+        coverImageAttribution: previewAttribution || undefined,
       });
 
       if (error) {
@@ -156,34 +217,98 @@ export default function CreateJourneyModal({
     }
   };
 
+  // Calculate unlock date for preview
+  const getUnlockDatePreview = () => {
+    if (customDate) {
+      return new Date(customDate).toLocaleDateString('en-US', { 
+        weekday: 'long', 
+        month: 'long', 
+        day: 'numeric' 
+      });
+    }
+    if (unlockDays) {
+      const date = new Date();
+      date.setDate(date.getDate() + unlockDays);
+      return date.toLocaleDateString('en-US', { 
+        weekday: 'long', 
+        month: 'long', 
+        day: 'numeric' 
+      });
+    }
+    return '';
+  };
+
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 bg-[var(--bg-base)] flex flex-col safe-top safe-bottom">
-      <div className="flex-1 flex flex-col p-6 animate-enter">
-        <button 
-          onClick={handleClose}
-          className="self-end w-10 h-10 flex items-center justify-center rounded-full bg-[var(--bg-hover)] mb-8"
-        >
-          <X className="w-5 h-5 text-[var(--fg-muted)]" />
-        </button>
+    <div className="fixed inset-0 z-50 flex flex-col overflow-hidden safe-top safe-bottom">
+      {/* Dynamic background */}
+      <div className="absolute inset-0 transition-all duration-700">
+        {previewImage ? (
+          <>
+            <Image
+              src={previewImage}
+              alt=""
+              fill
+              sizes="100vw"
+              className="object-cover"
+              priority
+            />
+            <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-black/80" />
+          </>
+        ) : (
+          <div className="absolute inset-0 bg-gradient-to-br from-amber-950 via-orange-950 to-slate-950" />
+        )}
         
-        <div className="flex-1 flex flex-col justify-center max-w-sm mx-auto w-full">
-          <div className="flex items-center gap-3 mb-2">
-            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-orange-500/20 to-pink-500/20 flex items-center justify-center">
-              <Plane className="w-6 h-6 text-orange-400" />
+        {/* Loading shimmer for preview */}
+        {loadingPreview && (
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent animate-shimmer" />
+        )}
+      </div>
+
+      {/* Header */}
+      <header className="relative z-20 flex justify-between items-center p-6">
+        <IconButton 
+          icon={step > 1 ? <ChevronLeft className="w-5 h-5" /> : <X className="w-5 h-5" />}
+          label={step > 1 ? "Go back" : "Close"}
+          onClick={step > 1 ? handleBack : handleClose}
+          variant="ghost"
+          dark
+        />
+        
+        {/* Step indicators */}
+        <div className="flex gap-2">
+          {Array.from({ length: totalSteps }).map((_, i) => (
+            <div 
+              key={i}
+              className={`h-1 rounded-full transition-all duration-300 ${
+                i + 1 === step 
+                  ? 'w-6 bg-white' 
+                  : i + 1 < step 
+                    ? 'w-2 bg-white/60' 
+                    : 'w-2 bg-white/30'
+              }`}
+            />
+          ))}
+        </div>
+        
+        <div className="w-10" /> {/* Spacer */}
+      </header>
+
+      {/* Content - scrollable and centered for keyboard */}
+      <main className="relative z-10 flex-1 overflow-y-auto p-6 pb-safe flex flex-col justify-center">
+        {/* STEP 1: Destination */}
+        {step === 1 && (
+          <div className="animate-fade-in">
+            <div className="text-center mb-8">
+              <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center">
+                <MapPin className="w-7 h-7 text-white" />
+              </div>
+              <h1 className="text-3xl font-light text-white mb-2">Where to?</h1>
+              <p className="text-white/60">Enter your destination to begin</p>
             </div>
-            <h2 className="text-3xl font-light tracking-tight text-[var(--fg-base)]">New Journey</h2>
-          </div>
-          <p className="text-[var(--fg-muted)] text-sm mb-10 ml-[60px]">Where are you headed?</p>
-          
-          <form onSubmit={handleCreate} className="space-y-8">
-            {/* Destination */}
-            <div>
-              <label className="flex items-center gap-2 text-[11px] uppercase tracking-[0.2em] text-[var(--fg-muted)] font-medium mb-3">
-                <MapPin className="w-3 h-3" />
-                Destination
-              </label>
+            
+            <div className="bg-black/30 backdrop-blur-xl rounded-3xl p-6 border border-white/10">
               <input 
                 type="text" 
                 autoFocus
@@ -191,138 +316,220 @@ export default function CreateJourneyModal({
                 value={tripName}
                 onChange={(e) => setTripName(e.target.value)}
                 maxLength={50}
-                className="w-full bg-[var(--bg-surface)]/50 border border-[var(--border-base)] focus:border-orange-400 rounded-2xl px-5 py-4 text-2xl font-light text-[var(--fg-base)] placeholder:text-[var(--fg-subtle)] focus:outline-none focus:bg-[var(--bg-base)]/50 transition-all input-premium"
+                className="w-full bg-transparent text-3xl font-light text-white placeholder:text-white/30 focus:outline-none text-center"
               />
+              
+              {previewImage && previewAttribution && (
+                <p className="text-center text-white/40 text-xs mt-4">
+                  Photo by {previewAttribution}
+                </p>
+              )}
             </div>
+            
+            <button
+              onClick={handleNext}
+              disabled={!tripName.trim()}
+              className="mt-6 w-full py-4 rounded-2xl bg-white text-black font-semibold text-lg flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed active:scale-[0.98] transition-all"
+            >
+              Continue
+              <ChevronRight className="w-5 h-5" />
+            </button>
+          </div>
+        )}
 
-            {/* Emoji Picker */}
-            <EmojiPicker value={emoji} onChange={setEmoji} />
-
-            {/* Unlock After */}
-            <div>
-              <label className="flex items-center gap-2 text-[11px] uppercase tracking-[0.2em] text-[var(--fg-muted)] font-medium mb-3">
-                <Timer className="w-3 h-3" />
-                Unlock After
-              </label>
-              <div className="flex gap-2 mb-3">
-                {[3, 5, 7, 14].map((days) => {
+        {/* STEP 2: Timing */}
+        {step === 2 && (
+          <div className="animate-fade-in">
+            <div className="text-center mb-8">
+              <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center">
+                <Timer className="w-7 h-7 text-white" />
+              </div>
+              <h1 className="text-3xl font-light text-white mb-2">When to unlock?</h1>
+              <p className="text-white/60">Your memories will stay sealed until then</p>
+            </div>
+            
+            <div className="bg-black/30 backdrop-blur-xl rounded-3xl p-6 border border-white/10 space-y-6">
+              {/* Quick options */}
+              <div className="grid grid-cols-5 gap-2">
+                {[1, 3, 5, 7, 14].map((days) => {
                   const isSelected = unlockDays === days && !customDate;
                   return (
                     <button
                       key={days}
                       type="button"
                       onClick={() => {
+                        hapticClick();
                         setUnlockDays(days);
                         setCustomDate('');
                       }}
-                      className={`flex-1 py-3 rounded-xl text-sm font-medium transition-all ${
+                      className={`py-4 rounded-xl font-medium transition-all ${
                         isSelected
-                          ? 'bg-[var(--fg-base)] text-[var(--fg-inverse)]' 
-                          : 'bg-[var(--bg-surface)] text-[var(--fg-muted)] hover:bg-[var(--bg-muted)]'
+                          ? 'bg-white text-black' 
+                          : 'bg-white/10 text-white hover:bg-white/20'
                       }`}
                     >
-                      {days}d
+                      <span className="text-lg">{days}</span>
+                      <span className="text-xs opacity-60 ml-0.5">{days === 1 ? 'day' : 'days'}</span>
                     </button>
                   );
                 })}
               </div>
-              <div className="flex items-center gap-3">
-                <span className="text-sm text-[var(--fg-subtle)]">or</span>
-                <input
-                  type="date"
-                  value={customDate}
-                  onFocus={() => setUnlockDays(null)}
-                  onInput={() => setUnlockDays(null)}
-                  onChange={(e) => {
-                    const selectedDate = new Date(e.target.value);
-                    const today = new Date();
-                    today.setHours(0, 0, 0, 0);
-                    
-                    if (selectedDate >= today) {
-                      setCustomDate(e.target.value);
-                      setUnlockDays(null);
-                    } else {
-                      setCustomDate('');
-                    }
-                  }}
-                  min={new Date().toISOString().split('T')[0]}
-                  className={`flex-1 py-3 px-4 rounded-xl text-sm font-medium transition-all bg-[var(--bg-surface)] border-2 ${
-                    customDate 
-                      ? 'border-[var(--fg-base)] text-[var(--fg-base)]' 
-                      : 'border-transparent text-[var(--fg-muted)]'
-                  }`}
-                />
-              </div>
-            </div>
-
-            {/* Share With (Optional) */}
-            <div>
-              <label className="flex items-center gap-2 text-[11px] uppercase tracking-[0.2em] text-[var(--fg-muted)] font-medium mb-3">
-                <UserPlus className="w-3 h-3" />
-                Share With <span className="text-[var(--fg-subtle)] normal-case tracking-normal">(optional)</span>
-              </label>
               
-              {shareEmails.length > 0 && (
-                <div className="flex flex-wrap gap-2 mb-3">
-                  {shareEmails.map((email, i) => (
-                    <div 
-                      key={i} 
-                      className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-blue-500/20 text-blue-400 text-xs"
-                    >
-                      <span>{email}</span>
-                      <button
-                        type="button"
-                        onClick={() => setShareEmails(shareEmails.filter((_, idx) => idx !== i))}
-                        className="hover:text-blue-300 transition-colors"
-                      >
-                        <X className="w-3 h-3" />
-                      </button>
-                    </div>
-                  ))}
+              {/* Custom date */}
+              <div className="flex items-center gap-3">
+                <div className="flex-1 h-px bg-white/20" />
+                <span className="text-sm text-white/40">or pick a date</span>
+                <div className="flex-1 h-px bg-white/20" />
+              </div>
+              
+              <input
+                type="date"
+                value={customDate}
+                onChange={(e) => {
+                  const selectedDate = new Date(e.target.value);
+                  const today = new Date();
+                  today.setHours(0, 0, 0, 0);
+                  
+                  if (selectedDate >= today) {
+                    setCustomDate(e.target.value);
+                    setUnlockDays(null);
+                  }
+                }}
+                min={new Date().toISOString().split('T')[0]}
+                className={`w-full py-4 px-4 rounded-xl text-center font-medium transition-all ${
+                  customDate 
+                    ? 'bg-white text-black' 
+                    : 'bg-white/10 text-white/60'
+                }`}
+              />
+              
+              {/* Preview */}
+              {(unlockDays || customDate) && (
+                <div className="text-center pt-4 border-t border-white/10">
+                  <p className="text-white/50 text-sm mb-1">Unlocks on</p>
+                  <p className="text-white font-medium">{getUnlockDatePreview()}</p>
                 </div>
               )}
-              
-              <div className="flex gap-2">
-                <input 
-                  type="email"
-                  placeholder="friend@email.com"
-                  value={shareEmailInput}
-                  onChange={(e) => setShareEmailInput(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
-                      e.preventDefault();
-                      handleAddShareEmail();
-                    }
-                  }}
-                  className="flex-1 bg-[var(--bg-surface)] border border-[var(--border-base)] rounded-xl py-3 px-4 text-sm text-[var(--fg-base)] placeholder:text-[var(--fg-subtle)] focus:outline-none focus:border-[var(--fg-subtle)] transition-colors"
-                />
-                <button
-                  type="button"
-                  onClick={handleAddShareEmail}
-                  disabled={!shareEmailInput.trim() || !shareEmailInput.includes('@')}
-                  className="px-4 py-3 rounded-xl bg-blue-500/20 text-blue-400 text-sm font-medium hover:bg-blue-500/30 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-                >
-                  Add
-                </button>
-              </div>
-              <p className="text-xs text-[var(--fg-subtle)] mt-2">
-                They'll be invited when the journey is created
-              </p>
             </div>
             
-            <Button 
-              type="submit"
-              disabled={!tripName}
-              loading={loading}
-              fullWidth 
-              size="lg" 
-              className="mt-4"
+            <button
+              onClick={handleNext}
+              disabled={!unlockDays && !customDate}
+              className="mt-6 w-full py-4 rounded-2xl bg-white text-black font-semibold text-lg flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed active:scale-[0.98] transition-all"
             >
-              {loading ? 'Creating...' : 'Start Journey'}
-            </Button>
-          </form>
-        </div>
-      </div>
+              Continue
+              <ChevronRight className="w-5 h-5" />
+            </button>
+          </div>
+        )}
+
+        {/* STEP 3: Personalize */}
+        {step === 3 && (
+          <div className="animate-fade-in">
+            <div className="text-center mb-8">
+              <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center">
+                <Sparkles className="w-7 h-7 text-white" />
+              </div>
+              <h1 className="text-3xl font-light text-white mb-2">Final touches</h1>
+              <p className="text-white/60">Add an emoji and invite friends</p>
+            </div>
+            
+            <div className="bg-black/30 backdrop-blur-xl rounded-3xl p-6 border border-white/10 space-y-6">
+              {/* Emoji picker */}
+              <div>
+                <label className="text-sm text-white/60 mb-3 block">Journey emoji</label>
+                <EmojiPicker value={emoji} onChange={setEmoji} />
+              </div>
+              
+              {/* Share section */}
+              <div>
+                <label className="flex items-center gap-2 text-sm text-white/60 mb-3">
+                  <UserPlus className="w-4 h-4" />
+                  Invite collaborators
+                  <span className="text-white/40">(optional)</span>
+                </label>
+                
+                {shareEmails.length > 0 && (
+                  <div className="flex flex-wrap gap-2 mb-3">
+                    {shareEmails.map((email, i) => (
+                      <div 
+                        key={i} 
+                        className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/10 text-white text-sm"
+                      >
+                        <span>{email}</span>
+                        <button
+                          type="button"
+                          onClick={() => setShareEmails(shareEmails.filter((_, idx) => idx !== i))}
+                          className="hover:text-white/60 transition-colors"
+                        >
+                          <X className="w-3 h-3" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                
+                <div className="flex gap-2">
+                  <input 
+                    type="email"
+                    placeholder="friend@email.com"
+                    value={shareEmailInput}
+                    onChange={(e) => setShareEmailInput(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        handleAddShareEmail();
+                      }
+                    }}
+                    className="flex-1 bg-white/10 border border-white/10 rounded-xl py-3 px-4 text-sm text-white placeholder:text-white/30 focus:outline-none focus:border-white/30 transition-colors"
+                  />
+                  <button
+                    type="button"
+                    onClick={handleAddShareEmail}
+                    disabled={!shareEmailInput.trim() || !shareEmailInput.includes('@')}
+                    className="px-4 py-3 rounded-xl bg-white/20 text-white text-sm font-medium hover:bg-white/30 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                  >
+                    Add
+                  </button>
+                </div>
+              </div>
+              
+              {/* Summary */}
+              <div className="pt-4 border-t border-white/10">
+                <div className="flex items-center justify-between text-sm mb-2">
+                  <span className="text-white/50">Destination</span>
+                  <span className="text-white font-medium">
+                    {emoji && <span className="mr-1">{emoji}</span>}
+                    {tripName}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-white/50">Unlocks</span>
+                  <span className="text-white font-medium">{getUnlockDatePreview()}</span>
+                </div>
+              </div>
+            </div>
+            
+            <button
+              onClick={handleCreate}
+              disabled={loading}
+              className="mt-6 w-full py-4 rounded-2xl bg-white text-black font-semibold text-lg flex items-center justify-center gap-2 disabled:opacity-70 active:scale-[0.98] transition-all"
+            >
+              {loading ? (
+                <>
+                  <div className="w-5 h-5 border-2 border-black/20 border-t-black rounded-full animate-spin" />
+                  Creating...
+                </>
+              ) : (
+                <>
+                  <Check className="w-5 h-5" />
+                  Start Journey
+                </>
+              )}
+            </button>
+          </div>
+        )}
+      </main>
     </div>
   );
 }

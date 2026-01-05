@@ -570,6 +570,11 @@ button, a, [role="button"] {
   background-size: 200% 100%;
 }
 
+.animate-shimmer {
+  background-size: 200% 100%;
+  animation: shimmer 2s ease-in-out infinite;
+}
+
 /* Image blur placeholder */
 .img-loading {
   filter: blur(20px);
