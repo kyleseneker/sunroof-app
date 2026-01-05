@@ -45,7 +45,8 @@ export function useJourneys(userId: string | undefined) {
   return {
     activeJourneys: data?.activeJourneys || [],
     pastJourneys: data?.pastJourneys || [],
-    isLoading: isLoading && !data,
+    // Show loading if we don't have data yet (initial load)
+    isLoading: !data,
     isRefreshing: isValidating,
     error: error?.message || null,
     refresh: () => mutate(),
