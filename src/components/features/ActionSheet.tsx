@@ -32,6 +32,7 @@ export default function ActionSheet({
   options 
 }: ActionSheetProps) {
   const sheetRef = useRef<HTMLDivElement>(null);
+  const handleRef = useRef<HTMLDivElement>(null);
   const [isClosing, setIsClosing] = useState(false);
   const [dragOffset, setDragOffset] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
@@ -46,7 +47,7 @@ export default function ActionSheet({
     }, 200);
   }, [onClose]);
 
-  // Swipe-to-dismiss handlers
+  // Swipe-to-dismiss handlers (only on handle area)
   const handleTouchStart = useCallback((e: React.TouchEvent) => {
     dragStartY.current = e.touches[0].clientY;
     setIsDragging(true);
@@ -63,6 +64,7 @@ export default function ActionSheet({
   }, [isDragging]);
 
   const handleTouchEnd = useCallback(() => {
+    if (!isDragging) return;
     setIsDragging(false);
     if (dragOffset > SWIPE_THRESHOLD) {
       hapticClick();
@@ -71,7 +73,7 @@ export default function ActionSheet({
       // Snap back
       setDragOffset(0);
     }
-  }, [dragOffset, handleClose]);
+  }, [isDragging, dragOffset, handleClose]);
 
   // Close on escape
   useEffect(() => {
@@ -142,12 +144,15 @@ export default function ActionSheet({
         `}
         style={{ transform: `translateY(${dragOffset}px)` }}
         onClick={(e) => e.stopPropagation()}
-        onTouchStart={handleTouchStart}
-        onTouchMove={handleTouchMove}
-        onTouchEnd={handleTouchEnd}
       >
-        {/* Handle - visual affordance for swipe */}
-        <div className="flex justify-center pt-3 pb-2 cursor-grab active:cursor-grabbing">
+        {/* Handle - swipe zone for dismiss */}
+        <div 
+          ref={handleRef}
+          className="flex justify-center pt-3 pb-2 cursor-grab active:cursor-grabbing touch-none"
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleTouchEnd}
+        >
           <div className="w-10 h-1 bg-[var(--border-base)] rounded-full" />
         </div>
 
