@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useMemo, useEffect, useCallback, useRef } from 'react';
-import { X, MapPin, Timer, UserPlus, ChevronRight, ChevronLeft, Sparkles, Check } from 'lucide-react';
+import { X, MapPin, Timer, UserPlus, ChevronRight, ChevronLeft, Sparkles, Check, Calendar } from 'lucide-react';
 import { useToast, IconButton } from '@/components/ui';
 import { EmojiPicker } from '@/components/features';
 import { createJourney, getUserIdByEmail } from '@/services';
@@ -382,26 +382,36 @@ export default function CreateJourneyModal({
                 <div className="flex-1 h-px bg-white/20" />
               </div>
               
-              <input
-                type="date"
-                value={customDate}
-                onChange={(e) => {
-                  const selectedDate = new Date(e.target.value);
-                  const today = new Date();
-                  today.setHours(0, 0, 0, 0);
-                  
-                  if (selectedDate >= today) {
-                    setCustomDate(e.target.value);
-                    setUnlockDays(null);
-                  }
-                }}
-                min={new Date().toISOString().split('T')[0]}
-                className={`w-full py-4 px-4 rounded-xl text-center font-medium transition-all ${
-                  customDate 
-                    ? 'bg-white text-black' 
-                    : 'bg-white/10 text-white/60'
-                }`}
-              />
+              <div className={`relative flex items-center rounded-xl transition-all ${
+                customDate 
+                  ? 'bg-white' 
+                  : 'bg-white/10'
+              }`}>
+                <Calendar className={`absolute left-4 w-5 h-5 pointer-events-none ${
+                  customDate ? 'text-black/50' : 'text-white/40'
+                }`} />
+                <input
+                  type="date"
+                  value={customDate}
+                  onChange={(e) => {
+                    const selectedDate = new Date(e.target.value);
+                    const today = new Date();
+                    today.setHours(0, 0, 0, 0);
+                    
+                    if (selectedDate >= today) {
+                      setCustomDate(e.target.value);
+                      setUnlockDays(null);
+                    }
+                  }}
+                  min={new Date().toISOString().split('T')[0]}
+                  className={`w-full py-4 pl-12 pr-4 bg-transparent rounded-xl font-medium appearance-none ${
+                    customDate 
+                      ? 'text-black' 
+                      : 'text-white/60'
+                  }`}
+                  style={{ colorScheme: customDate ? 'light' : 'dark' }}
+                />
+              </div>
               
               {/* Preview */}
               {(unlockDays || customDate) && (

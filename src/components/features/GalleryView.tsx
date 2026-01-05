@@ -287,8 +287,10 @@ export default function GalleryView({ journey: initialJourney, onClose, onMemory
       )}
 
       {/* Sticky header - stays at top while scrolling */}
-      <header className="sticky top-0 z-30 safe-top bg-gradient-to-b from-black/60 to-transparent">
-        <div className="flex justify-between items-center p-6">
+      <header className="sticky top-0 z-30 safe-top">
+        {/* Extended gradient that covers overscroll bounce */}
+        <div className="absolute inset-x-0 bottom-0 h-[200%] -top-[100%] bg-gradient-to-b from-black/60 via-black/60 to-transparent pointer-events-none" />
+        <div className="relative flex justify-between items-center p-6">
           <IconButton 
             icon={<X className="w-5 h-5" />} 
             label="Close" 

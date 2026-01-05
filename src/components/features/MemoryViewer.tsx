@@ -208,7 +208,7 @@ export default function MemoryViewer({
       </div>
 
       {/* Main content area */}
-      <div className="relative z-10 flex-1 flex flex-col items-center justify-center px-6 safe-top safe-bottom overflow-hidden">
+      <div className="relative z-10 flex-1 flex flex-col items-center justify-center px-6 pt-24 pb-6 safe-bottom overflow-hidden">
         
         {/* Photo */}
         {memory.type === 'photo' && memory.url && (
@@ -216,7 +216,7 @@ export default function MemoryViewer({
             <img
               src={memory.url}
               alt=""
-              className="max-w-full max-h-[80vh] object-contain rounded-2xl shadow-2xl"
+              className="max-w-full max-h-[70vh] object-contain rounded-2xl shadow-2xl"
               onError={(e) => {
                 e.currentTarget.src =
                   'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiM2NjYiIHN0cm9rZS13aWR0aD0iMiI+PHJlY3QgeD0iMyIgeT0iMyIgd2lkdGg9IjE4IiBoZWlnaHQ9IjE4IiByeD0iMiIvPjxjaXJjbGUgY3g9IjguNSIgY3k9IjguNSIgcj0iMS41Ii8+PHBhdGggZD0ibTIxIDE1LTUtNS01IDV6Ii8+PC9zdmc+';
