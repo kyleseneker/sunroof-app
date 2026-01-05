@@ -537,12 +537,12 @@ export default function DashboardV2({
               <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/20 to-black/70" />
             </>
           ) : (
-            <div className="absolute inset-0 bg-gradient-to-br from-violet-900 via-indigo-900 to-slate-900">
+            <div className="absolute inset-0 bg-gradient-to-br from-amber-950 via-orange-950 to-slate-950">
               {/* Ambient animated elements */}
               <div className="absolute inset-0 overflow-hidden">
-                <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-violet-500/20 rounded-full blur-3xl animate-float" />
-                <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-indigo-500/20 rounded-full blur-3xl animate-float" style={{ animationDelay: '2s' }} />
-                <div className="absolute top-1/2 right-1/3 w-64 h-64 bg-fuchsia-500/10 rounded-full blur-3xl animate-breathe" />
+                <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-amber-500/20 rounded-full blur-3xl animate-float" />
+                <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-orange-500/20 rounded-full blur-3xl animate-float" style={{ animationDelay: '2s' }} />
+                <div className="absolute top-1/2 right-1/3 w-64 h-64 bg-rose-500/10 rounded-full blur-3xl animate-breathe" />
               </div>
             </div>
           )}
