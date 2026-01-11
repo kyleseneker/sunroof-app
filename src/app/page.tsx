@@ -12,7 +12,7 @@ export default function LandingPage() {
           <div 
             className="w-[88px] h-[88px] rounded-3xl flex items-center justify-center"
             style={{
-              background: 'linear-gradient(135deg, #451a03 0%, #431407 50%, #1e1b4b 100%)',
+              background: 'linear-gradient(180deg, #451a03 0%, #431407 50%, #1e1b4b 100%)',
               boxShadow: '0 8px 24px rgba(249, 115, 22, 0.5)',
             }}
           >

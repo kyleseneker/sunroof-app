@@ -13,34 +13,9 @@ export async function GET() {
           flexDirection: 'column',
           alignItems: 'center',
           justifyContent: 'center',
-          background: 'linear-gradient(135deg, #451a03 0%, #431407 50%, #1e1b4b 100%)',
-          overflow: 'hidden',
+          background: 'linear-gradient(180deg, #451a03 0%, #431407 50%, #1e1b4b 100%)',
         }}
       >
-        {/* Ambient glow */}
-        <div
-          style={{
-            position: 'absolute',
-            top: -50,
-            right: -50,
-            width: 400,
-            height: 400,
-            borderRadius: '50%',
-            background: 'radial-gradient(circle, rgba(251, 146, 60, 0.2) 0%, transparent 70%)',
-          }}
-        />
-        <div
-          style={{
-            position: 'absolute',
-            bottom: -50,
-            left: -50,
-            width: 450,
-            height: 450,
-            borderRadius: '50%',
-            background: 'radial-gradient(circle, rgba(249, 115, 22, 0.15) 0%, transparent 70%)',
-          }}
-        />
-
         {/* Logo */}
         <div
           style={{
@@ -52,11 +27,11 @@ export async function GET() {
         >
           <div
             style={{
-              width: 100,
-              height: 100,
-              borderRadius: 28,
-              background: 'linear-gradient(135deg, #451a03 0%, #431407 50%, #1e1b4b 100%)',
-              boxShadow: '0 12px 40px rgba(249, 115, 22, 0.5)',
+              width: 88,
+              height: 88,
+              borderRadius: 24,
+              background: 'linear-gradient(180deg, #451a03 0%, #431407 50%, #1e1b4b 100%)',
+              boxShadow: '0 8px 24px rgba(249, 115, 22, 0.5)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
@@ -64,8 +39,8 @@ export async function GET() {
           >
             {/* Sun icon */}
             <svg
-              width="60"
-              height="60"
+              width="56"
+              height="56"
               viewBox="0 0 512 512"
               fill="none"
               stroke="#f97316"
@@ -91,7 +66,7 @@ export async function GET() {
             fontSize: 72,
             fontWeight: 300,
             color: 'white',
-            letterSpacing: '2px',
+            letterSpacing: '1px',
             marginBottom: 16,
           }}
         >
@@ -104,22 +79,9 @@ export async function GET() {
             fontSize: 32,
             fontWeight: 400,
             color: 'rgba(255, 255, 255, 0.6)',
-            marginBottom: 40,
           }}
         >
           Capture now. Relive later.
-        </div>
-
-        {/* Description */}
-        <div
-          style={{
-            fontSize: 22,
-            color: 'rgba(255, 255, 255, 0.4)',
-            maxWidth: 500,
-            textAlign: 'center',
-          }}
-        >
-          The delayed camera for your journeys
         </div>
       </div>
     ),
