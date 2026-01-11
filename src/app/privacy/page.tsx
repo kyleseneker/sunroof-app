@@ -124,6 +124,7 @@ export default function PrivacyPolicy() {
                 We share data with the following third-party services to operate Sunroof:
               </p>
               <SimpleBullet text="Supabase (database, authentication, file storage) — stores your account and memory data" />
+              <SimpleBullet text="Sentry (error tracking, performance monitoring) — receives crash reports, app performance data, and error logs to help us improve stability" />
               <SimpleBullet text="OpenAI (AI recaps) — receives only text notes, never photos or audio" />
               <SimpleBullet text="OpenWeather (weather data) — receives your location coordinates" />
               <SimpleBullet text="Unsplash (cover images) — receives search queries for destinations" />

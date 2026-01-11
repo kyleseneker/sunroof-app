@@ -114,6 +114,7 @@ export default function TermsOfService() {
                 Sunroof integrates with third-party services to provide its features:
               </p>
               <SimpleBullet text="Supabase for authentication, database, and file storage" />
+              <SimpleBullet text="Sentry for error tracking and performance monitoring" />
               <SimpleBullet text="OpenAI for AI-powered journey recaps (text notes only)" />
               <SimpleBullet text="OpenWeather for weather data" />
               <SimpleBullet text="Unsplash for journey cover images" />
