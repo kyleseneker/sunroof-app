@@ -1,6 +1,8 @@
 import Link from 'next/link';
 import { ChevronLeft, ShieldCheck, Eye, Database, Lock, UserCheck, Mail, Cpu, MapPin } from 'lucide-react';
 
+const textStyle = { fontSize: '12px', color: 'rgba(255, 255, 255, 0.7)', lineHeight: '22px' };
+
 export default function PrivacyPolicy() {
   return (
     <div className="min-h-screen flex flex-col overflow-y-auto scrollbar-hide">
@@ -52,7 +54,7 @@ export default function PrivacyPolicy() {
             }}
           >
             <Section icon={<Eye size={18} />} title="Overview">
-              <p style={{ fontSize: '12px', color: 'rgba(255, 255, 255, 0.7)', lineHeight: '22px' }}>
+              <p style={textStyle}>
                 Sunroof is committed to protecting your privacy. This Privacy Policy explains how 
                 we collect, use, and safeguard your information when you use our mobile application.
               </p>
@@ -67,7 +69,7 @@ export default function PrivacyPolicy() {
             </Section>
 
             <Section icon={<MapPin size={18} />} title="Location & Weather">
-              <p className="mb-2" style={{ fontSize: '12px', color: 'rgba(255, 255, 255, 0.7)', lineHeight: '22px' }}>
+              <p className="mb-2" style={textStyle}>
                 With your permission, we capture location and weather data with each memory to 
                 enrich your journey experience. This data is:
               </p>
@@ -78,7 +80,7 @@ export default function PrivacyPolicy() {
             </Section>
 
             <Section icon={<Cpu size={18} />} title="AI Features">
-              <p className="mb-2" style={{ fontSize: '12px', color: 'rgba(255, 255, 255, 0.7)', lineHeight: '22px' }}>
+              <p className="mb-2" style={textStyle}>
                 Our AI Recap feature generates journey summaries. Here&apos;s how we protect your privacy:
               </p>
               <SimpleBullet text="Only text notes are sent to AI—never photos, videos, or audio" />
@@ -88,7 +90,7 @@ export default function PrivacyPolicy() {
             </Section>
 
             <Section icon={<Lock size={18} />} title="Data Storage & Security">
-              <p className="mb-2" style={{ fontSize: '12px', color: 'rgba(255, 255, 255, 0.7)', lineHeight: '22px' }}>
+              <p className="mb-2" style={textStyle}>
                 Your memories are stored securely using industry-standard practices:
               </p>
               <SimpleBullet text="Backend powered by Supabase with SOC 2 Type II compliance" />
@@ -106,7 +108,7 @@ export default function PrivacyPolicy() {
             </Section>
 
             <Section icon={<Mail size={18} />} title="Contact Us" isLast>
-              <p style={{ fontSize: '12px', color: 'rgba(255, 255, 255, 0.7)', lineHeight: '22px' }}>
+              <p style={textStyle}>
                 If you have questions about this Privacy Policy or want to exercise your data rights, 
                 please contact us at{' '}
                 <a 
@@ -179,7 +181,7 @@ function BulletPoint({ label, text }: { label: string; text: string }) {
   return (
     <div className="flex items-start gap-2 mb-2">
       <div 
-        className="w-1.5 h-1.5 rounded-full mt-[5px] flex-shrink-0"
+        className="w-1.5 h-1.5 rounded-full mt-2 flex-shrink-0"
         style={{ background: '#f97316' }}
       />
       <p style={{ fontSize: '12px', color: 'rgba(255, 255, 255, 0.7)', lineHeight: '22px' }}>
@@ -194,7 +196,7 @@ function SimpleBullet({ text }: { text: string }) {
   return (
     <div className="flex items-start gap-2 mb-2">
       <div 
-        className="w-1.5 h-1.5 rounded-full mt-[5px] flex-shrink-0"
+        className="w-1.5 h-1.5 rounded-full mt-2 flex-shrink-0"
         style={{ background: '#f97316' }}
       />
       <p style={{ fontSize: '12px', color: 'rgba(255, 255, 255, 0.7)', lineHeight: '22px' }}>

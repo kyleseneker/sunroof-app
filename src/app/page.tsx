@@ -109,6 +109,13 @@ export default function LandingPage() {
               How It Works
             </Link>
             <Link 
+              href="/support" 
+              className="hover:text-white transition-colors"
+              style={{ color: 'rgba(255, 255, 255, 0.4)' }}
+            >
+              Support
+            </Link>
+            <Link 
               href="/privacy" 
               className="hover:text-white transition-colors"
               style={{ color: 'rgba(255, 255, 255, 0.4)' }}
@@ -122,13 +129,6 @@ export default function LandingPage() {
             >
               Terms
             </Link>
-            <a 
-              href="mailto:hello@getsunroof.com" 
-              className="hover:text-white transition-colors"
-              style={{ color: 'rgba(255, 255, 255, 0.4)' }}
-            >
-              Contact
-            </a>
           </nav>
         </div>
         

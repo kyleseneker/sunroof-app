@@ -181,7 +181,7 @@ function SimpleBullet({ text }: { text: string }) {
   return (
     <div className="flex items-start gap-2 mb-2">
       <div 
-        className="w-1.5 h-1.5 rounded-full mt-[5px] flex-shrink-0"
+        className="w-1.5 h-1.5 rounded-full mt-2 flex-shrink-0"
         style={{ background: '#f97316' }}
       />
       <p style={{ fontSize: '12px', color: 'rgba(255, 255, 255, 0.7)', lineHeight: '22px' }}>
