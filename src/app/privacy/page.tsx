@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { ChevronLeft, ShieldCheck, Eye, Database, Lock, UserCheck, Mail, Cpu, MapPin } from 'lucide-react';
+import { ChevronLeft, ShieldCheck, Eye, Database, Lock, UserCheck, Mail, Cpu, MapPin, Users, Share2, Globe, Clock, Bell } from 'lucide-react';
 
 const textStyle = { fontSize: '12px', color: 'rgba(255, 255, 255, 0.7)', lineHeight: '22px' };
 
@@ -55,8 +55,29 @@ export default function PrivacyPolicy() {
           >
             <Section icon={<Eye size={18} />} title="Overview">
               <p style={textStyle}>
-                Sunroof is committed to protecting your privacy. This Privacy Policy explains how 
-                we collect, use, and safeguard your information when you use our mobile application.
+                Kyle Seneker (&quot;we,&quot; &quot;us,&quot; or &quot;our&quot;) operates the Sunroof mobile 
+                application (&quot;Service&quot;). This Privacy Policy describes how we collect, use, 
+                disclose, and safeguard your personal information when you use our Service. 
+                By accessing or using the Service, you consent to the collection and use of 
+                your information in accordance with this Privacy Policy. If you do not agree 
+                with our policies and practices, do not use the Service.
+              </p>
+            </Section>
+
+            <Section icon={<Users size={18} />} title="Children&apos;s Privacy">
+              <p style={textStyle}>
+                Sunroof is not intended for children under 13 years of age. We do not knowingly 
+                collect personal information from children under 13. If you are a parent or guardian 
+                and believe your child has provided us with personal information, please contact us 
+                at{' '}
+                <a 
+                  href="mailto:privacy@getsunroof.com" 
+                  style={{ color: '#f97316', fontWeight: 500 }}
+                  className="hover:underline"
+                >
+                  privacy@getsunroof.com
+                </a>
+                {' '}and we will promptly delete such information.
               </p>
             </Section>
 
@@ -89,6 +110,29 @@ export default function PrivacyPolicy() {
               <SimpleBullet text="You choose when to generate a recap—it's never automatic" />
             </Section>
 
+            <Section icon={<Bell size={18} />} title="Push Notifications">
+              <p style={textStyle}>
+                With your permission, we send push notifications to remind you when journeys unlock 
+                and for daily capture reminders. We collect your device token to deliver these 
+                notifications. You can disable notifications at any time in your device settings 
+                or within the app.
+              </p>
+            </Section>
+
+            <Section icon={<Share2 size={18} />} title="Third-Party Services">
+              <p className="mb-2" style={textStyle}>
+                We share data with the following third-party services to operate Sunroof:
+              </p>
+              <SimpleBullet text="Supabase (database, authentication, file storage) — stores your account and memory data" />
+              <SimpleBullet text="OpenAI (AI recaps) — receives only text notes, never photos or audio" />
+              <SimpleBullet text="OpenWeather (weather data) — receives your location coordinates" />
+              <SimpleBullet text="Unsplash (cover images) — receives search queries for destinations" />
+              <p className="mt-2" style={textStyle}>
+                We do not sell your personal information. We do not share your data with 
+                advertisers or data brokers.
+              </p>
+            </Section>
+
             <Section icon={<Lock size={18} />} title="Data Storage & Security">
               <p className="mb-2" style={textStyle}>
                 Your memories are stored securely using industry-standard practices:
@@ -99,12 +143,62 @@ export default function PrivacyPolicy() {
               <SimpleBullet text="Offline captures are stored locally until synced" />
             </Section>
 
+            <Section icon={<Globe size={18} />} title="International Data Transfers">
+              <p style={textStyle}>
+                Your data may be transferred to and processed in countries other than your own, 
+                including the United States where our servers and third-party service providers 
+                are located. By using Sunroof, you consent to the transfer of your information 
+                to these countries, which may have different data protection laws than your jurisdiction.
+              </p>
+            </Section>
+
+            <Section icon={<Clock size={18} />} title="Data Retention">
+              <p style={textStyle}>
+                We retain your data for as long as your account is active. When you delete your 
+                account, all your data including journeys, memories, and personal information 
+                is permanently deleted within 30 days. Backup copies may persist for up to 90 days 
+                before complete removal.
+              </p>
+            </Section>
+
             <Section icon={<UserCheck size={18} />} title="Your Rights">
               <SimpleBullet text="Access all your personal data through the app" />
               <SimpleBullet text="Delete your account and all associated data" />
               <SimpleBullet text="Export your unlocked memories" />
               <SimpleBullet text="Control location and weather capture in settings" />
               <SimpleBullet text="Opt out of AI features entirely" />
+            </Section>
+
+            <Section icon={<ShieldCheck size={18} />} title="California Privacy Rights">
+              <p className="mb-2" style={textStyle}>
+                If you are a California resident, you have additional rights under the California 
+                Consumer Privacy Act (CCPA):
+              </p>
+              <SimpleBullet text="Right to know what personal information we collect and how it is used" />
+              <SimpleBullet text="Right to delete your personal information" />
+              <SimpleBullet text="Right to opt-out of the sale of personal information (we do not sell your data)" />
+              <SimpleBullet text="Right to non-discrimination for exercising your privacy rights" />
+              <p className="mt-2" style={textStyle}>
+                To exercise these rights, contact us at{' '}
+                <a 
+                  href="mailto:privacy@getsunroof.com" 
+                  style={{ color: '#f97316', fontWeight: 500 }}
+                  className="hover:underline"
+                >
+                  privacy@getsunroof.com
+                </a>
+                . We will respond to verifiable consumer requests within 45 days.
+              </p>
+            </Section>
+
+            <Section icon={<Clock size={18} />} title="Changes to This Policy">
+              <p style={textStyle}>
+                We may update this Privacy Policy from time to time. If we make material changes, 
+                we will notify you by posting the updated policy within the Service and updating 
+                the &quot;Last updated&quot; date above. We encourage you to review this Privacy Policy 
+                periodically for any changes. Your continued use of the Service after the posting 
+                of changes constitutes your acceptance of such changes.
+              </p>
             </Section>
 
             <Section icon={<Mail size={18} />} title="Contact Us" isLast>
