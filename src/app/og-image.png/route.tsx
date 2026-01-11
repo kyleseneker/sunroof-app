@@ -14,31 +14,30 @@ export async function GET() {
           alignItems: 'center',
           justifyContent: 'center',
           background: 'linear-gradient(135deg, #451a03 0%, #431407 50%, #1e1b4b 100%)',
+          overflow: 'hidden',
         }}
       >
-        {/* Ambient orbs */}
+        {/* Ambient glow */}
         <div
           style={{
             position: 'absolute',
-            top: 60,
-            right: 100,
-            width: 300,
-            height: 300,
+            top: -50,
+            right: -50,
+            width: 400,
+            height: 400,
             borderRadius: '50%',
-            background: 'rgba(251, 146, 60, 0.15)',
-            filter: 'blur(60px)',
+            background: 'radial-gradient(circle, rgba(251, 146, 60, 0.2) 0%, transparent 70%)',
           }}
         />
         <div
           style={{
             position: 'absolute',
-            bottom: 80,
-            left: 80,
-            width: 350,
-            height: 350,
+            bottom: -50,
+            left: -50,
+            width: 450,
+            height: 450,
             borderRadius: '50%',
-            background: 'rgba(249, 115, 22, 0.12)',
-            filter: 'blur(80px)',
+            background: 'radial-gradient(circle, rgba(249, 115, 22, 0.15) 0%, transparent 70%)',
           }}
         />
 
