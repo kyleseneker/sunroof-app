@@ -1,15 +1,5 @@
 import type { Metadata, Viewport } from 'next';
-import { Space_Grotesk } from 'next/font/google';
 import './globals.css';
-import { ToastProvider, SkipLink } from '@/components/ui';
-import { OfflineIndicator, InstallPrompt, ErrorBoundary } from '@/components/features';
-import { AuthProvider, ThemeProvider } from '@/providers';
-
-const spaceGrotesk = Space_Grotesk({ 
-  subsets: ['latin'],
-  display: 'swap',
-  variable: '--font-space',
-});
 
 export const metadata: Metadata = {
   title: {
@@ -17,7 +7,6 @@ export const metadata: Metadata = {
     template: '%s | Sunroof',
   },
   description: 'The delayed camera. Take photos and notes during your journey. Unlock them when you\'re ready to remember.',
-  manifest: '/manifest.json',
   metadataBase: new URL('https://getsunroof.com'),
   keywords: ['photo journal', 'travel memories', 'time capsule', 'delayed camera', 'trip journal', 'memory app'],
   authors: [{ name: 'Sunroof' }],
@@ -66,10 +55,8 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
-  maximumScale: 1,
-  userScalable: false,
   viewportFit: 'cover',
-  themeColor: '#000000',
+  themeColor: '#451a03',
 };
 
 export default function RootLayout({
@@ -78,41 +65,36 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={spaceGrotesk.variable} suppressHydrationWarning>
+    <html lang="en">
       <head>
         <link rel="apple-touch-icon" href="/icon.svg" />
         <link rel="icon" type="image/svg+xml" href="/icon.svg" />
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
       </head>
-      <body className="font-sans antialiased bg-[var(--bg-base)] text-[var(--fg-base)] overflow-hidden selection:bg-[var(--color-accent)]/30 selection:text-[var(--fg-base)]">
-        {/* Skip Link for Accessibility */}
-        <SkipLink />
+      <body 
+        className="antialiased overflow-x-hidden selection:bg-orange-500/30 selection:text-white"
+        style={{
+          fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
+        }}
+      >
+        {/* Background image - Rolling hills at sunset by Sohan Shingade on Unsplash */}
+        <div className="fixed inset-0 z-0">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/api/background"
+            alt=""
+            className="w-full h-full object-cover"
+          />
+          {/* Gradient overlay matching RN app: top dark, middle clear, bottom darker */}
+          <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-transparent to-black/80" />
+        </div>
         
-        <ErrorBoundary>
-          <ThemeProvider defaultTheme="dark">
-            <AuthProvider>
-              <ToastProvider>
-                {/* Offline Indicator */}
-                <OfflineIndicator />
-                
-                {/* Install Prompt for PWA */}
-                <InstallPrompt />
-                
-                {/* Ambient Aurora Glow */}
-                <div className="aurora-bg" aria-hidden="true" />
-                
-                {/* Film Grain Texture */}
-                <div className="grain-overlay" aria-hidden="true" />
-                
-                {/* Content */}
-                <main id="main-content" className="relative z-[var(--z-elevated)]" role="main">
-                  {children}
-                </main>
-              </ToastProvider>
-            </AuthProvider>
-          </ThemeProvider>
-        </ErrorBoundary>
+        {/* Film grain texture */}
+        <div className="grain-overlay" aria-hidden="true" />
+        
+        {/* Content */}
+        <main className="relative z-10">
+          {children}
+        </main>
       </body>
     </html>
   );

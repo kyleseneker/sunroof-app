@@ -1,132 +1,205 @@
-'use client';
-
 import Link from 'next/link';
-import { ChevronLeft } from 'lucide-react';
-import { IconButton } from '@/components/ui';
+import { ChevronLeft, ShieldCheck, Eye, Database, Lock, UserCheck, Mail, Cpu, MapPin } from 'lucide-react';
 
 export default function PrivacyPolicy() {
   return (
-    <div className="fixed inset-0 z-50 flex flex-col overflow-hidden safe-top safe-bottom">
-      {/* Warm gradient background */}
-      <div className="absolute inset-0 bg-gradient-to-br from-amber-950 via-orange-950 to-slate-950">
-        {/* Ambient orbs */}
-        <div className="absolute top-20 right-0 w-80 h-80 bg-amber-500/10 rounded-full blur-3xl" />
-        <div className="absolute bottom-40 left-0 w-96 h-96 bg-orange-500/10 rounded-full blur-3xl" />
-      </div>
-
+    <div className="min-h-screen flex flex-col overflow-y-auto scrollbar-hide">
       {/* Header */}
-      <header className="relative z-10 p-4">
-        <Link href="/login">
-          <IconButton 
-            icon={<ChevronLeft className="w-5 h-5" />}
-            label="Back"
-            variant="ghost"
-            dark
-          />
+      <header className="p-4">
+        <Link 
+          href="/"
+          className="inline-flex items-center justify-center w-10 h-10 rounded-full transition-colors hover:bg-white/10"
+          style={{ color: 'rgba(255, 255, 255, 0.6)' }}
+          aria-label="Back to home"
+        >
+          <ChevronLeft className="w-6 h-6" />
         </Link>
       </header>
 
       {/* Content */}
-      <main className="relative z-10 flex-1 overflow-y-auto scrollbar-hide px-6 pb-6">
+      <main className="flex-1 px-6 pb-12">
         <div className="max-w-2xl mx-auto">
-          {/* Title */}
-          <div className="text-center mb-8">
-            <h1 className="text-3xl font-light text-white mb-2">Privacy Policy</h1>
-            <p className="text-white/40 text-sm">Last updated: December 29, 2025</p>
+          {/* Hero - matching RN Hero component */}
+          <div className="text-center mb-6">
+            <div className="flex justify-center mb-4">
+              <div 
+                className="w-[72px] h-[72px] rounded-full flex items-center justify-center"
+                style={{
+                  background: 'linear-gradient(135deg, #f97316, #fb923c)',
+                  boxShadow: '0 8px 16px rgba(249, 115, 22, 0.4)',
+                }}
+              >
+                <ShieldCheck className="w-8 h-8 text-white" />
+              </div>
+            </div>
+            <h1 
+              className="text-white mb-1"
+              style={{ fontSize: '24px', fontWeight: 700 }}
+            >
+              Privacy Policy
+            </h1>
+            <p style={{ fontSize: '16px', color: 'rgba(255, 255, 255, 0.6)' }}>
+              Last updated: January 10, 2026
+            </p>
           </div>
 
-          {/* Content card */}
-          <div className="p-6 rounded-3xl bg-white/5 backdrop-blur-md border border-white/10 space-y-8">
-            <section>
-              <h2 className="text-lg font-medium text-white mb-3">Overview</h2>
-              <p className="text-white/60 leading-relaxed">
-                Sunroof (&quot;we&quot;, &quot;our&quot;, or &quot;us&quot;) is committed to protecting your privacy. 
-                This Privacy Policy explains how we collect, use, and safeguard your information 
-                when you use our mobile application.
+          {/* Sections card */}
+          <div 
+            className="rounded-3xl overflow-hidden"
+            style={{
+              background: 'rgba(0, 0, 0, 0.5)',
+              border: '1px solid rgba(255, 255, 255, 0.1)',
+            }}
+          >
+            <Section icon={<Eye size={18} />} title="Overview">
+              <p style={{ fontSize: '12px', color: 'rgba(255, 255, 255, 0.7)', lineHeight: '22px' }}>
+                Sunroof is committed to protecting your privacy. This Privacy Policy explains how 
+                we collect, use, and safeguard your information when you use our mobile application.
               </p>
-            </section>
+            </Section>
 
-            <section>
-              <h2 className="text-lg font-medium text-white mb-3">Information We Collect</h2>
-              <ul className="text-white/60 leading-relaxed space-y-2">
-                <li className="flex gap-2">
-                  <span className="text-amber-400">•</span>
-                  <span><strong className="text-white/80">Photos and Notes:</strong> Content you capture within the app is stored securely until your chosen unlock date.</span>
-                </li>
-                <li className="flex gap-2">
-                  <span className="text-amber-400">•</span>
-                  <span><strong className="text-white/80">Journey Data:</strong> Journey names, unlock dates, and timestamps you provide.</span>
-                </li>
-                <li className="flex gap-2">
-                  <span className="text-amber-400">•</span>
-                  <span><strong className="text-white/80">Device Information:</strong> Basic device identifiers for app functionality.</span>
-                </li>
-              </ul>
-            </section>
+            <Section icon={<Database size={18} />} title="Information We Collect">
+              <BulletPoint label="Photos & Videos" text="Media you capture is stored securely until your chosen unlock date." />
+              <BulletPoint label="Audio Memos" text="Voice recordings you create (up to 5 minutes each)." />
+              <BulletPoint label="Text Notes" text="Written notes and reflections you add to your journeys." />
+              <BulletPoint label="Journey Data" text="Journey names, destinations, emojis, unlock dates, and cover images." />
+              <BulletPoint label="Account Info" text="Email address and profile data from Google OAuth or email sign-in." />
+            </Section>
 
-            <section>
-              <h2 className="text-lg font-medium text-white mb-3">How We Use Your Information</h2>
-              <ul className="text-white/60 leading-relaxed space-y-2">
-                <li className="flex gap-2">
-                  <span className="text-amber-400">•</span>
-                  <span>To provide the core app functionality (storing and unlocking memories)</span>
-                </li>
-                <li className="flex gap-2">
-                  <span className="text-amber-400">•</span>
-                  <span>To improve our services and user experience</span>
-                </li>
-                <li className="flex gap-2">
-                  <span className="text-amber-400">•</span>
-                  <span>To ensure the security of your data</span>
-                </li>
-              </ul>
-            </section>
-
-            <section>
-              <h2 className="text-lg font-medium text-white mb-3">Data Storage</h2>
-              <p className="text-white/60 leading-relaxed">
-                Your photos and notes are stored securely using industry-standard encryption. 
-                We use Supabase as our backend provider, which maintains SOC 2 Type II compliance.
+            <Section icon={<MapPin size={18} />} title="Location & Weather">
+              <p className="mb-2" style={{ fontSize: '12px', color: 'rgba(255, 255, 255, 0.7)', lineHeight: '22px' }}>
+                With your permission, we capture location and weather data with each memory to 
+                enrich your journey experience. This data is:
               </p>
-            </section>
+              <SimpleBullet text="Only collected when you actively capture a memory" />
+              <SimpleBullet text="Stored with your memory and locked until the unlock date" />
+              <SimpleBullet text="Never shared with third parties for advertising" />
+              <SimpleBullet text="Controllable via your device settings and in-app preferences" />
+            </Section>
 
-            <section>
-              <h2 className="text-lg font-medium text-white mb-3">Your Rights</h2>
-              <ul className="text-white/60 leading-relaxed space-y-2">
-                <li className="flex gap-2">
-                  <span className="text-amber-400">•</span>
-                  <span>Access your personal data at any time</span>
-                </li>
-                <li className="flex gap-2">
-                  <span className="text-amber-400">•</span>
-                  <span>Delete your data through the app settings</span>
-                </li>
-                <li className="flex gap-2">
-                  <span className="text-amber-400">•</span>
-                  <span>Export your memories after they unlock</span>
-                </li>
-              </ul>
-            </section>
+            <Section icon={<Cpu size={18} />} title="AI Features">
+              <p className="mb-2" style={{ fontSize: '12px', color: 'rgba(255, 255, 255, 0.7)', lineHeight: '22px' }}>
+                Our AI Recap feature generates journey summaries. Here&apos;s how we protect your privacy:
+              </p>
+              <SimpleBullet text="Only text notes are sent to AI—never photos, videos, or audio" />
+              <SimpleBullet text="AI processing is done via OpenAI's API" />
+              <SimpleBullet text="Recaps are saved to your account and can be deleted anytime" />
+              <SimpleBullet text="You choose when to generate a recap—it's never automatic" />
+            </Section>
 
-            <section>
-              <h2 className="text-lg font-medium text-white mb-3">Contact Us</h2>
-              <p className="text-white/60 leading-relaxed">
-                If you have questions about this Privacy Policy, please contact us at{' '}
-                <a href="mailto:privacy@getsunroof.com" className="text-amber-400 hover:underline">
+            <Section icon={<Lock size={18} />} title="Data Storage & Security">
+              <p className="mb-2" style={{ fontSize: '12px', color: 'rgba(255, 255, 255, 0.7)', lineHeight: '22px' }}>
+                Your memories are stored securely using industry-standard practices:
+              </p>
+              <SimpleBullet text="Backend powered by Supabase with SOC 2 Type II compliance" />
+              <SimpleBullet text="Authentication tokens stored in secure device keychain" />
+              <SimpleBullet text="Media files stored in encrypted cloud storage" />
+              <SimpleBullet text="Offline captures are stored locally until synced" />
+            </Section>
+
+            <Section icon={<UserCheck size={18} />} title="Your Rights">
+              <SimpleBullet text="Access all your personal data through the app" />
+              <SimpleBullet text="Delete your account and all associated data" />
+              <SimpleBullet text="Export your unlocked memories" />
+              <SimpleBullet text="Control location and weather capture in settings" />
+              <SimpleBullet text="Opt out of AI features entirely" />
+            </Section>
+
+            <Section icon={<Mail size={18} />} title="Contact Us" isLast>
+              <p style={{ fontSize: '12px', color: 'rgba(255, 255, 255, 0.7)', lineHeight: '22px' }}>
+                If you have questions about this Privacy Policy or want to exercise your data rights, 
+                please contact us at{' '}
+                <a 
+                  href="mailto:privacy@getsunroof.com" 
+                  style={{ color: '#f97316', fontWeight: 500 }}
+                  className="hover:underline"
+                >
                   privacy@getsunroof.com
                 </a>
               </p>
-            </section>
+            </Section>
           </div>
           
           {/* Footer */}
           <footer className="mt-8 text-center">
-            <p className="text-xs text-white/30">
-              © {new Date().getFullYear()} Sunroof. All rights reserved.
+            <p className="text-xs" style={{ color: 'rgba(255, 255, 255, 0.3)' }}>
+              © {new Date().getFullYear()} Kyle Seneker. All rights reserved.
             </p>
           </footer>
         </div>
       </main>
+    </div>
+  );
+}
+
+function Section({ 
+  icon, 
+  title, 
+  children, 
+  isLast = false 
+}: { 
+  icon: React.ReactNode; 
+  title: string; 
+  children: React.ReactNode;
+  isLast?: boolean;
+}) {
+  return (
+    <div 
+      className="p-6"
+      style={{ 
+        borderBottom: isLast ? 'none' : '1px solid rgba(255, 255, 255, 0.08)' 
+      }}
+    >
+      <div className="flex items-center gap-4 mb-4">
+        <div 
+          className="w-9 h-9 rounded-full flex items-center justify-center"
+          style={{
+            background: 'linear-gradient(135deg, rgba(249, 115, 22, 0.2), rgba(234, 88, 12, 0.2))',
+            border: '1px solid rgba(249, 115, 22, 0.3)',
+            color: '#f97316',
+          }}
+        >
+          {icon}
+        </div>
+        <h2 
+          className="flex-1 text-white"
+          style={{ fontSize: '16px', fontWeight: 600 }}
+        >
+          {title}
+        </h2>
+      </div>
+      <div className="pl-12">
+        {children}
+      </div>
+    </div>
+  );
+}
+
+function BulletPoint({ label, text }: { label: string; text: string }) {
+  return (
+    <div className="flex items-start gap-2 mb-2">
+      <div 
+        className="w-1.5 h-1.5 rounded-full mt-[5px] flex-shrink-0"
+        style={{ background: '#f97316' }}
+      />
+      <p style={{ fontSize: '12px', color: 'rgba(255, 255, 255, 0.7)', lineHeight: '22px' }}>
+        <span style={{ color: 'rgba(255, 255, 255, 0.9)', fontWeight: 500 }}>{label}: </span>
+        {text}
+      </p>
+    </div>
+  );
+}
+
+function SimpleBullet({ text }: { text: string }) {
+  return (
+    <div className="flex items-start gap-2 mb-2">
+      <div 
+        className="w-1.5 h-1.5 rounded-full mt-[5px] flex-shrink-0"
+        style={{ background: '#f97316' }}
+      />
+      <p style={{ fontSize: '12px', color: 'rgba(255, 255, 255, 0.7)', lineHeight: '22px' }}>
+        {text}
+      </p>
     </div>
   );
 }

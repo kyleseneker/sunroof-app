@@ -13,81 +13,114 @@ export async function GET() {
           flexDirection: 'column',
           alignItems: 'center',
           justifyContent: 'center',
-          backgroundColor: '#000',
-          backgroundImage: 'radial-gradient(ellipse 80% 50% at 50% -20%, rgba(249, 115, 22, 0.3) 0%, transparent 50%), radial-gradient(ellipse 60% 40% at 100% 50%, rgba(236, 72, 153, 0.2) 0%, transparent 40%)',
+          background: 'linear-gradient(135deg, #451a03 0%, #431407 50%, #1e1b4b 100%)',
         }}
       >
+        {/* Ambient orbs */}
+        <div
+          style={{
+            position: 'absolute',
+            top: 60,
+            right: 100,
+            width: 300,
+            height: 300,
+            borderRadius: '50%',
+            background: 'rgba(251, 146, 60, 0.15)',
+            filter: 'blur(60px)',
+          }}
+        />
+        <div
+          style={{
+            position: 'absolute',
+            bottom: 80,
+            left: 80,
+            width: 350,
+            height: 350,
+            borderRadius: '50%',
+            background: 'rgba(249, 115, 22, 0.12)',
+            filter: 'blur(80px)',
+          }}
+        />
+
         {/* Logo */}
         <div
           style={{
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            marginBottom: 40,
+            marginBottom: 32,
           }}
         >
           <div
             style={{
-              width: 80,
-              height: 80,
-              borderRadius: 20,
-              background: 'linear-gradient(135deg, #f97316, #ec4899)',
+              width: 100,
+              height: 100,
+              borderRadius: 28,
+              background: 'linear-gradient(135deg, #451a03 0%, #431407 50%, #1e1b4b 100%)',
+              boxShadow: '0 12px 40px rgba(249, 115, 22, 0.5)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              marginRight: 20,
             }}
           >
+            {/* Sun icon */}
             <svg
-              width="48"
-              height="48"
-              viewBox="0 0 24 24"
+              width="60"
+              height="60"
+              viewBox="0 0 512 512"
               fill="none"
-              stroke="white"
-              strokeWidth="2"
+              stroke="#f97316"
+              strokeWidth="28"
               strokeLinecap="round"
-              strokeLinejoin="round"
             >
-              <path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z" />
-              <circle cx="12" cy="13" r="3" />
+              <circle cx="256" cy="256" r="80" />
+              <line x1="256" y1="80" x2="256" y2="130" />
+              <line x1="256" y1="382" x2="256" y2="432" />
+              <line x1="80" y1="256" x2="130" y2="256" />
+              <line x1="382" y1="256" x2="432" y2="256" />
+              <line x1="131" y1="131" x2="166" y2="166" />
+              <line x1="346" y1="346" x2="381" y2="381" />
+              <line x1="131" y1="381" x2="166" y2="346" />
+              <line x1="346" y1="166" x2="381" y2="131" />
             </svg>
           </div>
-          <span
-            style={{
-              fontSize: 64,
-              fontWeight: 300,
-              color: 'white',
-              letterSpacing: '-0.02em',
-            }}
-          >
-            Sunroof
-          </span>
+        </div>
+
+        {/* App name */}
+        <div
+          style={{
+            fontSize: 72,
+            fontWeight: 300,
+            color: 'white',
+            letterSpacing: '2px',
+            marginBottom: 16,
+          }}
+        >
+          Sunroof
         </div>
 
         {/* Tagline */}
         <div
           style={{
-            fontSize: 36,
-            fontWeight: 500,
-            background: 'linear-gradient(90deg, #f97316, #ec4899)',
-            backgroundClip: 'text',
-            color: 'transparent',
-            marginBottom: 20,
+            fontSize: 32,
+            fontWeight: 400,
+            color: 'rgba(255, 255, 255, 0.6)',
+            marginBottom: 40,
           }}
         >
-          Capture now, relive later.
+          Capture now. Relive later.
         </div>
 
         {/* Description */}
         <div
           style={{
-            fontSize: 24,
-            color: '#71717a',
-            maxWidth: 600,
+            fontSize: 22,
+            color: 'rgba(255, 255, 255, 0.4)',
+            maxWidth: 500,
             textAlign: 'center',
           }}
         >
-          The delayed camera. Your memories unlock when you&apos;re ready.
+          The delayed camera for your journeys
         </div>
       </div>
     ),
@@ -97,4 +130,3 @@ export async function GET() {
     }
   );
 }
-
