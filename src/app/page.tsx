@@ -52,7 +52,7 @@ export default function LandingPage() {
         {/* App Store Buttons */}
         <div className="flex flex-col sm:flex-row gap-3 mb-6">
           <a 
-            href="#" 
+            href="https://apps.apple.com/us/app/sunroof-adventure-journal/id6757656492" 
             className="group flex items-center gap-3 px-5 py-3 rounded-2xl bg-white text-black font-semibold hover:scale-105 active:scale-95 transition-transform"
             style={{ boxShadow: '0 10px 15px rgba(0, 0, 0, 0.15)' }}
             aria-label="Download on the App Store"
@@ -88,7 +88,7 @@ export default function LandingPage() {
         </div>
 
         <p className="text-xs" style={{ color: 'rgba(255, 255, 255, 0.4)' }}>
-          Coming soon to iOS and Android
+          Android coming soon
         </p>
       </main>
 
